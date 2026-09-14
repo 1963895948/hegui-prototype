@@ -213,7 +213,7 @@
     @media(max-width:720px){.site-config-card .sc-grid{grid-template-columns:1fr}}
     .site-config-card label.mini{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
     .pd-table-wrap{border:1px solid var(--line);border-radius:6px;overflow:auto}
-    .pd-table-wrap table{margin:0;min-width:900px;width:100%}
+    .pd-table-wrap table{margin:0;min-width:1020px;width:100%}
     .pd-table-wrap th{background:#f8fafd;white-space:nowrap;font-size:12px}
     .pd-table-wrap td{font-size:12px;vertical-align:middle}
     .pd-table-wrap .url-cell{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -573,6 +573,56 @@
     .batch-dd{position:relative;display:inline-block}
     .batch-dd .op-menu{left:0;right:auto;min-width:120px}
     .modal-box.lg{width:min(1200px,96vw)}
+    .modal-box.stats{width:min(1080px,96vw)}
+    .stats-filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+    .stats-filter .sel,.stats-filter .input{height:32px}
+    .stats-daterange{
+      display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;
+      border:1px solid var(--line);border-radius:4px;background:#fff;font-size:12px;color:var(--sub);
+    }
+    .stats-daterange input{
+      border:none;outline:none;width:100px;font-size:12px;color:var(--text);background:transparent;
+    }
+    .stats-daterange .cal{color:#b0b8c4;margin-left:4px}
+    .stats-kpi{
+      display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+      color:#f5222d;font-size:13px;margin:4px 0 14px;line-height:1.6;
+    }
+    .stats-kpi .kpi-sep{margin:0 8px;opacity:.35}
+    .stats-info{
+      position:relative;display:inline-flex;align-items:center;justify-content:center;
+      width:16px;height:16px;border-radius:50%;border:1px solid #f5222d;color:#f5222d;
+      font-size:11px;font-style:normal;cursor:help;user-select:none;flex:none;
+    }
+    .stats-info-tip{
+      display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);
+      width:320px;padding:10px 12px;background:rgba(0,0,0,.85);color:#fff;border-radius:4px;
+      font-size:12px;line-height:1.7;z-index:5;text-align:left;font-weight:400;
+      box-shadow:0 6px 16px rgba(0,0,0,.2);
+    }
+    .stats-info-tip::after{
+      content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);
+      border:6px solid transparent;border-top-color:rgba(0,0,0,.85);
+    }
+    .stats-info:hover .stats-info-tip,.stats-info:focus .stats-info-tip{display:block}
+    .stats-table-wrap{border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:min(52vh,480px);background:#fff}
+    .stats-table-wrap table{width:100%;min-width:920px;margin:0;border-collapse:collapse}
+    .stats-table-wrap th,.stats-table-wrap td{
+      padding:10px 12px;font-size:12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;
+    }
+    .stats-table-wrap th{background:#fafafa;color:var(--sub);font-weight:600;position:sticky;top:0;z-index:1}
+    .stats-empty{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:56px 16px;color:#bfbfbf;font-size:13px;gap:10px;
+    }
+    .stats-empty-ico{
+      width:64px;height:48px;border:2px solid #e8e8e8;border-radius:4px;position:relative;
+      background:linear-gradient(180deg,#fafafa 0%,#f0f0f0 100%);
+    }
+    .stats-empty-ico::before{
+      content:'';position:absolute;left:10px;right:10px;top:14px;height:2px;background:#e8e8e8;
+      box-shadow:0 8px 0 #e8e8e8,0 16px 0 #e8e8e8;
+    }
     .detail-cols{display:grid;grid-template-columns:1fr 1fr;gap:28px 40px;align-items:start}
     @media(max-width:760px){.detail-cols{grid-template-columns:1fr}}
     .detail-block{margin-bottom:14px}
@@ -1377,7 +1427,7 @@
                     <select class="sel block" id="rescanPolicySelect">
                       <option value="">请选择政策（仅已通过）</option>
                     </select>
-                    <div class="hint" style="margin-top:6px">仅可从「政策管理」选择已通过政策；选择后下方展示政策内容，可再编辑（仅影响本次任务）。</div>
+                    <div class="hint" style="margin-top:6px">选项为「政策分类（已学习站点）」；选择后下方带出政策内容可再编辑（仅影响本次任务）。回扫站点仅可勾选该分类已学习站点。</div>
                     <textarea class="textarea lg" id="rescanPolicyContent" style="margin-top:8px" placeholder="选择政策后自动带出内容，也可继续修改">Amazon US 儿童产品需符合 CPSIA，12 岁以下玩具须提供 CPC 及第三方测试报告；产品页需展示合规信息…</textarea>
                   </div>
                 </div>
@@ -1406,7 +1456,7 @@
           </div>
           <div class="toolbar row">
             <button class="btn pri" data-go="rescan-create">添加回扫任务</button>
-            <button class="btn pri">审核统计</button>
+            <button class="btn pri" type="button" id="openAuditStatsBtn">审核统计</button>
           </div>
           <table>
             <thead>
@@ -1789,7 +1839,6 @@
                 <div class="sub">按合规分类聚合 · 亚马逊站点<em>分类来自禁售列表</em></div>
               </div>
               <div class="row" style="margin:0;gap:8px">
-                <button type="button" class="btn" id="policyExportBtn">导出报表</button>
                 <button type="button" class="btn pri" data-go="policy-add">＋ 新建政策</button>
               </div>
             </div>
@@ -1799,9 +1848,10 @@
                 <label>状态</label>
                 <select class="sel" id="policyStatusFilter">
                   <option value="">全部</option>
-                  <option>已通过</option>
                   <option>待审核</option>
                   <option>已驳回</option>
+                  <option>学习中</option>
+                  <option>已通过</option>
                   <option>已停用</option>
                 </select>
               </div>
@@ -2195,11 +2245,77 @@
         <button type="button" class="modal-x" id="closePolicyDisableModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd">
-        <p style="margin:0;font-size:13px;line-height:1.7">确认停用分类 <b id="policyDisableName">—</b> 下全部已通过站点？停用后不可再被创建回扫引用，也不再参与新回扫与模型学习。</p>
+        <p style="margin:0;font-size:13px;line-height:1.7">确认停用分类 <b id="policyDisableName">—</b>？停用后该分类聚合态为「已停用」，不可再被创建回扫引用，也不再参与新回扫与模型学习。</p>
       </div>
       <div class="modal-ft">
         <button type="button" class="btn" id="cancelPolicyDisableModal">取消</button>
         <button type="button" class="btn pri" id="confirmPolicyDisableModal">确定停用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 审核统计 · 数据统计 -->
+  <div class="modal-mask" id="auditStatsModal" aria-hidden="true">
+    <div class="modal-box stats" role="dialog" aria-labelledby="auditStatsTitle">
+      <div class="modal-hd">
+        <span id="auditStatsTitle">数据统计</span>
+        <button type="button" class="modal-x" id="closeAuditStatsModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <div class="stats-filter">
+          <select class="sel" id="auditStatsType" style="width:140px">
+            <option value="audit">审核统计</option>
+          </select>
+          <div class="stats-daterange" title="统计时间范围">
+            <input type="date" id="auditStatsDateStart" aria-label="开始日期" />
+            <span>→</span>
+            <input type="date" id="auditStatsDateEnd" aria-label="结束日期" />
+            <span class="cal">▾</span>
+          </div>
+          <button type="button" class="btn pri" id="auditStatsSearchBtn">搜索</button>
+          <button type="button" class="btn" id="auditStatsResetBtn">重置</button>
+        </div>
+        <div class="stats-kpi" id="auditStatsKpi">
+          <span>准确率：<b id="auditStatsAcc">--%</b></span>
+          <span class="kpi-sep"></span>
+          <span>召回率：<b id="auditStatsRecall">--%</b></span>
+          <span class="kpi-sep"></span>
+          <span>误杀率：<b id="auditStatsFpr">--%</b></span>
+          <span class="stats-info" tabindex="0" aria-label="指标说明">
+            i
+            <span class="stats-info-tip" role="tooltip">
+              TP（真正例）：预测为合规品，实际审核为合规品<br>
+              FP（假正例）：预测为合规品，实际审核为非合规品<br>
+              FN（假负例）：预测为非合规品，实际审核为合规品<br>
+              TN（真负例）：预测为非合规品，实际审核为非合规品<br>
+              总数：按筛选条件查出的总数据<br>
+              准确率：(TP+FP) / 总数<br>
+              召回率：TP / (TP+FN)<br>
+              误杀率：FP / (FP+TN)
+            </span>
+          </span>
+        </div>
+        <div class="stats-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>任务ID</th>
+                <th>任务名称</th>
+                <th>模型认为合规品数</th>
+                <th>审核人</th>
+                <th>已审核数量</th>
+                <th>合规品数量</th>
+                <th>非合规品数量</th>
+                <th>精确率</th>
+              </tr>
+            </thead>
+            <tbody id="auditStatsBody"></tbody>
+          </table>
+          <div class="stats-empty" id="auditStatsEmpty" hidden>
+            <div class="stats-empty-ico" aria-hidden="true"></div>
+            <div>暂无数据</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2567,6 +2683,10 @@
         certs: ['UKCA'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'EN 71-1/2/3', tic: '已接入TIC直接验证'
       },
       {
+        id: 'toys_mx', category: '儿童玩具', platform: '亚马逊', site: '墨西哥', status: '待审核', learned: false,
+        crawlUrl: '', certs: ['CPC'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'NOM', tic: '', ticVerify: ''
+      },
+      {
         id: 'toys_de', category: '儿童玩具', platform: '亚马逊', site: '德国', status: '待审核', learned: false,
         crawlUrl: 'https://sellercentral.amazon.de/help/hub/reference/external/G200204080',
         certs: ['CE'], content: 'CE标志及玩具安全指令', standard: 'EN 71系列 / REACH', tic: '待接入'
@@ -2657,6 +2777,12 @@
         POLICY_BODIES[rfKey].status = '已通过';
         POLICY_BODIES[rfKey].learned = true;
       }
+      // 儿童睡衣：内容已审过、待模型学习 → 聚合态「学习中」示意
+      ['CPC证书及易燃性要求', 'UKCA及燃烧性能'].forEach(text => {
+        const b = getPolicyContent(text);
+        b.status = '已通过';
+        b.learned = false;
+      });
     }
     seedPolicyContents();
 
@@ -2672,42 +2798,42 @@
     function statusTagHtml(status){
       if (status === '已通过' || status === '已生效') return '<span class="tag t-y">已通过</span>';
       if (status === '已停用') return '<span class="tag t-d">已停用</span>';
+      if (status === '已驳回') return '<span class="tag t-d">已驳回</span>';
       if (status === '待审核') return '<span class="tag t-w">待审核</span>';
       if (status === '学习中') return '<span class="tag t-w">学习中</span>';
-      if (status === '部分通过') return '<span class="tag t-w">部分通过</span>';
       return `<span class="tag t-d">${status}</span>`;
     }
-    function categoryStatus(rows){
-      if (!rows.length) return '待审核';
-      if (rows.every(r => r.status === '已停用')) return '已停用';
+    function categoryUniqueBodies(rows){
       const bodyKeys = new Set(rows.map(r => bodyKeyByContent(r.content)));
-      const bodies = [...bodyKeys].map(k => {
+      return [...bodyKeys].map(k => {
         const row = rows.find(r => bodyKeyByContent(r.content) === k);
         return getPolicyContent(row.content);
       });
+    }
+    function categoryStatus(rows){
+      if (!rows.length) return '待审核';
+      // 5. 已停用：整个合规分类被停用
+      if (rows.every(r => r.status === '已停用')) return '已停用';
+      const bodies = categoryUniqueBodies(rows);
+      // 1. 待审核：任一政策内容为待审核
       if (bodies.some(b => b.status === '待审核')) return '待审核';
-      if (bodies.every(b => b.status === '已驳回')) return '已驳回';
-      // 内容已通过且模型学习完成 → 与筛选项「已通过」一致（不再用「已生效」）
-      if (bodies.every(b => b.status === '已通过' && b.learned)) return '已通过';
-      if (bodies.every(b => b.status === '已通过')) return '学习中';
-      if (bodies.some(b => b.status === '已通过')) return '部分通过';
+      // 2. 已驳回：全部政策内容均为已驳回
+      if (bodies.length && bodies.every(b => b.status === '已驳回')) return '已驳回';
+      // 3. 学习中：无待审核，且存在待模型学习（内容已通过但未学习完）
+      if (bodies.some(b => b.status === '已通过' && !b.learned)) return '学习中';
+      // 4. 已通过：无待审核，且存在模型学习完毕的数据
+      if (bodies.some(b => b.status === '已通过' && b.learned)) return '已通过';
       return '待审核';
     }
     function policyOpsHtml(g){
       const cat = g.category.replace(/"/g, '&quot;');
-      if (g.status === '待审核') {
-        return `<div class="policy-ops">
-          <span class="link-btn policy-audit-btn" data-category="${cat}">审核</span>
-          <span class="link-btn policy-view-btn" data-category="${cat}">详情</span>
-        </div>`;
-      }
-      if (g.status === '已通过' || g.status === '已生效') {
-        return `<div class="policy-ops">
-          <span class="link-btn danger policy-disable-btn" data-category="${cat}">停用</span>
-          <span class="link-btn policy-view-btn" data-category="${cat}">详情</span>
-        </div>`;
-      }
-      return `<div class="policy-ops"><span class="link-btn policy-view-btn" data-category="${cat}">详情</span></div>`;
+      const canDisable = g.status === '待审核' || g.status === '已通过' || g.status === '已生效' || g.status === '学习中';
+      const canAudit = g.status === '待审核';
+      const ops = [];
+      if (canAudit) ops.push(`<span class="link-btn policy-audit-btn" data-category="${cat}">审核</span>`);
+      if (canDisable) ops.push(`<span class="link-btn danger policy-disable-btn" data-category="${cat}">停用</span>`);
+      ops.push(`<span class="link-btn policy-view-btn" data-category="${cat}">详情</span>`);
+      return `<div class="policy-ops">${ops.join('')}</div>`;
     }
     function getCategoryGroups(){
       const status = document.getElementById('policyStatusFilter')?.value || '';
@@ -2806,20 +2932,27 @@
       POLICY_STORE.forEach(p => {
         if (seen.has(p.category)) return;
         seen.add(p.category);
-        const approvedSites = POLICY_STORE.filter(x =>
-          x.category === p.category &&
-          x.status === '已通过' &&
-          getPolicyContent(x.content).status === '已通过'
-        );
+        // 括号内站点 = 内容已通过且已学习 + 站点已通过
+        const approvedSites = POLICY_STORE.filter(x => {
+          if (x.category !== p.category || x.status !== '已通过') return false;
+          const body = getPolicyContent(x.content);
+          return body.status === '已通过' && body.learned;
+        });
         const contentOk = approvedSites.length > 0;
         const primary = approvedSites[0] || POLICY_STORE.find(x => x.category === p.category);
+        const plat = (approvedSites[0] || primary)?.platform || '亚马逊';
+        const siteNames = approvedSites.map(x => x.site);
         list.push({
           id: p.category,
           name: p.category,
           category: p.category,
           content: primary ? getPolicyContent(primary.content).content : '',
-          platform: '亚马逊',
-          sites: approvedSites.map(x => x.site).join('、'),
+          platform: plat,
+          sites: siteNames.join('、'),
+          siteNames,
+          // 供回扫站点勾选范围：平台|站点
+          siteKeys: siteNames.map(s => `${plat}|${s}`),
+          sitesLabel: siteNames.length ? `${plat}-${siteNames.join('、')}` : '',
           status: contentOk ? '已通过' : categoryStatus(POLICY_STORE.filter(x => x.category === p.category)),
           link: approvedSites[0]?.crawlUrl || '',
           tr: null
@@ -2832,21 +2965,12 @@
       const list = getPolicyListFromTable().filter(p => p.status === '已通过');
       const cur = rescanPolicySelect.value;
       rescanPolicySelect.innerHTML = '<option value="">请选择政策（仅已通过）</option>' + list.map((p, i) =>
-        `<option value="${i}">${p.category.replace(/</g, '&lt;')}（亚马逊 · ${p.sites.replace(/</g, '&lt;')}）</option>`
+        `<option value="${i}">${p.category.replace(/</g, '&lt;')}（${(p.sitesLabel || '').replace(/</g, '&lt;')}）</option>`
       ).join('');
       if (cur && +cur < list.length) {
         rescanPolicySelect.value = cur;
       }
     }
-    rescanPolicySelect?.addEventListener('change', () => {
-      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
-      const p = list[+rescanPolicySelect.value];
-      if (p && rescanPolicyContent) {
-        rescanPolicyContent.value = p.content || '';
-        const ruleName = document.querySelector('#rescan-create input.input.block[maxlength="30"]');
-        if (ruleName && !ruleName.value) ruleName.value = p.name.slice(0, 30);
-      }
-    });
     refreshRescanPolicySelect();
     /* renderPolicyTable 延后到站点筛选初始化后 */
 
@@ -2879,6 +3003,8 @@
     let draftSites = new Set();
     let modalTarget = 'rescan';
     let policySiteNames = new Set(['美国']);
+    // 创建回扫：可选站点受当前所选合规政策限制（仅该分类已学习站点）
+    let rescanAllowedSiteKeys = null;
 
     function siteKey(p, s){ return `${p}|${s}` }
     function parseKey(k){ const i = k.indexOf('|'); return { platform: k.slice(0, i), site: k.slice(i + 1) }; }
@@ -2896,9 +3022,37 @@
       const am = PLATFORM_SITES.find(p => p.id === 'amazon');
       return am.sites.filter(filterFn).map(s => siteKey(am.name, s));
     }
+    function getSelectedRescanPolicy(){
+      if (!rescanPolicySelect || rescanPolicySelect.value === '') return null;
+      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
+      return list[+rescanPolicySelect.value] || null;
+    }
+    function syncRescanSitesToPolicy(p){
+      if (!p || !(p.siteKeys || []).length) {
+        rescanAllowedSiteKeys = null;
+        confirmedSites = new Set();
+        renderPlatformPicked();
+        return;
+      }
+      rescanAllowedSiteKeys = new Set(p.siteKeys);
+      confirmedSites = new Set([...confirmedSites].filter(k => rescanAllowedSiteKeys.has(k)));
+      if (!confirmedSites.size) {
+        confirmedSites = new Set([p.siteKeys[0]]);
+      }
+      renderPlatformPicked();
+    }
     function platformsForModal(){
-      // 政策管理本期仅亚马逊；审核/检测/回扫为平台+站点
-      if (modalTarget === 'policy') return PLATFORM_SITES.filter(p => p.id === 'amazon');
+      // 政策管理、检测提交、创建回扫：本期仅亚马逊；审核合规站点保留多平台
+      if (modalTarget === 'policy' || modalTarget === 'detect' || modalTarget === 'rescan') {
+        const am = PLATFORM_SITES.filter(p => p.id === 'amazon');
+        if (modalTarget === 'rescan' && rescanAllowedSiteKeys) {
+          return am.map(p => ({
+            ...p,
+            sites: p.sites.filter(s => rescanAllowedSiteKeys.has(siteKey(p.name, s)))
+          })).filter(p => p.sites.length);
+        }
+        return am;
+      }
       return PLATFORM_SITES;
     }
 
@@ -2965,14 +3119,20 @@
 
       const platforms = platformsForModal();
       const amazonOnly = platforms.length === 1 && platforms[0].id === 'amazon';
+      const allowedKeysForRescan = modalTarget === 'rescan' && rescanAllowedSiteKeys
+        ? rescanAllowedSiteKeys
+        : null;
+      const filterKeys = (keys) => allowedKeysForRescan
+        ? keys.filter(k => allowedKeysForRescan.has(k))
+        : keys;
 
       const bulkDefs = amazonOnly
         ? [
-            { label: '全选-全部站点', keys: amazonKeys(() => true) },
-            { label: '全选-欧英', keys: amazonKeys(s => AMAZON_EU_UK.includes(s)) },
-            { label: '全选-欧盟', keys: amazonKeys(s => AMAZON_EU.includes(s)) },
-            { label: '全选-欧洲', keys: amazonKeys(s => AMAZON_EUROPE.includes(s)) }
-          ]
+            { label: '全选-全部站点', keys: filterKeys(platforms[0] ? platforms[0].sites.map(s => siteKey(platforms[0].name, s)) : []) },
+            { label: '全选-欧英', keys: filterKeys(amazonKeys(s => AMAZON_EU_UK.includes(s))) },
+            { label: '全选-欧盟', keys: filterKeys(amazonKeys(s => AMAZON_EU.includes(s))) },
+            { label: '全选-欧洲', keys: filterKeys(amazonKeys(s => AMAZON_EUROPE.includes(s))) }
+          ].filter(b => b.keys.length)
         : [
             { label: '全选-所有平台', keys: allSiteKeys() },
             { label: '全选-Amazon欧英', keys: amazonKeys(s => AMAZON_EU_UK.includes(s)) },
@@ -2982,9 +3142,9 @@
       bulk.innerHTML = bulkDefs.map((b, i) => {
         const allOn = b.keys.length && b.keys.every(k => draftSites.has(k));
         return `<label><input type="checkbox" class="ps-bulk-cb" data-bulk="${i}" ${allOn ? 'checked' : ''} /> ${b.label}</label>`;
-      }).join('');
+      }).join('') || '<span class="hint">当前政策下无可选站点</span>';
 
-      list.innerHTML = platforms.map(p => {
+      list.innerHTML = platforms.length ? platforms.map(p => {
         const selectedCount = p.sites.filter(s => draftSites.has(siteKey(p.name, s))).length;
         const allChecked = selectedCount === p.sites.length && p.sites.length > 0;
         const someChecked = selectedCount > 0 && !allChecked;
@@ -3004,7 +3164,7 @@
             <div class="ps-sites">${siteCells}</div>
           </div>
         </div>`;
-      }).join('');
+      }).join('') : '<div class="hint">请先选择合规政策；可选站点仅为该政策已学习站点。</div>';
 
       bulk.querySelectorAll('.ps-bulk-cb').forEach(cb => {
         cb.addEventListener('change', () => {
@@ -3018,8 +3178,9 @@
       list.querySelectorAll('.ps-plat-cb').forEach(cb => {
         if (cb.dataset.indeterminate) cb.indeterminate = true;
         cb.addEventListener('change', () => {
-          const plat = PLATFORM_SITES.find(p => p.name === cb.dataset.platform);
-          plat.sites.forEach(s => {
+          const plat = platforms.find(p => p.name === cb.dataset.platform)
+            || PLATFORM_SITES.find(p => p.name === cb.dataset.platform);
+          (plat?.sites || []).forEach(s => {
             const k = siteKey(plat.name, s);
             if (cb.checked) draftSites.add(k); else draftSites.delete(k);
           });
@@ -3052,8 +3213,14 @@
         draftSites = new Set(auditSites);
         document.getElementById('platformModalTitle').textContent = '快速关联';
       } else {
-        draftSites = new Set(confirmedSites);
-        document.getElementById('platformModalTitle').textContent = '快速关联';
+        const policy = getSelectedRescanPolicy();
+        if (!policy) {
+          showToast('请先选择合规政策');
+          return;
+        }
+        syncRescanSitesToPolicy(policy);
+        draftSites = new Set([...confirmedSites].filter(k => !rescanAllowedSiteKeys || rescanAllowedSiteKeys.has(k)));
+        document.getElementById('platformModalTitle').textContent = '选择回扫站点';
       }
       updatePsCurrentText();
       renderPlatformModal();
@@ -3086,7 +3253,9 @@
         auditSites = new Set(draftSites);
         renderAuditSitePicked();
       } else {
-        confirmedSites = new Set(draftSites);
+        confirmedSites = rescanAllowedSiteKeys
+          ? new Set([...draftSites].filter(k => rescanAllowedSiteKeys.has(k)))
+          : new Set(draftSites);
         renderPlatformPicked();
       }
       closePlatformModal();
@@ -3241,6 +3410,19 @@
     renderPlatformPicked();
     renderDetectPlatformPicked();
 
+    rescanPolicySelect?.addEventListener('change', () => {
+      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
+      const p = rescanPolicySelect.value === '' ? null : list[+rescanPolicySelect.value];
+      if (p && rescanPolicyContent) {
+        rescanPolicyContent.value = p.content || '';
+        const ruleName = document.querySelector('#rescan-create input.input.block[maxlength="30"]');
+        if (ruleName && !ruleName.value) ruleName.value = p.name.slice(0, 30);
+      } else if (rescanPolicyContent) {
+        rescanPolicyContent.value = '';
+      }
+      syncRescanSitesToPolicy(p);
+    });
+
     /* 合规性提交检测 · Tab 切换 */
     const detectTabMap = { manual: 'detectPaneManual', sku: 'detectPaneSku', batch: 'detectPaneBatch' };
     document.querySelectorAll('#detectTabs .tab').forEach(tab => {
@@ -3359,7 +3541,6 @@
       renderPolicyTable();
       showToast('已重置筛选条件');
     });
-    document.getElementById('policyExportBtn')?.addEventListener('click', () => showToast('导出报表（原型示意）'));
     document.getElementById('policyCategorySearch')?.addEventListener('keydown', e => {
       if (e.key === 'Enter') renderPolicyTable();
     });
@@ -3669,6 +3850,106 @@
     });
 
     const rescanResultSection = document.getElementById('rescan-result');
+
+    /* 审核统计 · 数据统计弹窗 */
+    const AUDIT_STATS_DEMO = [
+      {
+        taskId: '100003', taskName: '电子类-FCC 存量回扫', modelRisk: 612, reviewer: '林佳丽',
+        audited: 640, risk: 580, safe: 60, precision: 0.948, date: '2026-05-28',
+        tp: 560, fp: 52, fn: 20, tn: 8
+      },
+      {
+        taskId: '200008', taskName: '增量政策回扫-2026W24', modelRisk: 1194, reviewer: '王五',
+        audited: 1280, risk: 1100, safe: 180, precision: 0.921, date: '2026-06-05',
+        tp: 1050, fp: 144, fn: 50, tn: 36
+      },
+      {
+        taskId: '200010', taskName: '增量邮件回扫-儿童玩具', modelRisk: 471, reviewer: '李四',
+        audited: 512, risk: 430, safe: 82, precision: 0.913, date: '2026-06-12',
+        tp: 410, fp: 61, fn: 20, tn: 21
+      },
+      {
+        taskId: '100001', taskName: '儿童玩具-CPC 存量回扫', modelRisk: 1055, reviewer: '待分配',
+        audited: 0, risk: 0, safe: 0, precision: null, date: '2026-06-10',
+        tp: 0, fp: 0, fn: 0, tn: 0
+      }
+    ];
+    function pct(n){
+      if (n == null || Number.isNaN(n)) return '--%';
+      return `${(n * 100).toFixed(1)}%`;
+    }
+    function filterAuditStatsRows(){
+      const start = document.getElementById('auditStatsDateStart')?.value || '';
+      const end = document.getElementById('auditStatsDateEnd')?.value || '';
+      return AUDIT_STATS_DEMO.filter(r => {
+        if (start && r.date < start) return false;
+        if (end && r.date > end) return false;
+        return true;
+      });
+    }
+    function renderAuditStatsTable(rows){
+      const body = document.getElementById('auditStatsBody');
+      const empty = document.getElementById('auditStatsEmpty');
+      if (!body) return;
+      if (!rows.length) {
+        body.innerHTML = '';
+        if (empty) empty.hidden = false;
+        document.getElementById('auditStatsAcc').textContent = '--%';
+        document.getElementById('auditStatsRecall').textContent = '--%';
+        document.getElementById('auditStatsFpr').textContent = '--%';
+        return;
+      }
+      if (empty) empty.hidden = true;
+      body.innerHTML = rows.map(r => `<tr>
+        <td>${r.taskId}</td>
+        <td>${r.taskName.replace(/</g, '&lt;')}</td>
+        <td>${r.modelRisk}</td>
+        <td>${r.reviewer.replace(/</g, '&lt;')}</td>
+        <td>${r.audited}</td>
+        <td>${r.risk}</td>
+        <td>${r.safe}</td>
+        <td>${r.precision == null ? '—' : pct(r.precision)}</td>
+      </tr>`).join('');
+
+      let tp = 0, fp = 0, fn = 0, tn = 0;
+      rows.forEach(r => { tp += r.tp; fp += r.fp; fn += r.fn; tn += r.tn; });
+      const total = tp + fp + fn + tn;
+      // 与现网截图口径：准确率 (TP+FP)/总数；召回率 TP/(TP+FN)；误杀率 FP/(FP+TN)
+      const acc = total ? (tp + fp) / total : null;
+      const recall = (tp + fn) ? tp / (tp + fn) : null;
+      const fpr = (fp + tn) ? fp / (fp + tn) : null;
+      document.getElementById('auditStatsAcc').textContent = pct(acc);
+      document.getElementById('auditStatsRecall').textContent = pct(recall);
+      document.getElementById('auditStatsFpr').textContent = pct(fpr);
+    }
+    function openAuditStatsModal(){
+      const start = document.getElementById('auditStatsDateStart');
+      const end = document.getElementById('auditStatsDateEnd');
+      if (start && !start.value) start.value = '2026-05-01';
+      if (end && !end.value) end.value = '2026-06-30';
+      renderAuditStatsTable(filterAuditStatsRows());
+      document.getElementById('auditStatsModal')?.classList.add('show');
+    }
+    function closeAuditStatsModal(){
+      document.getElementById('auditStatsModal')?.classList.remove('show');
+    }
+    document.getElementById('openAuditStatsBtn')?.addEventListener('click', openAuditStatsModal);
+    document.getElementById('closeAuditStatsModal')?.addEventListener('click', closeAuditStatsModal);
+    document.getElementById('auditStatsModal')?.addEventListener('click', e => {
+      if (e.target.id === 'auditStatsModal') closeAuditStatsModal();
+    });
+    document.getElementById('auditStatsSearchBtn')?.addEventListener('click', () => {
+      renderAuditStatsTable(filterAuditStatsRows());
+      showToast('已按条件刷新审核统计');
+    });
+    document.getElementById('auditStatsResetBtn')?.addEventListener('click', () => {
+      const start = document.getElementById('auditStatsDateStart');
+      const end = document.getElementById('auditStatsDateEnd');
+      if (start) start.value = '';
+      if (end) end.value = '';
+      renderAuditStatsTable(filterAuditStatsRows());
+      showToast('已重置筛选');
+    });
     rescanResultSection?.addEventListener('click', e => {
       const btn = e.target.closest('.rescan-assign-btn');
       if (!btn) return;
@@ -4851,7 +5132,7 @@
         g.sites.forEach((p, idx) => {
           const editable = canEditSite(p);
           const urlCell = editable
-            ? `<input class="input block pd-url" data-id="${p.id}" value="${(p.crawlUrl || '').replace(/"/g, '&quot;')}" />`
+            ? `<input class="input block pd-url" data-id="${p.id}" value="${(p.crawlUrl || '').replace(/"/g, '&quot;')}" placeholder="请输入采集链接" />`
             : (p.crawlUrl ? `<a href="${p.crawlUrl.replace(/"/g, '')}" target="_blank" rel="noopener" title="${esc(p.crawlUrl)}">${esc(p.crawlUrl)}</a>` : '未配置');
           const certCell = certMultiSelectHtml('pd-cert-ms', p.certs, !editable, `data-id="${p.id}"`);
           const ticCell = editable
@@ -4889,20 +5170,30 @@
                  </div>
                </td>`
             : '';
+          // 站点审核：内容已通过后，才可审站点（与内容审分开）
+          const siteAudit = (policyModalMode === 'audit' && body.status === '已通过' && p.status === '待审核')
+            ? `<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;align-items:stretch">
+                 <button type="button" class="btn pri pd-site-pass" data-id="${p.id}" style="height:24px;padding:0 8px;font-size:11px;min-width:0">通过站点</button>
+                 <button type="button" class="btn pd-site-reject" data-id="${p.id}" style="height:24px;padding:0 8px;font-size:11px;min-width:0">驳回站点</button>
+               </div>`
+            : '';
+          const canDelSite = !body.learned && (body.status !== '已通过' || p.status === '待审核' || p.status === '已驳回');
           const rowOps = [
-            `<button type="button" class="btn pd-log-btn" data-id="${p.id}" style="height:24px;padding:0 10px;font-size:11px;min-width:0">查看日志</button>`
+            `<button type="button" class="btn pd-log-btn" data-id="${p.id}" style="height:24px;padding:0 10px;font-size:11px;min-width:0">查看日志</button>`,
+            siteAudit
           ];
           tbody += `<tr>
             ${actionCell}
             <td style="white-space:nowrap">
               <span>${esc(p.site)}</span>
-              ${(!body.learned && body.status !== '已通过') ? `<button type="button" class="btn pd-delete-site" data-id="${p.id}" style="height:22px;padding:0 8px;font-size:11px;min-width:0;margin-left:8px;color:#d4380d;border-color:#ffd8bf;background:#fff7e6">删除</button>` : ''}
+              ${canDelSite ? `<button type="button" class="btn pd-delete-site" data-id="${p.id}" style="height:22px;padding:0 8px;font-size:11px;min-width:0;margin-left:8px;color:#d4380d;border-color:#ffd8bf;background:#fff7e6">删除</button>` : ''}
             </td>
             ${idx === 0 ? `<td class="pd-content-cell" rowspan="${n}">${contentCellInner}</td>` : ''}
             <td class="url-cell">${urlCell}</td>
             <td>${certCell}</td>
             <td>${ticCell}</td>
             ${idx === 0 ? `<td rowspan="${n}" style="text-align:center">${statusTagHtml(body.status)}</td>` : ''}
+            <td style="text-align:center">${statusTagHtml(p.status)}</td>
             ${idx === 0 ? `<td rowspan="${n}" style="text-align:center">${learnCell}</td>` : ''}
             <td style="text-align:center"><div style="display:flex;flex-direction:column;gap:6px;align-items:center">${rowOps.join('')}</div></td>
           </tr>`;
@@ -4917,6 +5208,7 @@
           <th>所需认证</th>
           <th>TIC验证</th>
           <th>内容状态</th>
+          <th>站点状态</th>
           <th>模型学习</th>
           <th>日志</th>
         </tr></thead>
@@ -4942,7 +5234,7 @@
           ckey,
           text,
           title: '通过内容',
-          desc: '确认通过该政策内容？通过后算法将优化大模型提示词，人工标记学习完成后方可识别该分类产品。',
+          desc: '确认通过该政策内容？通过后算法将优化大模型提示词，人工标记学习完成后方可识别该分类产品。站点状态不受影响，需另行审核站点。',
           remarkRequired: false
         });
       }));
@@ -4955,6 +5247,35 @@
           ckey,
           title: '驳回内容',
           desc: '确认驳回该政策内容？可修改内容后重新提交。',
+          remarkRequired: true
+        });
+      }));
+      grid.querySelectorAll('.pd-site-pass').forEach(btn => btn.addEventListener('click', () => {
+        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
+        if (!p) return;
+        const body = getPolicyContent(p.content);
+        if (body.status !== '已通过') {
+          showToast('请先通过内容审核，再审核站点');
+          return;
+        }
+        openPolicyAuditConfirm({
+          kind: 'site-pass',
+          category,
+          siteId: p.id,
+          title: '通过站点',
+          desc: `确认通过亚马逊：${p.site}？仅该站生效，不重复推模型。`,
+          remarkRequired: false
+        });
+      }));
+      grid.querySelectorAll('.pd-site-reject').forEach(btn => btn.addEventListener('click', () => {
+        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
+        if (!p) return;
+        openPolicyAuditConfirm({
+          kind: 'site-reject',
+          category,
+          siteId: p.id,
+          title: '驳回站点',
+          desc: `确认驳回亚马逊：${p.site}？可修改采集链接/认证后重新提交。`,
           remarkRequired: true
         });
       }));
@@ -5006,7 +5327,7 @@
           category,
           siteId: p.id,
           title: '删除站点配置',
-          desc: `确认删除亚马逊：${p.site} 的站点配置？仅模型学习未开始时可删除。`,
+          desc: `确认删除亚马逊：${p.site} 的站点配置？`,
           remarkRequired: false
         });
       }));
@@ -5413,12 +5734,12 @@
     });
     document.getElementById('confirmPolicyDisableModal')?.addEventListener('click', () => {
       sitesOfCategory(policyDisableCategory).forEach(p => {
-        if (p.status === '已通过') p.status = '已停用';
+        if (p.status !== '已停用') p.status = '已停用';
       });
       renderPolicyTable();
       refreshRescanPolicySelect();
       closePolicyDisableModal();
-      showToast('已停用该分类下已通过站点');
+      showToast('已停用该合规分类');
     });
 
     function policySitesListHtml(category){
