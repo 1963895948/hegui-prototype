@@ -145,6 +145,18 @@
     .policy-table-wrap tr:hover td{background:#fafcff}
     .policy-cat-name{font-weight:600;color:var(--text)}
     .chip-row{display:flex;flex-wrap:wrap;gap:6px}
+    .chip-tag{
+      display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+      line-height:1.5;white-space:nowrap;border:1px solid transparent;font-weight:500;
+    }
+    .chip-tag.c0{background:#e8f1ff;border-color:#c5d8f7;color:#1a4b8c}
+    .chip-tag.c1{background:#e7f8f2;border-color:#b7e4d4;color:#0f6b4c}
+    .chip-tag.c2{background:#fff6e6;border-color:#f0d9a8;color:#8a5a00}
+    .chip-tag.c3{background:#fdeeee;border-color:#f0c4c4;color:#a33b3b}
+    .chip-tag.c4{background:#f0eefc;border-color:#d4cef3;color:#4f3d9e}
+    .chip-tag.c5{background:#e8f7fb;border-color:#b9e3ef;color:#0e6578}
+    .chip-tag.c6{background:#f3f5f8;border-color:#d5dbe5;color:#3d4a5c}
+    .chip-tag.c7{background:#eef8e8;border-color:#c6e4b8;color:#3a6e1e}
     .plat-sum{
       display:inline-flex;align-items:center;gap:4px;max-width:100%;
       padding:3px 10px;border-radius:12px;font-size:12px;line-height:1.4;
@@ -176,8 +188,6 @@
       max-width:280px;font-size:12px;line-height:1.4;color:var(--sub);cursor:pointer;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
-    .policy-content-preview:hover{color:var(--pri)}
-    .policy-content-more{margin-top:2px;color:var(--pri);font-size:11px;line-height:1.4}
     .policy-content-meta{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:2px}
     .policy-content-meta em{font-style:normal;color:var(--sub);margin:0 4px}
     .policy-time{font-size:12px;color:var(--sub);line-height:1.55;white-space:nowrap}
@@ -228,16 +238,6 @@
       display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;cursor:pointer;
     }
     .policy-add-site-menu-ft{padding:8px 4px 2px;border-top:1px dashed var(--line);margin-top:6px;text-align:right}
-    .policy-content-tip{
-      position:fixed;z-index:85;display:none;max-width:440px;min-width:220px;
-      background:#fff;border:1px solid var(--line);border-radius:6px;
-      box-shadow:0 8px 24px rgba(20,40,80,.14);padding:10px 12px;
-      font-size:12px;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word;
-    }
-    .policy-content-tip.show{display:block}
-    .policy-content-tip .tip-hd{font-weight:600;margin-bottom:4px;color:var(--sub);font-size:11px}
-    .policy-content-tip .tip-block{margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed #eef1f5}
-    .policy-content-tip .tip-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
     .policy-group-hd td{
       background:#f4f7fb;font-weight:600;font-size:12px;color:var(--text);
       border-bottom:1px solid #e8edf3;
@@ -2143,7 +2143,6 @@
     </div>
   </div>
   <div class="plat-hover-tip" id="policySiteHoverTip"></div>
-  <div class="policy-content-tip" id="policyContentHoverTip"></div>
   <div class="modal-mask" id="policyDetailModal" aria-hidden="true">
     <div class="modal-box lg" role="dialog" aria-labelledby="policyDetailTitle">
       <div class="modal-hd">
@@ -2691,6 +2690,21 @@
       if (!selected) return [];
       return String(selected).split(/[;；,，、]/).map(s => s.trim()).filter(Boolean);
     }
+    function certToneIndex(name){
+      let h = 0;
+      const s = String(name || '');
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h % 8;
+    }
+    function certChipHtml(name){
+      const n = String(name || '').trim();
+      if (!n) return '';
+      return `<span class="chip-tag c${certToneIndex(n)}">${n.replace(/</g, '&lt;')}</span>`;
+    }
+    function certChipsHtml(list){
+      const chips = [...new Set((list || []).map(x => String(x).trim()).filter(Boolean))].map(certChipHtml).join('');
+      return chips || '—';
+    }
     function certLabel(values){
       return values.length ? values.join('、') : '请选择';
     }
@@ -3014,14 +3028,11 @@
       const contents = categoryUniqueContents(g.rows);
       const meta = `<div class="policy-content-meta">已配 ${total} 站<em>·</em>启用 ${enabled} 站${contents.length > 1 ? `<em>·</em>${contents.length} 种文案` : ''}</div>`;
       if (!contents.length) {
-        return `<div class="policy-content-hover policy-view-btn" data-category="${cat}" style="cursor:pointer">${meta}<span style="color:var(--sub)">暂无政策正文</span></div>`;
+        return `<div class="policy-view-btn" data-category="${cat}" style="cursor:pointer">${meta}<span style="color:var(--sub)">暂无政策正文</span></div>`;
       }
       const preview = contents[0].replace(/</g, '&lt;');
-      const more = contents.length > 1
-        ? `<div class="policy-content-more">悬停查看全部文案</div>`
-        : '';
-      return `<div class="policy-content-hover policy-view-btn" data-category="${cat}" style="cursor:pointer">
-        ${meta}<div class="policy-content-preview" title="${preview}">${preview}</div>${more}
+      return `<div class="policy-view-btn" data-category="${cat}" style="cursor:pointer">
+        ${meta}<div class="policy-content-preview" title="${preview}">${preview}</div>
       </div>`;
     }
     function renderPolicyTable(){
@@ -3033,7 +3044,7 @@
       } else {
         tbody.innerHTML = groups.map(g => {
           const cat = g.category.replace(/"/g, '&quot;');
-          const certs = [...new Set(g.rows.flatMap(r => r.certs || []))].map(x => `<span class="chip-tag">${x.replace(/</g, '&lt;')}</span>`).join('') || '—';
+          const certs = certChipsHtml(g.rows.flatMap(r => r.certs || []));
           const info = g.statusInfo || categoryStatusInfo(g.rows);
           const times = g.times || categoryTimes(g.rows);
           const ratio = (info.key === '启用' || info.key === '部分启用') ? info.ratio : '';
@@ -6055,41 +6066,8 @@
     function hidePolicySiteHover(){
       document.getElementById('policySiteHoverTip')?.classList.remove('show');
     }
-    function showPolicyContentHover(el){
-      const tip = document.getElementById('policyContentHoverTip');
-      const category = el.getAttribute('data-category');
-      if (!tip || !category) return;
-      const rows = POLICY_STORE.filter(p => p.category === category);
-      const contents = categoryUniqueContents(rows);
-      if (!contents.length) {
-        tip.classList.remove('show');
-        return;
-      }
-      tip.innerHTML = contents.map((c, i) => {
-        const hd = contents.length > 1 ? `<div class="tip-hd">内容 ${i + 1}</div>` : '';
-        return `<div class="tip-block">${hd}${c.replace(/</g, '&lt;')}</div>`;
-      }).join('');
-      tip.classList.add('show');
-      const rect = el.getBoundingClientRect();
-      const tipW = Math.min(440, tip.offsetWidth || 320);
-      let left = rect.left;
-      let top = rect.bottom + 6;
-      if (left + tipW > window.innerWidth - 12) left = Math.max(12, window.innerWidth - tipW - 12);
-      tip.style.left = left + 'px';
-      tip.style.top = top + 'px';
-      requestAnimationFrame(() => {
-        const h = tip.offsetHeight || 120;
-        if (top + h > window.innerHeight - 8) {
-          tip.style.top = Math.max(8, rect.top - h - 6) + 'px';
-        }
-      });
-    }
-    function hidePolicyContentHover(){
-      document.getElementById('policyContentHoverTip')?.classList.remove('show');
-    }
     function openPolicySitesModal(category){
       hidePolicySiteHover();
-      hidePolicyContentHover();
       document.getElementById('policySitesTitle').textContent = `${category} · 站点配置`;
       document.getElementById('policySitesList').innerHTML = policySitesListHtml(category);
       document.getElementById('policySitesModal')?.classList.add('show');
@@ -6113,31 +6091,19 @@
       const btn = e.target.closest('.policy-view-btn');
       if (!btn) return;
       hidePolicySiteHover();
-      hidePolicyContentHover();
       const category = btn.getAttribute('data-category');
       if (!category) return;
       openPolicyDetailModal(category, 'view');
     });
     document.getElementById('policyTableBody')?.addEventListener('mouseover', e => {
       const chip = e.target.closest('.policy-sites-pop');
-      const contentEl = e.target.closest('.policy-content-hover');
-      if (chip) {
-        hidePolicyContentHover();
-        showPolicySiteHover(chip);
-      } else if (contentEl) {
-        hidePolicySiteHover();
-        showPolicyContentHover(contentEl);
-      } else {
-        hidePolicySiteHover();
-        hidePolicyContentHover();
-      }
+      if (chip) showPolicySiteHover(chip);
+      else hidePolicySiteHover();
     });
     document.getElementById('policyTableBody')?.addEventListener('mouseleave', () => {
       hidePolicySiteHover();
-      hidePolicyContentHover();
     });
     document.getElementById('policySiteHoverTip')?.addEventListener('mouseleave', hidePolicySiteHover);
-    document.getElementById('policyContentHoverTip')?.addEventListener('mouseleave', hidePolicyContentHover);
   </script>
 </body>
 </html>
