@@ -173,12 +173,61 @@
     .policy-ops .link-btn:hover{border-color:var(--pri);color:var(--pri)}
     .policy-ops .link-btn.danger{background:#fff1f0;border-color:#ffccc7;color:var(--danger)}
     .policy-content-preview{
-      max-width:300px;font-size:12px;line-height:1.55;color:var(--text);cursor:pointer;
-      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-      overflow:hidden;word-break:break-word;
+      max-width:280px;font-size:12px;line-height:1.4;color:var(--sub);cursor:pointer;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
     .policy-content-preview:hover{color:var(--pri)}
     .policy-content-more{margin-top:2px;color:var(--pri);font-size:11px;line-height:1.4}
+    .policy-content-meta{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:2px}
+    .policy-content-meta em{font-style:normal;color:var(--sub);margin:0 4px}
+    .policy-time{font-size:12px;color:var(--sub);line-height:1.55;white-space:nowrap}
+    .policy-time .t-lab{color:#9aa3b2;margin-right:4px}
+    .pd-table-wrap .op-cell{vertical-align:middle}
+    .pd-table-wrap .op-menu{z-index:40;min-width:112px}
+    .pd-batch-dd{position:relative;display:inline-block}
+    .pd-batch-menu{
+      position:absolute;right:0;top:calc(100% + 4px);z-index:20;min-width:148px;
+      background:#fff;border:1px solid var(--line);border-radius:8px;
+      box-shadow:0 8px 20px rgba(20,40,80,.12);padding:4px;display:flex;flex-direction:column;gap:2px;
+    }
+    .pd-batch-menu[hidden]{display:none!important}
+    .pd-batch-item{
+      border:0;background:transparent;text-align:left;padding:8px 12px;border-radius:6px;
+      font-size:12px;color:var(--text);cursor:pointer;width:100%;
+    }
+    .pd-batch-item:hover{background:#f4f7fb;color:var(--pri)}
+    .pd-check{width:36px;text-align:center}
+    .pd-check input{cursor:pointer;accent-color:var(--pri)}
+    .pd-ac-table-wrap{max-height:min(52vh,420px);overflow:auto;border:1px solid var(--line);border-radius:8px}
+    .pd-ac-table-wrap table{width:100%;border-collapse:collapse;font-size:12px}
+    .pd-ac-table-wrap th{
+      position:sticky;top:0;z-index:1;background:#fafafa;color:var(--sub);font-weight:600;
+      padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:left;
+    }
+    .pd-ac-table-wrap td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+    .pd-ac-table-wrap tr:last-child td{border-bottom:none}
+    .pd-ac-table-wrap .pd-ac-row-off{opacity:.45;background:#fafafa}
+    .pd-ac-table-wrap .pd-ac-row-off .cert-ms{pointer-events:none}
+    .pd-ac-table-wrap textarea.textarea{min-height:64px;font-size:12px;width:100%;min-width:160px}
+    .pd-ac-table-wrap .input,.pd-ac-table-wrap .sel{font-size:12px;width:100%;min-width:120px}
+    .pd-ac-table-wrap .cert-ms{min-width:120px}
+    .policy-add-form{max-width:min(1100px,100%)}
+    .policy-add-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+    .policy-add-table-wrap{max-height:min(58vh,520px)}
+    .policy-add-site-menu{min-width:280px;right:auto;left:0;padding:8px}
+    .policy-add-site-menu-hd{
+      display:flex;justify-content:space-between;align-items:center;gap:8px;
+      font-size:12px;color:var(--sub);padding:2px 4px 8px;border-bottom:1px dashed var(--line);margin-bottom:6px;
+    }
+    .policy-add-site-menu-hd button{border:0;background:none;color:var(--pri);cursor:pointer;font-size:12px;padding:0}
+    .policy-add-site-menu-list{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 8px;
+      max-height:220px;overflow:auto;padding:2px 4px;
+    }
+    .policy-add-site-menu-list label{
+      display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;cursor:pointer;
+    }
+    .policy-add-site-menu-ft{padding:8px 4px 2px;border-top:1px dashed var(--line);margin-top:6px;text-align:right}
     .policy-content-tip{
       position:fixed;z-index:85;display:none;max-width:440px;min-width:220px;
       background:#fff;border:1px solid var(--line);border-radius:6px;
@@ -1425,7 +1474,7 @@
                   <label><span class="req">*</span>合规政策</label>
                   <div class="ctl">
                     <select class="sel block" id="rescanPolicySelect">
-                      <option value="">请选择政策（仅已通过）</option>
+                      <option value="">请选择政策（仅启用）</option>
                     </select>
                     <div class="hint" style="margin-top:6px">选项为「政策分类（已学习站点）」；选择后下方带出政策内容可再编辑（仅影响本次任务）。回扫站点仅可勾选该分类已学习站点。</div>
                     <textarea class="textarea lg" id="rescanPolicyContent" style="margin-top:8px" placeholder="选择政策后自动带出内容，也可继续修改">Amazon US 儿童产品需符合 CPSIA，12 岁以下玩具须提供 CPC 及第三方测试报告；产品页需展示合规信息…</textarea>
@@ -1836,7 +1885,7 @@
             <div class="policy-cat-hd">
               <div>
                 <h3>合规政策管理</h3>
-                <div class="sub">按合规分类聚合 · 亚马逊站点<em>分类来自禁售列表</em></div>
+                <div class="sub">按合规分类聚合 · 明细主键：站点 + 分类 · 按需加站</div>
               </div>
               <div class="row" style="margin:0;gap:8px">
                 <button type="button" class="btn pri" data-go="policy-add">＋ 新建政策</button>
@@ -1848,10 +1897,8 @@
                 <label>状态</label>
                 <select class="sel" id="policyStatusFilter">
                   <option value="">全部</option>
-                  <option>待审核</option>
-                  <option>已驳回</option>
-                  <option>学习中</option>
-                  <option>已通过</option>
+                  <option>启用</option>
+                  <option>部分启用</option>
                   <option>已停用</option>
                 </select>
               </div>
@@ -1891,9 +1938,10 @@
                     <th>合规分类</th>
                     <th>合规平台站点</th>
                     <th>所需认证汇总</th>
-                    <th>状态</th>
-                    <th>操作</th>
                     <th>政策内容</th>
+                    <th>状态</th>
+                    <th>时间</th>
+                    <th>操作</th>
                   </tr>
                 </thead>
                 <tbody id="policyTableBody"></tbody>
@@ -1904,33 +1952,49 @@
         </section>
 
         <section id="policy-add" class="route">
-          <div class="task-form" style="max-width:820px">
+          <div class="task-form policy-add-form">
             <h3 class="form-page-title">新建政策</h3>
-            <p class="hint" style="margin:0 0 14px">爬虫按站点采集链接写入规则；提交后为待审核。业务按<strong>站点</strong>确认后，算法才学习该「分类 + 亚马逊站点」。</p>
+            <p class="hint" style="margin:0 0 14px">选择合规分类后，按站点表格配置明细；提交后各站默认启用。已有政策加站请走详情。</p>
 
             <div class="form-field">
               <label><span class="req">*</span>合规分类</label>
               <div class="ctl">
-                <select class="sel block" id="policyCategoryInput" style="width:100%;max-width:100%">
+                <select class="sel block" id="policyCategoryInput" style="width:100%;max-width:420px">
                   <option value="">请选择（来自禁售列表·合规分类下的禁售分类）</option>
                 </select>
-                <div class="hint">本页只读引用分类，不在此新建分类。同一分类可配置多个亚马逊站点。</div>
+                <div class="hint">本页只读引用分类，不在此新建分类。</div>
               </div>
             </div>
 
             <div class="form-field">
-              <label><span class="req">*</span>站点与政策内容</label>
+              <label><span class="req">*</span>站点明细</label>
               <div class="ctl">
-                <div class="row" style="margin:0 0 8px;gap:8px;align-items:center">
-                  <select class="sel" id="policyAddSiteSelect" style="width:160px"></select>
-                  <button type="button" class="btn" id="policyAddSiteBtn">＋ 添加亚马逊站点</button>
+                <div class="policy-add-toolbar">
+                  <div class="pd-batch-dd" id="policyAddSiteDd">
+                    <button type="button" class="btn" id="policyAddSiteBtn">＋ 添加站点 ▾</button>
+                    <div class="pd-batch-menu policy-add-site-menu" id="policyAddSiteMenu" hidden>
+                      <div class="policy-add-site-menu-hd">
+                        <span>勾选要添加的站点</span>
+                        <span>
+                          <button type="button" id="policyAddSiteAll">全选</button>
+                          ·
+                          <button type="button" id="policyAddSiteNone">清空</button>
+                        </span>
+                      </div>
+                      <div class="policy-add-site-menu-list" id="policyAddSiteMenuList"></div>
+                      <div class="policy-add-site-menu-ft">
+                        <button type="button" class="btn pri" id="policyAddSiteConfirm" style="height:28px;padding:0 12px;font-size:12px">添加到表格</button>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="hint" id="policyAddSiteCount" style="margin:0">已添加 0 站</span>
                 </div>
-                <div class="hint" style="margin-bottom:8px">每站单独填<strong>政策内容</strong>、采集链接与认证；内容相同的站可在详情里合并显示。</div>
-                <div id="policySiteConfigList"></div>
+                <div class="hint" style="margin:8px 0">每行一个站点，自上而下填写政策内容、采集链接与认证。</div>
+                <div class="pd-ac-table-wrap policy-add-table-wrap" id="policySiteConfigList"></div>
               </div>
             </div>
 
-            <p class="hint" style="margin:8px 0 0">提交后各站<strong>内容</strong>与<strong>站点</strong>均为待审核。内容通过→推模型（相同内容只学一次）；站点通过→该站生效。</p>
+            <p class="hint" style="margin:8px 0 0">提交后写入「分类 + 站点」明细；后续加站请在该政策详情中操作。</p>
 
             <div class="form-footer">
               <button type="button" class="btn" data-go="policy">取消</button>
@@ -2091,59 +2155,76 @@
           <div style="font-size:16px;font-weight:600" id="pdCategory">—</div>
           <div class="hint" style="margin-top:4px" id="pdSubLine">—</div>
         </div>
-        <div class="region-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>站点与政策内容<span style="font-weight:400;color:var(--sub);margin-left:8px">每站一份内容，相同内容合并显示 · 内容审核与站点审核分开</span></span>
-          <button type="button" class="btn pri" id="pdAddNewContentBtn" style="height:30px;padding:0 14px;font-size:12px">＋ 新增政策内容</button>
+        <div class="region-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <span>站点明细<span style="font-weight:400;color:var(--sub);margin-left:8px">主键：站点 + 合规分类 · 按需添加</span></span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="pd-batch-dd" id="pdBatchDd">
+              <button type="button" class="btn" id="pdBatchBtn" style="height:30px;padding:0 12px;font-size:12px">批量操作 ▾</button>
+              <div class="pd-batch-menu" id="pdBatchMenu" hidden>
+                <button type="button" class="pd-batch-item" data-action="edit">编辑所选站点</button>
+                <button type="button" class="pd-batch-item" data-action="enable">启用所选站点</button>
+                <button type="button" class="pd-batch-item" data-action="disable">停用所选站点</button>
+              </div>
+            </div>
+            <button type="button" class="btn pri" id="pdAddSiteBtn" style="height:30px;padding:0 14px;font-size:12px;flex-shrink:0">＋ 新增站点</button>
+          </div>
         </div>
         <div id="pdRegionGrid"></div>
-        <p class="hint" id="pdImmutableHint" style="margin:12px 0 0" hidden>已通过的内容/站点不可改；内容更新需停用后新增，站点更新需停用该站后新增。</p>
+        <p class="hint" id="pdImmutableHint" style="margin:12px 0 0">仅展示已添加站点；启用后该站生效，停用后不参与检测/回扫。变更可在「日志」中查看。</p>
       </div>
       <div class="modal-ft">
         <button type="button" class="btn" id="cancelPolicyDetailModal">关闭</button>
-        <button type="button" class="btn pri" id="savePolicyDetailBtn" hidden>保存</button>
       </div>
     </div>
   </div>
 
-  <!-- 新增政策内容 / 新增站点 通用弹窗 -->
+  <!-- 新增 / 编辑 / 批量编辑 站点弹窗 -->
   <div class="modal-mask above" id="pdAddContentModal" aria-hidden="true">
-    <div class="modal-box" style="width:min(680px,95vw)" role="dialog" aria-labelledby="pdAddContentModalTitle">
+    <div class="modal-box" id="pdAddContentBox" style="width:min(680px,95vw)" role="dialog" aria-labelledby="pdAddContentModalTitle">
       <div class="modal-hd">
         <span id="pdAddContentModalTitle">新增政策内容</span>
         <button type="button" class="modal-x" id="closePdAddContentModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd modal-form">
-        <div class="form-field" id="pdAcContentField">
-          <label><span class="req">*</span>政策内容</label>
-          <div class="ctl">
-            <textarea class="textarea" id="pdAcContent" rows="4" placeholder="给模型学习的规则正文"></textarea>
+        <div id="pdAcFormSingle">
+          <div class="form-field" id="pdAcContentField">
+            <label><span class="req">*</span>政策内容</label>
+            <div class="ctl">
+              <textarea class="textarea" id="pdAcContent" rows="4" placeholder="给模型学习的规则正文"></textarea>
+            </div>
+          </div>
+          <div class="form-field" id="pdAcSiteField">
+            <label><span class="req">*</span>站点</label>
+            <div class="ctl">
+              <select class="sel block" id="pdAcSiteSelect" style="width:100%;max-width:280px"></select>
+              <div class="hint" id="pdAcSiteHint" style="margin-top:6px;display:none"></div>
+            </div>
+          </div>
+          <div class="form-field" id="pdAcUrlField">
+            <label><span class="req">*</span>采集链接</label>
+            <div class="ctl">
+              <input class="input block" id="pdAcUrl" placeholder="亚马逊政策页 URL" />
+              <div class="hint" id="pdAcUrlHint" style="margin-top:6px;display:none">留空则各站保留原采集链接，不覆盖</div>
+            </div>
+          </div>
+          <div class="form-field" id="pdAcCertField">
+            <label>所需认证</label>
+            <div class="ctl" id="pdAcCertWrap"></div>
+          </div>
+          <div class="form-field" id="pdAcTicField">
+            <label>TIC验证</label>
+            <div class="ctl">
+              <select class="sel block" id="pdAcTic">
+                <option value="">请选择</option>
+                <option value="是">是</option>
+                <option value="否">否</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div class="form-field">
-          <label><span class="req">*</span>站点</label>
-          <div class="ctl">
-            <select class="sel block" id="pdAcSiteSelect" style="width:100%;max-width:280px"></select>
-          </div>
-        </div>
-        <div class="form-field">
-          <label><span class="req">*</span>采集链接</label>
-          <div class="ctl">
-            <input class="input block" id="pdAcUrl" placeholder="亚马逊政策页 URL" />
-          </div>
-        </div>
-        <div class="form-field">
-          <label>所需认证</label>
-          <div class="ctl" id="pdAcCertWrap"></div>
-        </div>
-        <div class="form-field">
-          <label>TIC验证</label>
-          <div class="ctl">
-            <select class="sel block" id="pdAcTic">
-              <option value="">请选择</option>
-              <option value="是">是</option>
-              <option value="否">否</option>
-            </select>
-          </div>
+        <div id="pdAcFormTable" hidden>
+          <p class="hint" style="margin:0 0 10px">勾选要新增的站点，按行填写配置（政策内容与采集链接必填）。</p>
+          <div class="pd-ac-table-wrap" id="pdAcSiteTableWrap"></div>
         </div>
       </div>
       <div class="modal-ft">
@@ -2233,6 +2314,23 @@
       </div>
       <div class="modal-ft">
         <button type="button" class="btn" id="closePolicyLogBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 站点明细 · 批量操作确认 -->
+  <div class="modal-mask above" id="pdBatchConfirmModal" aria-hidden="true">
+    <div class="modal-box sm" role="dialog" aria-labelledby="pdBatchConfirmTitle">
+      <div class="modal-hd">
+        <span id="pdBatchConfirmTitle">批量操作确认</span>
+        <button type="button" class="modal-x" id="closePdBatchConfirmModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <p style="margin:0;font-size:13px;line-height:1.7" id="pdBatchConfirmDesc">—</p>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn" id="cancelPdBatchConfirmModal">取消</button>
+        <button type="button" class="btn pri" id="confirmPdBatchConfirmModal">确定</button>
       </div>
     </div>
   </div>
@@ -2654,7 +2752,7 @@
         lab.style.display = !kw || lab.textContent.toUpperCase().includes(kw) ? '' : 'none';
       });
     });
-    const COMPLIANCE_CATEGORIES = [
+    let COMPLIANCE_CATEGORIES = [
       '医用测温计',
       '不明磁性',
       '婴儿奶嘴',
@@ -2668,73 +2766,88 @@
     ];
     let POLICY_STORE = [
       {
-        id: 'toys_us', category: '儿童玩具', platform: '亚马逊', site: '美国', status: '已通过', learned: false,
+        id: 'toys_us', category: '儿童玩具', platform: '亚马逊', site: '美国', status: '启用', learned: false,
+        createdAt: '2026-08-12 10:20', updatedAt: '2026-09-10 14:32',
         crawlUrl: 'https://sellercentral.amazon.com/help/hub/reference/external/G200204080',
-        certs: ['CPC'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'ASTM F963-23 / CPSIA', tic: '已接入TIC直接验证'
+        certs: ['CPC'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'ASTM F963-23 / CPSIA', tic: '已接入TIC直接验证', ticVerify: '是'
       },
       {
-        id: 'toys_ca', category: '儿童玩具', platform: '亚马逊', site: '加拿大', status: '已通过', learned: false,
+        id: 'toys_ca', category: '儿童玩具', platform: '亚马逊', site: '加拿大', status: '启用', learned: false,
+        createdAt: '2026-08-12 10:22', updatedAt: '2026-09-10 14:32',
         crawlUrl: 'https://sellercentral.amazon.ca/help/hub/reference/external/G200204080',
-        certs: ['ISO 17025'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'SOR/2011-17', tic: '已接入TIC直接验证'
+        certs: ['ISO 17025'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'SOR/2011-17', tic: '已接入TIC直接验证', ticVerify: '是'
       },
       {
-        id: 'toys_uk', category: '儿童玩具', platform: '亚马逊', site: '英国', status: '已通过', learned: false,
+        id: 'toys_uk', category: '儿童玩具', platform: '亚马逊', site: '英国', status: '启用', learned: false,
+        createdAt: '2026-08-12 10:25', updatedAt: '2026-09-08 09:10',
         crawlUrl: 'https://sellercentral.amazon.co.uk/help/hub/reference/external/G200204080',
-        certs: ['UKCA'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'EN 71-1/2/3', tic: '已接入TIC直接验证'
+        certs: ['UKCA'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'EN 71-1/2/3', tic: '已接入TIC直接验证', ticVerify: '是'
       },
       {
-        id: 'toys_mx', category: '儿童玩具', platform: '亚马逊', site: '墨西哥', status: '待审核', learned: false,
-        crawlUrl: '', certs: ['CPC'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'NOM', tic: '', ticVerify: ''
+        id: 'toys_mx', category: '儿童玩具', platform: '亚马逊', site: '墨西哥', status: '启用', learned: false,
+        createdAt: '2026-08-20 11:00', updatedAt: '2026-09-12 16:05',
+        crawlUrl: 'https://sellercentral.amazon.com.mx/help/hub/reference/external/G200204080',
+        certs: ['CPC'], content: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'NOM', tic: '', ticVerify: '否'
       },
       {
-        id: 'toys_de', category: '儿童玩具', platform: '亚马逊', site: '德国', status: '待审核', learned: false,
+        id: 'toys_de', category: '儿童玩具', platform: '亚马逊', site: '德国', status: '启用', learned: false,
+        createdAt: '2026-08-18 15:40', updatedAt: '2026-09-01 11:20',
         crawlUrl: 'https://sellercentral.amazon.de/help/hub/reference/external/G200204080',
-        certs: ['CE'], content: 'CE标志及玩具安全指令', standard: 'EN 71系列 / REACH', tic: '待接入'
+        certs: ['CE'], content: 'CE标志及玩具安全指令', standard: 'EN 71系列 / REACH', tic: '待接入', ticVerify: '否'
       },
       {
-        id: 'toys_nl', category: '儿童玩具', platform: '亚马逊', site: '荷兰', status: '待审核', learned: false,
+        id: 'toys_nl', category: '儿童玩具', platform: '亚马逊', site: '荷兰', status: '启用', learned: false,
+        createdAt: '2026-08-18 15:42', updatedAt: '2026-09-01 11:20',
         crawlUrl: 'https://sellercentral.amazon.nl/help/hub/reference/external/G200204080',
-        certs: ['CE'], content: 'CE及玩具安全指令', standard: 'EN 71系列', tic: '待接入'
+        certs: ['CE'], content: 'CE及玩具安全指令', standard: 'EN 71系列', tic: '待接入', ticVerify: '否'
       },
       {
-        id: 'toys_jp', category: '儿童玩具', platform: '亚马逊', site: '日本', status: '待审核', learned: false,
+        id: 'toys_jp', category: '儿童玩具', platform: '亚马逊', site: '日本', status: '已停用', learned: false,
+        createdAt: '2026-08-22 09:15', updatedAt: '2026-09-14 10:00',
         crawlUrl: 'https://sellercentral.amazon.co.jp/help/hub/reference/external/G200204080',
-        certs: ['PSC'], content: '日本玩具安全要求', standard: 'ST 2016', tic: '待接入'
+        certs: ['PSC'], content: '日本玩具安全要求', standard: 'ST 2016', tic: '待接入', ticVerify: '否'
       },
       {
-        id: 'toys_fr', category: '儿童玩具', platform: '亚马逊', site: '法国', status: '待审核', learned: false,
+        id: 'toys_fr', category: '儿童玩具', platform: '亚马逊', site: '法国', status: '已停用', learned: false,
+        createdAt: '2026-08-22 09:18', updatedAt: '2026-09-14 10:00',
         crawlUrl: 'https://sellercentral.amazon.fr/help/hub/reference/external/G200204080',
-        certs: ['CE'], content: 'CE及EN 71', standard: 'EN 71系列', tic: '待接入'
+        certs: ['CE'], content: 'CE及EN 71', standard: 'EN 71系列', tic: '待接入', ticVerify: '否'
       },
       {
-        id: 'pajama_us', category: '儿童睡衣', platform: '亚马逊', site: '美国', status: '待审核', learned: false,
+        id: 'pajama_us', category: '儿童睡衣', platform: '亚马逊', site: '美国', status: '启用', learned: false,
+        createdAt: '2026-09-01 09:30', updatedAt: '2026-09-13 18:22',
         crawlUrl: 'https://sellercentral.amazon.com/help/hub/reference/external/G200332540',
-        certs: ['CPC'], content: 'CPC证书及易燃性要求', standard: '16 CFR 1615/1616', tic: '待接入直接验证'
+        certs: ['CPC'], content: 'CPC证书及易燃性要求', standard: '16 CFR 1615/1616', tic: '待接入直接验证', ticVerify: '否'
       },
       {
-        id: 'pajama_uk', category: '儿童睡衣', platform: '亚马逊', site: '英国', status: '待审核', learned: false,
+        id: 'pajama_uk', category: '儿童睡衣', platform: '亚马逊', site: '英国', status: '启用', learned: false,
+        createdAt: '2026-09-01 09:35', updatedAt: '2026-09-13 18:22',
         crawlUrl: 'https://sellercentral.amazon.co.uk/help/hub/reference/external/G200332540',
-        certs: ['UKCA'], content: 'UKCA及燃烧性能', standard: 'EN 71-2 / BS 7177', tic: '未接入'
+        certs: ['UKCA'], content: 'UKCA及燃烧性能', standard: 'EN 71-2 / BS 7177', tic: '未接入', ticVerify: '否'
       },
       {
-        id: 'rf_us', category: '无线射频设备', platform: '亚马逊', site: '美国', status: '已通过', learned: false,
+        id: 'rf_us', category: '无线射频设备', platform: '亚马逊', site: '美国', status: '启用', learned: false,
+        createdAt: '2026-07-20 14:00', updatedAt: '2026-09-05 08:45',
         crawlUrl: 'https://sellercentral.amazon.com/help/hub/reference/external/G200332540',
-        certs: ['FCC'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: '47 CFR Part 15', tic: '已接入TIC直接验证'
+        certs: ['FCC'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: '47 CFR Part 15', tic: '已接入TIC直接验证', ticVerify: '是'
       },
       {
-        id: 'rf_ca', category: '无线射频设备', platform: '亚马逊', site: '加拿大', status: '已通过', learned: false,
+        id: 'rf_ca', category: '无线射频设备', platform: '亚马逊', site: '加拿大', status: '启用', learned: false,
+        createdAt: '2026-07-20 14:05', updatedAt: '2026-09-05 08:45',
         crawlUrl: 'https://sellercentral.amazon.ca/help/hub/reference/external/G200332540',
-        certs: ['ISED'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'RSS-247 / RSS-102', tic: '已接入TIC直接验证'
+        certs: ['ISED'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'RSS-247 / RSS-102', tic: '已接入TIC直接验证', ticVerify: '是'
       },
       {
-        id: 'rf_de', category: '无线射频设备', platform: '亚马逊', site: '德国', status: '已通过', learned: false,
+        id: 'rf_de', category: '无线射频设备', platform: '亚马逊', site: '德国', status: '启用', learned: false,
+        createdAt: '2026-07-21 10:12', updatedAt: '2026-09-05 08:45',
         crawlUrl: 'https://sellercentral.amazon.de/gp/help/customer/display.html',
-        certs: ['CE'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'ETSI EN 300 328', tic: '学习中'
+        certs: ['CE'], content: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。', standard: 'ETSI EN 300 328', tic: '已接入', ticVerify: '是'
       },
       {
         id: 'magnet_us', category: '不明磁性', platform: '亚马逊', site: '美国', status: '已停用', learned: false,
+        createdAt: '2026-06-10 11:00', updatedAt: '2026-08-30 17:40',
         crawlUrl: 'https://sellercentral.amazon.com/help/hub/reference/external/G200204080',
-        certs: ['FCC'], content: '历史 FCC 要求（已停用）', standard: '47 CFR Part 15', tic: '—'
+        certs: ['FCC'], content: '历史 FCC 要求（已停用）', standard: '47 CFR Part 15', tic: '—', ticVerify: '否'
       }
     ];
     // 内容审核与站点审核分离：POLICY_BODIES 仅存「相同内容」的学习状态；站点行只存站点 status。
@@ -2783,6 +2896,10 @@
         b.status = '已通过';
         b.learned = false;
       });
+      // 明细行学习态与内容学习态对齐（演示）
+      POLICY_STORE.forEach(p => {
+        p.learned = !!getPolicyContent(p.content || '').learned;
+      });
     }
     seedPolicyContents();
 
@@ -2795,45 +2912,44 @@
     }
     fillComplianceCategorySelects();
 
-    function statusTagHtml(status){
-      if (status === '已通过' || status === '已生效') return '<span class="tag t-y">已通过</span>';
-      if (status === '已停用') return '<span class="tag t-d">已停用</span>';
-      if (status === '已驳回') return '<span class="tag t-d">已驳回</span>';
-      if (status === '待审核') return '<span class="tag t-w">待审核</span>';
-      if (status === '学习中') return '<span class="tag t-w">学习中</span>';
+    function nowPolicyTime(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    function touchPolicyRow(p){
+      if (!p) return;
+      if (!p.createdAt) p.createdAt = nowPolicyTime();
+      p.updatedAt = nowPolicyTime();
+    }
+    function statusTagHtml(status, ratioText){
+      const extra = ratioText ? ` ${ratioText}` : '';
+      if (status === '部分启用') return `<span class="tag t-w">部分启用${extra}</span>`;
+      if (status === '启用' || status === '已通过' || status === '已生效') return `<span class="tag t-y">启用${extra}</span>`;
+      if (status === '已停用' || status === '停用') return '<span class="tag t-d">已停用</span>';
       return `<span class="tag t-d">${status}</span>`;
     }
-    function categoryUniqueBodies(rows){
-      const bodyKeys = new Set(rows.map(r => bodyKeyByContent(r.content)));
-      return [...bodyKeys].map(k => {
-        const row = rows.find(r => bodyKeyByContent(r.content) === k);
-        return getPolicyContent(row.content);
-      });
+    function categoryStatusInfo(rows){
+      const total = (rows || []).length;
+      const enabled = (rows || []).filter(r => r.status !== '已停用').length;
+      if (!total || enabled === 0) {
+        return { key: '已停用', enabled: 0, total, ratio: total ? `0/${total}` : '0/0', label: '已停用' };
+      }
+      if (enabled === total) {
+        return { key: '启用', enabled, total, ratio: `${enabled}/${total}`, label: `启用 ${enabled}/${total}` };
+      }
+      return { key: '部分启用', enabled, total, ratio: `${enabled}/${total}`, label: `部分启用 ${enabled}/${total}` };
     }
     function categoryStatus(rows){
-      if (!rows.length) return '待审核';
-      // 5. 已停用：整个合规分类被停用
-      if (rows.every(r => r.status === '已停用')) return '已停用';
-      const bodies = categoryUniqueBodies(rows);
-      // 1. 待审核：任一政策内容为待审核
-      if (bodies.some(b => b.status === '待审核')) return '待审核';
-      // 2. 已驳回：全部政策内容均为已驳回
-      if (bodies.length && bodies.every(b => b.status === '已驳回')) return '已驳回';
-      // 3. 学习中：无待审核，且存在待模型学习（内容已通过但未学习完）
-      if (bodies.some(b => b.status === '已通过' && !b.learned)) return '学习中';
-      // 4. 已通过：无待审核，且存在模型学习完毕的数据
-      if (bodies.some(b => b.status === '已通过' && b.learned)) return '已通过';
-      return '待审核';
+      return categoryStatusInfo(rows).key;
+    }
+    function categoryTimes(rows){
+      const created = (rows || []).map(r => r.createdAt).filter(Boolean).sort()[0] || '—';
+      const updated = (rows || []).map(r => r.updatedAt).filter(Boolean).sort().reverse()[0] || '—';
+      return { created, updated };
     }
     function policyOpsHtml(g){
       const cat = g.category.replace(/"/g, '&quot;');
-      const canDisable = g.status === '待审核' || g.status === '已通过' || g.status === '已生效' || g.status === '学习中';
-      const canAudit = g.status === '待审核';
-      const ops = [];
-      if (canAudit) ops.push(`<span class="link-btn policy-audit-btn" data-category="${cat}">审核</span>`);
-      if (canDisable) ops.push(`<span class="link-btn danger policy-disable-btn" data-category="${cat}">停用</span>`);
-      ops.push(`<span class="link-btn policy-view-btn" data-category="${cat}">详情</span>`);
-      return `<div class="policy-ops">${ops.join('')}</div>`;
+      return `<div class="policy-ops"><span class="link-btn policy-view-btn" data-category="${cat}">详情</span></div>`;
     }
     function getCategoryGroups(){
       const status = document.getElementById('policyStatusFilter')?.value || '';
@@ -2842,16 +2958,17 @@
       const map = new Map();
       POLICY_STORE.forEach(p => {
         if (kw && !p.category.toLowerCase().includes(kw)) return;
-        if (certKw && !(p.certs || '').toUpperCase().includes(certKw)) return;
+        const certStr = Array.isArray(p.certs) ? p.certs.join(',') : (p.certs || '');
+        if (certKw && !certStr.toUpperCase().includes(certKw)) return;
         if (!map.has(p.category)) map.set(p.category, []);
         map.get(p.category).push(p);
       });
       const groups = [];
       map.forEach((rows, category) => {
         if (policyFilterSites.size && !rows.some(r => policyFilterSites.has(r.site))) return;
-        const st = categoryStatus(rows);
-        if (status && st !== status) return;
-        groups.push({ category, rows, status: st });
+        const info = categoryStatusInfo(rows);
+        if (status && info.key !== status) return;
+        groups.push({ category, rows, status: info.key, statusInfo: info, times: categoryTimes(rows) });
       });
       return groups;
     }
@@ -2869,11 +2986,13 @@
       const parts = [];
       groupRowsByPlatform(g.rows).forEach((list, plat) => {
         const names = list.map(x => x.site);
+        const on = list.filter(x => x.status !== '已停用').length;
         const label = names.length <= 2
           ? `${names.join('、')}`
           : `${names.length} 个站点`;
         const extra = names.length > 2 ? '<em>悬停/点击</em>' : '';
-        parts.push(`<span class="plat-sum policy-sites-pop" data-category="${cat}" data-platform="${plat.replace(/"/g, '&quot;')}">${label.replace(/</g, '&lt;')}${extra}</span>`);
+        const ratio = `<span style="color:var(--sub);font-size:11px;margin-left:4px">启用 ${on}/${names.length}</span>`;
+        parts.push(`<span class="plat-sum policy-sites-pop" data-category="${cat}" data-platform="${plat.replace(/"/g, '&quot;')}">${label.replace(/</g, '&lt;')}${extra}${ratio}</span>`);
       });
       return `<div class="chip-row">${parts.join('')}</div>`;
     }
@@ -2881,7 +3000,7 @@
       const seen = new Set();
       const list = [];
       (rows || []).forEach(r => {
-        const text = (getPolicyContent(r.content).content || '').trim();
+        const text = (r.content || '').trim();
         if (!text || seen.has(text)) return;
         seen.add(text);
         list.push(text);
@@ -2890,16 +3009,19 @@
     }
     function policyContentCellHtml(g){
       const cat = g.category.replace(/"/g, '&quot;');
+      const total = g.rows.length;
+      const enabled = g.rows.filter(r => r.status !== '已停用').length;
       const contents = categoryUniqueContents(g.rows);
+      const meta = `<div class="policy-content-meta">已配 ${total} 站<em>·</em>启用 ${enabled} 站${contents.length > 1 ? `<em>·</em>${contents.length} 种文案` : ''}</div>`;
       if (!contents.length) {
-        return '<span style="color:var(--sub)">—</span>';
+        return `<div class="policy-content-hover policy-view-btn" data-category="${cat}" style="cursor:pointer">${meta}<span style="color:var(--sub)">暂无政策正文</span></div>`;
       }
       const preview = contents[0].replace(/</g, '&lt;');
       const more = contents.length > 1
-        ? `<div class="policy-content-more">等 ${contents.length} 条不同内容 · 悬停查看</div>`
+        ? `<div class="policy-content-more">悬停查看全部文案</div>`
         : '';
       return `<div class="policy-content-hover policy-view-btn" data-category="${cat}" style="cursor:pointer">
-        <div class="policy-content-preview">${preview}</div>${more}
+        ${meta}<div class="policy-content-preview" title="${preview}">${preview}</div>${more}
       </div>`;
     }
     function renderPolicyTable(){
@@ -2907,18 +3029,25 @@
       if (!tbody) return;
       const groups = getCategoryGroups();
       if (!groups.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:28px">暂无匹配政策</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:28px">暂无匹配政策</td></tr>`;
       } else {
         tbody.innerHTML = groups.map(g => {
           const cat = g.category.replace(/"/g, '&quot;');
           const certs = [...new Set(g.rows.flatMap(r => r.certs || []))].map(x => `<span class="chip-tag">${x.replace(/</g, '&lt;')}</span>`).join('') || '—';
+          const info = g.statusInfo || categoryStatusInfo(g.rows);
+          const times = g.times || categoryTimes(g.rows);
+          const ratio = (info.key === '启用' || info.key === '部分启用') ? info.ratio : '';
           return `<tr data-category="${cat}">
             <td class="policy-cat-name">${g.category.replace(/</g, '&lt;')}</td>
             <td>${platformSitesHtml(g)}</td>
             <td><div class="chip-row">${certs}</div></td>
-            <td>${statusTagHtml(g.status)}</td>
-            <td>${policyOpsHtml(g)}</td>
             <td>${policyContentCellHtml(g)}</td>
+            <td>${statusTagHtml(info.key, ratio ? `(${ratio})` : '')}</td>
+            <td class="policy-time">
+              <div><span class="t-lab">创建</span>${(times.created || '—').replace(/</g, '&lt;')}</div>
+              <div><span class="t-lab">更新</span>${(times.updated || '—').replace(/</g, '&lt;')}</div>
+            </td>
+            <td>${policyOpsHtml(g)}</td>
           </tr>`;
         }).join('');
       }
@@ -2932,12 +3061,10 @@
       POLICY_STORE.forEach(p => {
         if (seen.has(p.category)) return;
         seen.add(p.category);
-        // 括号内站点 = 内容已通过且已学习 + 站点已通过
-        const approvedSites = POLICY_STORE.filter(x => {
-          if (x.category !== p.category || x.status !== '已通过') return false;
-          const body = getPolicyContent(x.content);
-          return body.status === '已通过' && body.learned;
-        });
+        // 启用站点才可供回扫/检测选用
+        const approvedSites = POLICY_STORE.filter(x =>
+          x.category === p.category && x.status === '启用' && (x.content || '').trim()
+        );
         const contentOk = approvedSites.length > 0;
         const primary = approvedSites[0] || POLICY_STORE.find(x => x.category === p.category);
         const plat = (approvedSites[0] || primary)?.platform || '亚马逊';
@@ -2946,14 +3073,13 @@
           id: p.category,
           name: p.category,
           category: p.category,
-          content: primary ? getPolicyContent(primary.content).content : '',
+          content: primary ? (primary.content || '') : '',
           platform: plat,
           sites: siteNames.join('、'),
           siteNames,
-          // 供回扫站点勾选范围：平台|站点
           siteKeys: siteNames.map(s => `${plat}|${s}`),
           sitesLabel: siteNames.length ? `${plat}-${siteNames.join('、')}` : '',
-          status: contentOk ? '已通过' : categoryStatus(POLICY_STORE.filter(x => x.category === p.category)),
+          status: contentOk ? '启用' : (categoryStatusInfo(POLICY_STORE.filter(x => x.category === p.category)).key === '部分启用' ? '启用' : categoryStatus(POLICY_STORE.filter(x => x.category === p.category))),
           link: approvedSites[0]?.crawlUrl || '',
           tr: null
         });
@@ -2962,9 +3088,9 @@
     }
     function refreshRescanPolicySelect(){
       if (!rescanPolicySelect) return;
-      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
+      const list = getPolicyListFromTable().filter(p => p.status === '启用');
       const cur = rescanPolicySelect.value;
-      rescanPolicySelect.innerHTML = '<option value="">请选择政策（仅已通过）</option>' + list.map((p, i) =>
+      rescanPolicySelect.innerHTML = '<option value="">请选择政策（仅启用）</option>' + list.map((p, i) =>
         `<option value="${i}">${p.category.replace(/</g, '&lt;')}（${(p.sitesLabel || '').replace(/</g, '&lt;')}）</option>`
       ).join('');
       if (cur && +cur < list.length) {
@@ -3024,7 +3150,7 @@
     }
     function getSelectedRescanPolicy(){
       if (!rescanPolicySelect || rescanPolicySelect.value === '') return null;
-      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
+      const list = getPolicyListFromTable().filter(p => p.status === '启用');
       return list[+rescanPolicySelect.value] || null;
     }
     function syncRescanSitesToPolicy(p){
@@ -3411,7 +3537,7 @@
     renderDetectPlatformPicked();
 
     rescanPolicySelect?.addEventListener('change', () => {
-      const list = getPolicyListFromTable().filter(p => p.status === '已通过');
+      const list = getPolicyListFromTable().filter(p => p.status === '启用');
       const p = rescanPolicySelect.value === '' ? null : list[+rescanPolicySelect.value];
       if (p && rescanPolicyContent) {
         rescanPolicyContent.value = p.content || '';
@@ -4931,59 +5057,77 @@
       });
     });
 
-    let policyAddRows = [{ site: '美国', crawlUrl: '', certs: [], content: '' }];
+    let policyAddRows = [{ site: '美国', crawlUrl: '', certs: [], content: '', ticVerify: '' }];
 
     function amazonSiteList(){
       return PLATFORM_SITES.find(p => p.id === 'amazon')?.sites || ['美国'];
     }
-    function fillPolicyAddSiteSelect(){
-      const sel = document.getElementById('policyAddSiteSelect');
-      if (!sel) return;
+    function availablePolicyAddSites(){
       const used = new Set(policyAddRows.map(r => r.site));
-      const left = amazonSiteList().filter(s => !used.has(s));
-      sel.innerHTML = left.length
-        ? left.map(s => `<option value="${s}">${s}</option>`).join('')
-        : '<option value="">已添加全部站点</option>';
-      sel.disabled = !left.length;
+      return amazonSiteList().filter(s => !used.has(s));
+    }
+    function closePolicyAddSiteMenu(){
+      const menu = document.getElementById('policyAddSiteMenu');
+      if (menu) menu.hidden = true;
+    }
+    function fillPolicyAddSiteMenu(){
+      const list = document.getElementById('policyAddSiteMenuList');
+      const btn = document.getElementById('policyAddSiteBtn');
+      if (!list) return;
+      const left = availablePolicyAddSites();
+      if (btn) {
+        btn.disabled = !left.length;
+        btn.title = left.length ? `还可添加 ${left.length} 个站点` : '已添加全部亚马逊站点';
+      }
+      if (!left.length) {
+        list.innerHTML = '<div style="grid-column:1/-1;color:var(--sub);padding:8px 0">已添加全部站点</div>';
+        return;
+      }
+      list.innerHTML = left.map(s =>
+        `<label><input type="checkbox" class="policy-add-site-cb" value="${s.replace(/"/g, '&quot;')}" /> ${s.replace(/</g, '&lt;')}</label>`
+      ).join('');
     }
     function renderPolicySiteConfigList(){
       const box = document.getElementById('policySiteConfigList');
       if (!box) return;
+      const countEl = document.getElementById('policyAddSiteCount');
+      if (countEl) countEl.textContent = `已添加 ${policyAddRows.length} 站`;
+      fillPolicyAddSiteMenu();
       if (!policyAddRows.length) {
-        box.innerHTML = '<div class="hint">请至少添加一个亚马逊站点</div>';
-        fillPolicyAddSiteSelect();
+        box.innerHTML = '<div style="padding:24px;text-align:center;color:var(--sub)">请先添加至少一个亚马逊站点</div>';
         return;
       }
-      box.innerHTML = policyAddRows.map((r, i) => `
-        <div class="site-config-card" data-idx="${i}">
-          <div class="sc-hd">
-            <span class="sc-title">${r.site.replace(/</g, '&lt;')}</span>
-            <span class="sc-rm" data-rm="${i}">移除</span>
-          </div>
-          <div class="sc-grid">
-            <div class="full">
-              <label class="mini"><span class="req">*</span>政策内容</label>
-              <textarea class="textarea sc-content" data-idx="${i}" placeholder="该站点给模型学习的规则正文" rows="3">${(r.content || '').replace(/</g, '&lt;')}</textarea>
-            </div>
-            <div class="full">
-              <label class="mini"><span class="req">*</span>采集链接</label>
-              <input class="input block sc-url" data-idx="${i}" placeholder="该站点亚马逊官网政策 URL" value="${(r.crawlUrl || '').replace(/"/g, '&quot;')}" />
-            </div>
-            <div class="full">
-              <label class="mini">所需认证</label>
-              ${certMultiSelectHtml('sc-cert-ms', r.certs || r.cert || [], false, `data-idx="${i}"`)}
-            </div>
-            <div class="full">
-              <label class="mini">TIC验证</label>
+      const order = amazonSiteList();
+      policyAddRows.sort((a, b) => (order.indexOf(a.site) < 0 ? 999 : order.indexOf(a.site)) - (order.indexOf(b.site) < 0 ? 999 : order.indexOf(b.site)));
+      const esc = s => (s || '').replace(/</g, '&lt;');
+      box.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th style="width:72px">站点</th>
+            <th style="min-width:200px">政策内容</th>
+            <th style="min-width:160px">采集链接</th>
+            <th style="min-width:130px">所需认证</th>
+            <th style="width:88px">TIC验证</th>
+            <th style="width:56px">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${policyAddRows.map((r, i) => `<tr data-idx="${i}">
+            <td style="white-space:nowrap;font-weight:600;padding-top:14px">${esc(r.site)}</td>
+            <td><textarea class="textarea sc-content" data-idx="${i}" rows="2" placeholder="该站政策内容">${esc(r.content)}</textarea></td>
+            <td><input class="input block sc-url" data-idx="${i}" placeholder="政策页 URL" value="${(r.crawlUrl || '').replace(/"/g, '&quot;')}" /></td>
+            <td>${certMultiSelectHtml('sc-cert-ms', r.certs || r.cert || [], false, `data-idx="${i}"`)}</td>
+            <td>
               <select class="sel block sc-tic" data-idx="${i}">
                 <option value="" ${!r.ticVerify ? 'selected' : ''}>请选择</option>
                 <option value="是" ${r.ticVerify === '是' ? 'selected' : ''}>是</option>
                 <option value="否" ${r.ticVerify === '否' ? 'selected' : ''}>否</option>
               </select>
-            </div>
-          </div>
-        </div>
-      `).join('');
+            </td>
+            <td style="padding-top:14px"><span class="link-btn sc-rm" data-rm="${i}" style="color:var(--danger);cursor:pointer">移除</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
       box.querySelectorAll('.sc-url').forEach(el => el.addEventListener('input', () => { policyAddRows[+el.dataset.idx].crawlUrl = el.value; }));
       box.querySelectorAll('.sc-content').forEach(el => el.addEventListener('input', () => { policyAddRows[+el.dataset.idx].content = el.value; }));
       box.querySelectorAll('.sc-tic').forEach(el => el.addEventListener('change', () => { policyAddRows[+el.dataset.idx].ticVerify = el.value; }));
@@ -4991,14 +5135,33 @@
         policyAddRows.splice(+el.dataset.rm, 1);
         renderPolicySiteConfigList();
       }));
-      fillPolicyAddSiteSelect();
     }
-    document.getElementById('policyAddSiteBtn')?.addEventListener('click', () => {
-      const sel = document.getElementById('policyAddSiteSelect');
-      const site = sel?.value;
-      if (!site) { showToast('没有可添加的站点'); return; }
-      policyAddRows.push({ site, crawlUrl: '', certs: [], content: '' });
+    document.getElementById('policyAddSiteBtn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      const menu = document.getElementById('policyAddSiteMenu');
+      if (!menu) return;
+      fillPolicyAddSiteMenu();
+      menu.hidden = !menu.hidden;
+    });
+    document.getElementById('policyAddSiteAll')?.addEventListener('click', () => {
+      document.querySelectorAll('#policyAddSiteMenuList .policy-add-site-cb').forEach(cb => { cb.checked = true; });
+    });
+    document.getElementById('policyAddSiteNone')?.addEventListener('click', () => {
+      document.querySelectorAll('#policyAddSiteMenuList .policy-add-site-cb').forEach(cb => { cb.checked = false; });
+    });
+    document.getElementById('policyAddSiteConfirm')?.addEventListener('click', () => {
+      const picks = [...document.querySelectorAll('#policyAddSiteMenuList .policy-add-site-cb:checked')].map(el => el.value);
+      if (!picks.length) { showToast('请勾选要添加的站点'); return; }
+      picks.forEach(site => {
+        if (policyAddRows.some(r => r.site === site)) return;
+        policyAddRows.push({ site, crawlUrl: '', certs: [], content: '', ticVerify: '' });
+      });
+      closePolicyAddSiteMenu();
       renderPolicySiteConfigList();
+      showToast(`已添加 ${picks.length} 个站点`);
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#policyAddSiteDd')) closePolicyAddSiteMenu();
     });
     renderPolicySiteConfigList();
 
@@ -5030,7 +5193,8 @@
     function resetPolicyForm(){
       const cat = document.getElementById('policyCategoryInput');
       if (cat) cat.value = '';
-      policyAddRows = [{ site: '美国', crawlUrl: '', certs: [], content: '' }];
+      policyAddRows = [{ site: '美国', crawlUrl: '', certs: [], content: '', ticVerify: '' }];
+      closePolicyAddSiteMenu();
       renderPolicySiteConfigList();
     }
 
@@ -5043,7 +5207,7 @@
         if (!r.crawlUrl.trim()) { showToast(`请填写亚马逊：${r.site} 的采集链接`); return; }
       }
       const dupSites = policyAddRows.filter(r =>
-        POLICY_STORE.some(p => p.category === category && p.site === r.site && p.status !== '已停用')
+        POLICY_STORE.some(p => p.category === category && p.site === r.site && p.status === '启用')
       );
       if (dupSites.length) {
         showToast(`「${category}」在 ${dupSites.map(x => x.site).join('、')} 已有配置（需先停用才能新增）`);
@@ -5059,13 +5223,16 @@
         }
         nb.content = content;
         const certs = normalizeCerts(r.certs || r.cert);
+        const tsStr = nowPolicyTime();
         POLICY_STORE.unshift({
           id: 'policy_' + ts + '_' + i,
           category,
           platform: '亚马逊',
           site: r.site,
-          status: '待审核',
+          status: '启用',
           learned: false,
+          createdAt: tsStr,
+          updatedAt: tsStr,
           crawlUrl: r.crawlUrl.trim(),
           certs,
           content,
@@ -5077,297 +5244,264 @@
       resetPolicyForm();
       renderPolicyTable();
       refreshRescanPolicySelect();
-      showToast('已提交：内容与站点待审核。内容通过后才推模型（只学一次）');
+      showToast('已提交：分类明细已写入，站点默认启用');
       go('policy');
     });
 
     let policyModalCategory = null;
     let policyModalMode = 'view';
-    let policyModalSnapshot = null;
     function sitesOfCategory(category){
       return POLICY_STORE.filter(p => p.category === category);
     }
-    function canEditSite(p){
-      return p.status === '待审核' || p.status === '已驳回';
+    function siteEnabled(p){
+      return p && p.status !== '已停用';
     }
-    function canEditBody(body){
-      return body.status === '待审核' || body.status === '已驳回';
+    function availableAmazonSites(category){
+      const used = new Set(sitesOfCategory(category).map(p => p.site));
+      return amazonSiteList().filter(s => !used.has(s));
     }
-    function groupSitesByContent(category){
-      const rows = sitesOfCategory(category);
-      const map = new Map();
-      rows.forEach(p => {
-        const key = bodyKeyByContent(p.content);
-        if (!map.has(key)) {
-          map.set(key, { key, content: p.content, body: getPolicyContent(p.content), sites: [] });
-        }
-        map.get(key).sites.push(p);
+    function orderedCategorySites(category){
+      const order = amazonSiteList();
+      const rows = sitesOfCategory(category).slice();
+      rows.sort((a, b) => {
+        const ia = order.indexOf(a.site);
+        const ib = order.indexOf(b.site);
+        return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
       });
-      return [...map.values()];
+      return rows;
+    }
+    let pdSelectedIds = new Set();
+    function syncPdSelectAll(grid){
+      const boxes = [...(grid?.querySelectorAll('.pd-row-check') || [])];
+      const all = grid?.querySelector('#pdCheckAll');
+      if (!all) return;
+      if (!boxes.length) {
+        all.checked = false;
+        all.indeterminate = false;
+        return;
+      }
+      const n = boxes.filter(b => b.checked).length;
+      all.checked = n === boxes.length;
+      all.indeterminate = n > 0 && n < boxes.length;
+    }
+    function getSelectedDetailRows(category){
+      return orderedCategorySites(category).filter(p => pdSelectedIds.has(p.id));
     }
     function renderPolicyDetailGrid(category){
       const grid = document.getElementById('pdRegionGrid');
       if (!grid) return;
-      const groups = groupSitesByContent(category);
-      if (!groups.length) {
-        grid.innerHTML = '<div style="text-align:center;color:var(--sub);padding:16px">暂无站点配置</div>';
+      const rows = orderedCategorySites(category);
+      const validIds = new Set(rows.map(r => r.id));
+      pdSelectedIds = new Set([...pdSelectedIds].filter(id => validIds.has(id)));
+      const left = availableAmazonSites(category).length;
+      const addBtn = document.getElementById('pdAddSiteBtn');
+      if (addBtn) {
+        addBtn.disabled = left === 0;
+        addBtn.title = left === 0 ? '已添加全部亚马逊站点' : `还可添加 ${left} 个站点`;
+      }
+      if (!rows.length) {
+        pdSelectedIds.clear();
+        grid.innerHTML = '<div style="text-align:center;color:var(--sub);padding:24px 16px">暂无站点明细，点击右上角「新增站点」按需添加（共 22 个亚马逊站可选）</div>';
         return;
       }
       const esc = s => (s || '').replace(/</g, '&lt;');
-      let tbody = '';
-      groups.forEach(g => {
-        const n = g.sites.length;
-        const body = g.body;
-        const editableContent = canEditBody(body);
-        const learnMeta = body.status === '已通过' ? (body.learned ? '<span class="g-meta">已推模型</span>' : '<span class="g-meta">学习中</span>') : '';
-        const groupTag = n > 1 ? `<div class="pd-group-tag">${n} 个站点共用此内容</div>` : '';
-        const contentAudit = (policyModalMode === 'audit' && body.status === '待审核')
-          ? `<div style="display:flex;flex-direction:column;gap:6px;width:100%">
-               <button type="button" class="btn pri pd-content-pass" data-ckey="${g.key}" style="height:28px;padding:0 10px;font-size:12px;width:100%">通过内容</button>
-               <button type="button" class="btn pd-content-reject" data-ckey="${g.key}" style="height:28px;padding:0 10px;font-size:12px;width:100%">驳回内容</button>
-             </div>` : '';
-        const contentCellInner = editableContent
-          ? `<textarea class="textarea pd-content" data-ckey="${g.key}" rows="4">${esc(g.content)}</textarea>${groupTag}`
-          : `<div class="pd-content-read">${esc(g.content || '—')}</div>${learnMeta}${groupTag}`;
-        g.sites.forEach((p, idx) => {
-          const editable = canEditSite(p);
-          const urlCell = editable
-            ? `<input class="input block pd-url" data-id="${p.id}" value="${(p.crawlUrl || '').replace(/"/g, '&quot;')}" placeholder="请输入采集链接" />`
-            : (p.crawlUrl ? `<a href="${p.crawlUrl.replace(/"/g, '')}" target="_blank" rel="noopener" title="${esc(p.crawlUrl)}">${esc(p.crawlUrl)}</a>` : '未配置');
-          const certCell = certMultiSelectHtml('pd-cert-ms', p.certs, !editable, `data-id="${p.id}"`);
-          const ticCell = editable
-            ? `<select class="sel block pd-tic" data-id="${p.id}" style="font-size:12px">
-                 <option value="" ${!p.ticVerify ? 'selected' : ''}>请选择</option>
-                 <option value="是" ${p.ticVerify === '是' ? 'selected' : ''}>是</option>
-                 <option value="否" ${p.ticVerify === '否' ? 'selected' : ''}>否</option>
-               </select>`
-            : esc(p.ticVerify || '—');
-          let learnCell = '';
-          if (idx === 0) {
-            if (body.learned) {
-              learnCell = '<span class="tag t-y">已学习</span>';
-            } else if (body.status === '已通过') {
-              learnCell = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-                <span class="tag t-w">学习中</span>
-                <div style="display:flex;gap:4px">
-                  <button type="button" class="btn ok pd-learn-pass" data-ckey="${g.key}" style="height:22px;padding:0 8px;font-size:11px;min-width:0">通过</button>
-                  <button type="button" class="btn pd-learn-reject" data-ckey="${g.key}" style="height:22px;padding:0 8px;font-size:11px;min-width:0">驳回</button>
-                </div>
-              </div>`;
-            } else {
-              learnCell = '<span class="tag t-d">未学习</span>';
-            }
-          }
-          const deleteAction = (!body.learned && body.status !== '已通过' && idx === 0)
-            ? `<button type="button" class="btn pd-delete-content" data-ckey="${g.key}" style="height:28px;padding:0 10px;font-size:12px;width:100%;color:#d4380d;border-color:#ffd8bf;background:#fff7e6">删除政策内容</button>`
-            : '';
-          const actionCell = idx === 0
-            ? `<td rowspan="${n}" style="vertical-align:middle;text-align:center;width:126px">
-                 <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch">
-                   <button type="button" class="btn ok pd-add-site-to-content" data-ckey="${g.key}" style="height:28px;padding:0 10px;font-size:12px;white-space:nowrap;width:100%">＋ 新增站点</button>
-                   ${contentAudit}
-                   ${deleteAction}
-                 </div>
-               </td>`
-            : '';
-          // 站点审核：内容已通过后，才可审站点（与内容审分开）
-          const siteAudit = (policyModalMode === 'audit' && body.status === '已通过' && p.status === '待审核')
-            ? `<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;align-items:stretch">
-                 <button type="button" class="btn pri pd-site-pass" data-id="${p.id}" style="height:24px;padding:0 8px;font-size:11px;min-width:0">通过站点</button>
-                 <button type="button" class="btn pd-site-reject" data-id="${p.id}" style="height:24px;padding:0 8px;font-size:11px;min-width:0">驳回站点</button>
-               </div>`
-            : '';
-          const canDelSite = !body.learned && (body.status !== '已通过' || p.status === '待审核' || p.status === '已驳回');
-          const rowOps = [
-            `<button type="button" class="btn pd-log-btn" data-id="${p.id}" style="height:24px;padding:0 10px;font-size:11px;min-width:0">查看日志</button>`,
-            siteAudit
-          ];
-          tbody += `<tr>
-            ${actionCell}
-            <td style="white-space:nowrap">
-              <span>${esc(p.site)}</span>
-              ${canDelSite ? `<button type="button" class="btn pd-delete-site" data-id="${p.id}" style="height:22px;padding:0 8px;font-size:11px;min-width:0;margin-left:8px;color:#d4380d;border-color:#ffd8bf;background:#fff7e6">删除</button>` : ''}
-            </td>
-            ${idx === 0 ? `<td class="pd-content-cell" rowspan="${n}">${contentCellInner}</td>` : ''}
-            <td class="url-cell">${urlCell}</td>
-            <td>${certCell}</td>
-            <td>${ticCell}</td>
-            ${idx === 0 ? `<td rowspan="${n}" style="text-align:center">${statusTagHtml(body.status)}</td>` : ''}
-            <td style="text-align:center">${statusTagHtml(p.status)}</td>
-            ${idx === 0 ? `<td rowspan="${n}" style="text-align:center">${learnCell}</td>` : ''}
-            <td style="text-align:center"><div style="display:flex;flex-direction:column;gap:6px;align-items:center">${rowOps.join('')}</div></td>
-          </tr>`;
-        });
-      });
+      const tbody = rows.map(p => {
+        const enabled = siteEnabled(p);
+        const statusCell = enabled
+          ? '<span class="tag t-y">启用</span>'
+          : '<span class="tag t-d">停用</span>';
+        const urlCell = p.crawlUrl
+          ? `<a href="${(p.crawlUrl || '').replace(/"/g, '')}" target="_blank" rel="noopener" title="${esc(p.crawlUrl)}">${esc(p.crawlUrl)}</a>`
+          : '<span style="color:var(--sub)">—</span>';
+        const certText = Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—');
+        const learned = !!p.learned;
+        const learnCell = learned
+          ? '<span class="tag t-y">已学习</span>'
+          : '<span class="tag t-d">未学习</span>';
+        const toggleAct = enabled ? 'disable' : 'enable';
+        const toggleLabel = enabled ? '停用' : '启用';
+        const learnAct = learned ? 'learn-off' : 'learn-on';
+        const learnLabel = learned ? '取消学习' : '确认学习';
+        const checked = pdSelectedIds.has(p.id) ? 'checked' : '';
+        return `<tr>
+          <td class="pd-check"><input type="checkbox" class="pd-row-check" data-id="${p.id}" ${checked} /></td>
+          <td style="white-space:nowrap">${esc(p.site)}</td>
+          <td class="pd-content-cell"><div class="pd-content-read">${esc(p.content || '—')}</div></td>
+          <td class="url-cell">${urlCell}</td>
+          <td>${esc(certText)}</td>
+          <td>${esc(p.ticVerify || '—')}</td>
+          <td style="text-align:center">${statusCell}</td>
+          <td style="text-align:center">${learnCell}</td>
+          <td style="text-align:center">
+            <div class="op-cell pd-op-cell">
+              <span class="op-more" title="操作">☰</span>
+              <div class="op-menu">
+                <button type="button" data-act="edit" data-id="${p.id}">编辑</button>
+                <button type="button" data-act="${toggleAct}" data-id="${p.id}">${toggleLabel}</button>
+                <button type="button" data-act="${learnAct}" data-id="${p.id}">${learnLabel}</button>
+                <button type="button" data-act="log" data-id="${p.id}">日志</button>
+              </div>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
       grid.innerHTML = `<div class="pd-table-wrap"><table>
         <thead><tr>
-          <th style="width:126px">操作</th>
+          <th class="pd-check"><input type="checkbox" id="pdCheckAll" title="全选" /></th>
           <th>站点</th>
           <th style="min-width:200px">政策内容</th>
           <th>采集链接</th>
           <th>所需认证</th>
           <th>TIC验证</th>
-          <th>内容状态</th>
-          <th>站点状态</th>
-          <th>模型学习</th>
-          <th>日志</th>
+          <th style="width:72px">状态</th>
+          <th style="width:92px">模型是否学习</th>
+          <th style="width:56px">操作</th>
         </tr></thead>
         <tbody>${tbody}</tbody>
       </table></div>`;
-      grid.querySelectorAll('.pd-add-site-to-content').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        const bodyObj = POLICY_BODIES[ckey];
-        const content = bodyObj?.content || '';
-        const usedSites = new Set(sitesOfCategory(category).map(r => r.site));
-        const available = amazonSiteList().filter(s => !usedSites.has(s));
-        if (!available.length) { showToast('已添加全部站点，无可用站点'); return; }
-        openPdAcModal(category, content, available);
-      }));
-      grid.querySelectorAll('.pd-content-pass').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        const ta = grid.querySelector(`.pd-content[data-ckey="${ckey}"]`);
-        const text = (ta?.value || POLICY_BODIES[ckey]?.content || '').trim();
-        if (!text) { showToast('政策内容不能为空'); return; }
-        openPolicyAuditConfirm({
-          kind: 'content-pass',
-          category,
-          ckey,
-          text,
-          title: '通过内容',
-          desc: '确认通过该政策内容？通过后算法将优化大模型提示词，人工标记学习完成后方可识别该分类产品。站点状态不受影响，需另行审核站点。',
-          remarkRequired: false
+      syncPdSelectAll(grid);
+      grid.querySelector('#pdCheckAll')?.addEventListener('change', e => {
+        const on = e.target.checked;
+        grid.querySelectorAll('.pd-row-check').forEach(box => {
+          box.checked = on;
+          if (on) pdSelectedIds.add(box.dataset.id);
+          else pdSelectedIds.delete(box.dataset.id);
         });
-      }));
-      grid.querySelectorAll('.pd-content-reject').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        if (!POLICY_BODIES[ckey]) return;
-        openPolicyAuditConfirm({
-          kind: 'content-reject',
-          category,
-          ckey,
-          title: '驳回内容',
-          desc: '确认驳回该政策内容？可修改内容后重新提交。',
-          remarkRequired: true
+        syncPdSelectAll(grid);
+      });
+      grid.querySelectorAll('.pd-row-check').forEach(box => {
+        box.addEventListener('change', () => {
+          if (box.checked) pdSelectedIds.add(box.dataset.id);
+          else pdSelectedIds.delete(box.dataset.id);
+          syncPdSelectAll(grid);
         });
-      }));
-      grid.querySelectorAll('.pd-site-pass').forEach(btn => btn.addEventListener('click', () => {
-        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
-        if (!p) return;
-        const body = getPolicyContent(p.content);
-        if (body.status !== '已通过') {
-          showToast('请先通过内容审核，再审核站点');
+      });
+      bindPdRegionGridOpsOnce();
+    }
+    function syncPolicyContentLearned(row, category){
+      const body = getPolicyContent(row.content || '');
+      const key = bodyKeyByContent(row.content || '');
+      const siblings = sitesOfCategory(category).filter(x => bodyKeyByContent(x.content || '') === key);
+      body.learned = siblings.some(x => !!x.learned);
+    }
+    function refreshPolicyDetailAfterSiteChange(category){
+      renderPolicyDetailGrid(category);
+      refreshPolicyDetailChrome(category);
+      renderPolicyTable();
+      refreshRescanPolicySelect();
+    }
+    let pdRegionGridOpsBound = false;
+    function bindPdRegionGridOpsOnce(){
+      if (pdRegionGridOpsBound) return;
+      const grid = document.getElementById('pdRegionGrid');
+      if (!grid) return;
+      pdRegionGridOpsBound = true;
+      grid.addEventListener('click', e => {
+        const category = policyModalCategory;
+        if (!category) return;
+        const more = e.target.closest('.pd-op-cell .op-more');
+        if (more) {
+          e.stopPropagation();
+          const menu = more.nextElementSibling;
+          const wasOpen = menu?.classList.contains('show');
+          closeAllOpMenus();
+          if (!wasOpen) menu?.classList.add('show');
           return;
         }
-        openPolicyAuditConfirm({
-          kind: 'site-pass',
-          category,
-          siteId: p.id,
-          title: '通过站点',
-          desc: `确认通过亚马逊：${p.site}？仅该站生效，不重复推模型。`,
-          remarkRequired: false
-        });
-      }));
-      grid.querySelectorAll('.pd-site-reject').forEach(btn => btn.addEventListener('click', () => {
-        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
-        if (!p) return;
-        openPolicyAuditConfirm({
-          kind: 'site-reject',
-          category,
-          siteId: p.id,
-          title: '驳回站点',
-          desc: `确认驳回亚马逊：${p.site}？可修改采集链接/认证后重新提交。`,
-          remarkRequired: true
-        });
-      }));
-      grid.querySelectorAll('.pd-learn-pass').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        openPolicyAuditConfirm({
-          kind: 'learn-pass',
-          category,
-          ckey,
-          title: '通过模型学习',
-          desc: '确认该政策内容的大模型学习已完成？通过后合规模型将可识别该分类产品。',
-          remarkRequired: false
-        });
-      }));
-      grid.querySelectorAll('.pd-learn-reject').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        openPolicyAuditConfirm({
-          kind: 'learn-reject',
-          category,
-          ckey,
-          title: '驳回模型学习',
-          desc: '确认驳回模型学习？将重置为学习中状态，需算法重新优化后再审核。',
-          remarkRequired: true
-        });
-      }));
-      grid.querySelectorAll('.pd-log-btn').forEach(btn => btn.addEventListener('click', () => {
-        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
-        if (!p) return;
-        openPolicyLogModal(p);
-      }));
-      grid.querySelectorAll('.pd-delete-content').forEach(btn => btn.addEventListener('click', () => {
-        const ckey = btn.dataset.ckey;
-        const bodyObj = POLICY_BODIES[ckey];
-        if (!bodyObj) return;
-        openPolicyAuditConfirm({
-          kind: 'delete-content',
-          category,
-          ckey,
-          title: '删除政策内容',
-          desc: '确认删除该政策内容及其下所有站点配置？仅模型学习未开始时可删除。',
-          remarkRequired: false
-        });
-      }));
-      grid.querySelectorAll('.pd-delete-site').forEach(btn => btn.addEventListener('click', () => {
-        const p = POLICY_STORE.find(x => x.id === btn.dataset.id);
-        if (!p) return;
-        openPolicyAuditConfirm({
-          kind: 'delete-site',
-          category,
-          siteId: p.id,
-          title: '删除站点配置',
-          desc: `确认删除亚马逊：${p.site} 的站点配置？`,
-          remarkRequired: false
-        });
-      }));
+        const actBtn = e.target.closest('.pd-op-cell .op-menu button[data-act]');
+        if (!actBtn) return;
+        e.stopPropagation();
+        closeAllOpMenus();
+        const row = POLICY_STORE.find(x => x.id === actBtn.dataset.id);
+        if (!row) return;
+        const act = actBtn.dataset.act;
+        if (act === 'edit') {
+          openPdEditSiteModal(row);
+          return;
+        }
+        if (act === 'log') {
+          openPolicyLogModal(row);
+          return;
+        }
+        if (act === 'enable') {
+          if (!(row.content || '').trim() || !(row.crawlUrl || '').trim()) {
+            showToast('请先编辑并填写政策内容与采集链接，再启用');
+            openPdEditSiteModal(row);
+            return;
+          }
+          row.status = '启用';
+          touchPolicyRow(row);
+          pushPolicyLog(row, '启用站点', '状态：启用');
+          showToast(`已启用：亚马逊 · ${row.site}`);
+          refreshPolicyDetailAfterSiteChange(category);
+          return;
+        }
+        if (act === 'disable') {
+          openPdSiteOpConfirm('disable', row, category);
+          return;
+        }
+        if (act === 'learn-on') {
+          if (!(row.content || '').trim()) {
+            showToast('请先填写政策内容，再确认模型学习');
+            openPdEditSiteModal(row);
+            return;
+          }
+          row.learned = true;
+          syncPolicyContentLearned(row, category);
+          touchPolicyRow(row);
+          pushPolicyLog(row, '确认模型学习', '模型是否学习：已学习');
+          showToast(`已确认学习：亚马逊 · ${row.site}`);
+          refreshPolicyDetailAfterSiteChange(category);
+          return;
+        }
+        if (act === 'learn-off') {
+          openPdSiteOpConfirm('learn-off', row, category);
+        }
+      });
+    }
+    const POLICY_LOGS = {};
+    function policyLogKey(p){ return p.id || `${p.category}|${p.site}`; }
+    function fmtLogTime(d){
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    function pushPolicyLog(p, type, detail, user){
+      const key = policyLogKey(p);
+      if (!POLICY_LOGS[key]) POLICY_LOGS[key] = [];
+      POLICY_LOGS[key].unshift({
+        time: fmtLogTime(new Date()),
+        user: user || '当前用户',
+        type,
+        detail: detail || '—'
+      });
+    }
+    function seedPolicyLogs(p){
+      const key = policyLogKey(p);
+      if (POLICY_LOGS[key]?.length) return;
+      const now = Date.now();
+      const certText = Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—');
+      POLICY_LOGS[key] = [
+        { time: fmtLogTime(new Date(now - 86400000)), user: '李四（合规）', type: siteEnabled(p) ? '启用站点' : '停用站点', detail: `状态：${siteEnabled(p) ? '启用' : '停用'}` },
+        ...(p.crawlUrl ? [{ time: fmtLogTime(new Date(now - 86400000 * 3)), user: '张三（产品）', type: '配置采集链接', detail: p.crawlUrl }] : []),
+        { time: fmtLogTime(new Date(now - 86400000 * 5)), user: '张三（产品）', type: '新增站点明细', detail: `亚马逊：${p.site}，认证：${certText}` }
+      ];
     }
     function openPolicyLogModal(p) {
       const modal = document.getElementById('policyLogModal');
       const title = document.getElementById('policyLogTitle');
       const tbody = document.getElementById('policyLogBody');
       if (!modal || !tbody) return;
+      seedPolicyLogs(p);
       title.textContent = `操作日志 — 亚马逊：${p.site}`;
-      const body = getPolicyContent(p.content);
-      const now = new Date();
-      const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      const logs = [];
-      const d1 = new Date(now - 86400000 * 5);
-      logs.push({ time: fmt(d1), user: '张三（产品）', type: '新增站点配置', detail: `新增亚马逊：${p.site}，认证：${p.certs || '—'}` });
-      if (p.crawlUrl) {
-        const d2 = new Date(now - 86400000 * 4);
-        logs.push({ time: fmt(d2), user: '张三（产品）', type: '配置采集链接', detail: p.crawlUrl });
-      }
-      if (body.status === '已通过' || body.status === '已驳回') {
-        const d3 = new Date(now - 86400000 * 3);
-        logs.push({ time: fmt(d3), user: '李四（合规）', type: '提交内容审核', detail: '提交政策内容待审核' });
-        const d4 = new Date(now - 86400000 * 2);
-        logs.push({ time: fmt(d4), user: '王五（审核）', type: body.status === '已通过' ? '内容审核通过' : '内容审核驳回',
-          detail: body.status === '已通过' ? '审核通过，推送算法优化大模型' : ('驳回原因：' + (body.auditRemark || '内容不符合要求')) });
-      }
-      if (body.learned) {
-        const d5 = new Date(now - 86400000 * 1);
-        logs.push({ time: fmt(d5), user: '系统', type: '模型学习完成', detail: '算法已完成大模型提示词优化' });
-        logs.push({ time: fmt(new Date(now - 3600000)), user: '王五（审核）', type: '模型学习审核通过', detail: '确认模型学习完成，合规模型已可识别该分类产品' });
-      }
-      logs.sort((a, b) => b.time.localeCompare(a.time));
+      const logs = POLICY_LOGS[policyLogKey(p)] || [];
       const esc = s => (s||'').replace(/</g,'&lt;');
-      tbody.innerHTML = logs.map(l => `<tr>
+      tbody.innerHTML = logs.length
+        ? logs.map(l => `<tr>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--sub)">${esc(l.time)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap">${esc(l.user)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap">${esc(l.type)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid var(--line);color:var(--sub);max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc(l.detail)}</td>
-      </tr>`).join('');
+        <td style="padding:8px 12px;border-bottom:1px solid var(--line);color:var(--sub);max-width:240px;overflow:hidden;text-overflow:ellipsis" title="${esc(l.detail)}">${esc(l.detail)}</td>
+      </tr>`).join('')
+        : '<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--sub)">暂无日志</td></tr>';
       modal.classList.add('show');
     }
     function closePolicyLogModal() {
@@ -5376,202 +5510,22 @@
     document.getElementById('closePolicyLogModal')?.addEventListener('click', closePolicyLogModal);
     document.getElementById('closePolicyLogBtn')?.addEventListener('click', closePolicyLogModal);
 
-    function openPolicyDingNotice(payload) {
-      const modal = document.getElementById('policyDingNoticeModal');
-      const desc = document.getElementById('policyDingNoticeDesc');
-      const mock = document.getElementById('policyDingNoticeMock');
-      if (!modal || !desc || !mock) return;
-      const rows = sitesOfCategory(payload.category).filter(p => bodyKeyByContent(p.content) === payload.ckey);
-      const sitesText = rows.map(p => `亚马逊：${p.site}`).join('、') || '相关站点';
-      desc.innerHTML = `该政策内容审核已通过，系统将通过钉钉通知对应负责人关注后续模型学习进度。<br/>通知范围：${sitesText}`;
-      mock.textContent = `【合规政策审核通知】「${payload.category}」下政策内容已审核通过，涉及站点：${sitesText}。请对应负责人跟进大模型提示词优化与学习结果确认。`;
-      modal.classList.add('show');
-    }
-    function closePolicyDingNotice() {
-      document.getElementById('policyDingNoticeModal')?.classList.remove('show');
-    }
-    document.getElementById('closePolicyDingNotice')?.addEventListener('click', closePolicyDingNotice);
-    document.getElementById('closePolicyDingNoticeBtn')?.addEventListener('click', closePolicyDingNotice);
-
-    function openPolicySaveConfirm() {
-      if (!policyModalCategory) return;
-      const box = document.getElementById('policySaveConfirmList');
-      if (!box) return;
-      const rows = sitesOfCategory(policyModalCategory);
-      const changedRows = rows.map(p => {
-        const urlEl = document.querySelector(`#pdRegionGrid .pd-url[data-id="${p.id}"]`);
-        const ticEl = document.querySelector(`#pdRegionGrid .pd-tic[data-id="${p.id}"]`);
-        const certBox = document.querySelector(`#pdRegionGrid .pd-cert-ms[data-id="${p.id}"]`);
-        const crawlUrl = urlEl ? urlEl.value.trim() : p.crawlUrl;
-        const certText = certBox ? (certValuesFromBox(certBox).join('、') || '—') : (Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—'));
-        const ticVerify = ticEl ? ticEl.value : p.ticVerify;
-        const snap = policyModalSnapshot?.[p.id] || null;
-        const oldCertText = snap ? (snap.certsText || '—') : (Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—'));
-        const oldCrawlUrl = snap ? (snap.crawlUrl || '') : (p.crawlUrl || '');
-        const oldTicVerify = snap ? (snap.ticVerify || '') : (p.ticVerify || '');
-        const isNewRow = !snap;
-        const changed = [];
-        if (isNewRow) changed.push('新增站点配置');
-        if ((crawlUrl || '') !== oldCrawlUrl || isNewRow) changed.push(`采集链接：${(crawlUrl || '未填写').replace(/</g, '&lt;')}`);
-        if ((certText || '—') !== (oldCertText || '—') || isNewRow) changed.push(`所需认证：${(certText || '—').replace(/</g, '&lt;')}`);
-        if ((ticVerify || '') !== oldTicVerify || isNewRow) changed.push(`TIC验证：${(ticVerify || '—').replace(/</g, '&lt;')}`);
-        if (!changed.length) return '';
-        return `<div style="padding:6px 0;border-bottom:1px dashed var(--line)">
-          <div style="color:var(--text)">亚马逊：${(p.site || '').replace(/</g, '&lt;')}</div>
-          ${changed.map(line => `<div>${line}</div>`).join('')}
-        </div>`;
-      }).filter(Boolean);
-      box.innerHTML = changedRows.length
-        ? changedRows.join('')
-        : '<div style="color:var(--sub)">当前没有可保存的配置变更</div>';
-      document.getElementById('policySaveConfirmModal')?.classList.add('show');
-    }
-    function closePolicySaveConfirm() {
-      document.getElementById('policySaveConfirmModal')?.classList.remove('show');
-    }
-    document.getElementById('closePolicySaveConfirm')?.addEventListener('click', closePolicySaveConfirm);
-    document.getElementById('cancelPolicySaveConfirm')?.addEventListener('click', closePolicySaveConfirm);
-
-    let policyAuditPending = null;
-    function openPolicyAuditConfirm(payload){
-      policyAuditPending = payload;
-      document.getElementById('policyAuditConfirmTitle').textContent = payload.title;
-      document.getElementById('policyAuditConfirmDesc').textContent = payload.desc;
-      const ta = document.getElementById('policyAuditRemark');
-      const lab = document.getElementById('policyAuditRemarkLabel');
-      if (ta) {
-        ta.value = '';
-        ta.placeholder = payload.remarkRequired ? '必填，说明驳回原因，最多200字' : '选填，最多200字';
-      }
-      if (lab) lab.innerHTML = payload.remarkRequired ? '<span class="req">*</span>审核备注' : '审核备注';
-      document.getElementById('policyAuditConfirmModal')?.classList.add('show');
-    }
-    function closePolicyAuditConfirm(){
-      document.getElementById('policyAuditConfirmModal')?.classList.remove('show');
-      policyAuditPending = null;
-    }
-    function applyPolicyAudit(payload, remark){
-      const category = payload.category;
-      if (payload.kind === 'content-pass') {
-        const b = getPolicyContent(payload.text);
-        b.status = '已通过';
-        b.learned = false;
-        b.content = payload.text;
-        b.auditRemark = remark;
-        sitesOfCategory(category).filter(p => bodyKeyByContent(p.content) === payload.ckey).forEach(p => { p.content = payload.text; });
-        showToast('内容已通过，算法将优化大模型提示词，学习完成后需人工审核');
-        setTimeout(() => openPolicyDingNotice(payload), 120);
-      } else if (payload.kind === 'content-reject') {
-        const b = POLICY_BODIES[payload.ckey];
-        if (!b) return;
-        b.status = '已驳回';
-        b.learned = false;
-        b.auditRemark = remark;
-        showToast('已驳回该内容，可修改后重新提交');
-      } else if (payload.kind === 'site-pass') {
-        const p = POLICY_STORE.find(x => x.id === payload.siteId);
-        if (!p) return;
-        p.status = '已通过';
-        p.auditRemark = remark;
-        showToast(`亚马逊：${p.site} 站点已通过（该站生效，不重复推模型）`);
-      } else if (payload.kind === 'site-reject') {
-        const p = POLICY_STORE.find(x => x.id === payload.siteId);
-        if (!p) return;
-        p.status = '已驳回';
-        p.auditRemark = remark;
-        showToast(`已驳回亚马逊：${p.site}`);
-      } else if (payload.kind === 'learn-pass') {
-        const b = POLICY_BODIES[payload.ckey];
-        if (!b) return;
-        b.learned = true;
-        b.learnRemark = remark;
-        showToast('模型学习已通过，合规模型现在可识别该分类产品');
-      } else if (payload.kind === 'learn-reject') {
-        const b = POLICY_BODIES[payload.ckey];
-        if (!b) return;
-        b.learned = false;
-        b.learnRemark = remark;
-        showToast('模型学习已驳回，需算法重新优化后再审核');
-      } else if (payload.kind === 'delete-site') {
-        const idx = POLICY_STORE.findIndex(x => x.id === payload.siteId);
-        if (idx < 0) return;
-        const p = POLICY_STORE[idx];
-        POLICY_STORE.splice(idx, 1);
-        showToast(`已删除亚马逊：${p.site} 的站点配置`);
-        if (!sitesOfCategory(category).length) {
-          closePolicyDetailModal();
-          renderPolicyTable();
-          refreshRescanPolicySelect();
-          return;
-        }
-      } else if (payload.kind === 'delete-content') {
-        const before = sitesOfCategory(category).length;
-        for (let i = POLICY_STORE.length - 1; i >= 0; i--) {
-          const p = POLICY_STORE[i];
-          if (p.category === category && bodyKeyByContent(p.content) === payload.ckey) {
-            POLICY_STORE.splice(i, 1);
-          }
-        }
-        const removed = before - sitesOfCategory(category).length;
-        showToast(`已删除该政策内容及 ${removed} 个站点配置`);
-        if (!sitesOfCategory(category).length) {
-          closePolicyDetailModal();
-          renderPolicyTable();
-          refreshRescanPolicySelect();
-          return;
-        }
-      }
-      renderPolicyDetailGrid(category);
-      renderPolicyTable();
-      refreshRescanPolicySelect();
-      refreshPolicyDetailChrome(category);
-    }
-    document.getElementById('closePolicyAuditConfirm')?.addEventListener('click', closePolicyAuditConfirm);
-    document.getElementById('cancelPolicyAuditConfirm')?.addEventListener('click', closePolicyAuditConfirm);
-    document.getElementById('policyAuditConfirmModal')?.addEventListener('click', e => {
-      if (e.target.id === 'policyAuditConfirmModal') closePolicyAuditConfirm();
-    });
-    document.getElementById('confirmPolicyAuditConfirm')?.addEventListener('click', () => {
-      if (!policyAuditPending) return;
-      const remark = (document.getElementById('policyAuditRemark')?.value || '').trim();
-      if (policyAuditPending.remarkRequired && !remark) {
-        showToast('请填写审核备注');
-        return;
-      }
-      const payload = policyAuditPending;
-      closePolicyAuditConfirm();
-      applyPolicyAudit(payload, remark);
-    });
     function refreshPolicyDetailChrome(category){
-      const rows = sitesOfCategory(category);
-      const groups = groupSitesByContent(category);
-      const st = categoryStatus(rows);
-      const pendingSites = rows.filter(r => r.status === '待审核').length;
-      const passedSites = rows.filter(r => r.status === '已通过').length;
-      const pendingContents = groups.filter(g => g.body.status === '待审核').length;
-      const learnedContents = groups.filter(g => g.body.learned).length;
+      const rows = orderedCategorySites(category);
+      const enabled = rows.filter(siteEnabled).length;
+      const left = availableAmazonSites(category).length;
       document.getElementById('pdSubLine').textContent =
-        `${rows.length} 个站点 · ${groups.length} 份内容 · 汇总${st}${learnedContents ? ` · ${learnedContents}份已推模型` : ''} · ${passedSites}站已通过${pendingSites ? ` · ${pendingSites}站待审` : ''}${pendingContents ? ` · ${pendingContents}份内容待审` : ''}`;
-      const saveBtn = document.getElementById('savePolicyDetailBtn');
-      if (saveBtn) saveBtn.hidden = !(groups.some(g => canEditBody(g.body)) || rows.some(canEditSite));
-      const imm = document.getElementById('pdImmutableHint');
-      if (imm) imm.hidden = !(groups.some(g => g.body.status === '已通过') || rows.some(r => r.status === '已通过'));
+        `已配置 ${rows.length} 站 · ${enabled} 站启用 · ${rows.length - enabled} 站停用 · 还可添加 ${left} 站（亚马逊共 22 站）`;
     }
     function openPolicyDetailModal(category, mode){
       const rows = sitesOfCategory(category);
       if (!rows.length) return;
       policyModalCategory = category;
-      policyModalMode = mode;
-      policyModalSnapshot = {};
-      rows.forEach(p => {
-        policyModalSnapshot[p.id] = {
-          crawlUrl: p.crawlUrl || '',
-          certsText: Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—'),
-          ticVerify: p.ticVerify || ''
-        };
-      });
+      policyModalMode = mode || 'view';
+      pdSelectedIds.clear();
+      closePdBatchMenu();
       document.getElementById('pdCategory').textContent = category;
-      document.getElementById('policyDetailTitle').textContent = mode === 'audit' ? '审核政策' : '政策详情';
+      document.getElementById('policyDetailTitle').textContent = '政策详情';
       renderPolicyDetailGrid(category);
       refreshPolicyDetailChrome(category);
       document.getElementById('policyDetailModal')?.classList.add('show');
@@ -5579,8 +5533,10 @@
     function closePolicyDetailModal(){
       document.getElementById('policyDetailModal')?.classList.remove('show');
       policyModalCategory = null;
-      policyModalSnapshot = null;
+      pdSelectedIds.clear();
+      closePdBatchMenu();
     }
+
     document.getElementById('closePolicyDetailModal')?.addEventListener('click', closePolicyDetailModal);
     document.getElementById('cancelPolicyDetailModal')?.addEventListener('click', closePolicyDetailModal);
     document.getElementById('policyDetailModal')?.addEventListener('click', e => {
@@ -5588,33 +5544,370 @@
     });
 
     let pdAcPending = null;
-    function openPdAcModal(category, fixedContent, available){
-      pdAcPending = { category, fixedContent };
-      const contentField = document.getElementById('pdAcContentField');
-      const ta = document.getElementById('pdAcContent');
-      if (fixedContent !== null) {
-        if (contentField) contentField.style.display = 'none';
-        if (ta) ta.value = fixedContent;
-        document.getElementById('pdAddContentModalTitle').textContent = '新增站点';
+    function setPdAcModalWide(wide){
+      const box = document.getElementById('pdAddContentBox');
+      if (box) box.style.width = wide ? 'min(980px,96vw)' : 'min(680px,95vw)';
+    }
+    function showPdAcFormMode(mode){
+      const single = document.getElementById('pdAcFormSingle');
+      const table = document.getElementById('pdAcFormTable');
+      if (mode === 'table') {
+        if (single) single.hidden = true;
+        if (table) table.hidden = false;
+        setPdAcModalWide(true);
       } else {
-        if (contentField) contentField.style.display = '';
-        if (ta) ta.value = '';
-        document.getElementById('pdAddContentModalTitle').textContent = '新增政策内容';
+        if (single) single.hidden = false;
+        if (table) table.hidden = true;
+        setPdAcModalWide(false);
       }
+    }
+    function resetPdAcChrome(){
+      showPdAcFormMode('single');
       const sel = document.getElementById('pdAcSiteSelect');
-      if (sel) sel.innerHTML = available.map(s => `<option value="${s}">${s}</option>`).join('');
+      if (sel) { sel.style.display = ''; sel.disabled = false; }
+      const wrap = document.getElementById('pdAcSiteTableWrap');
+      if (wrap) wrap.innerHTML = '';
+      const siteHint = document.getElementById('pdAcSiteHint');
+      if (siteHint) { siteHint.style.display = 'none'; siteHint.textContent = ''; }
+      const urlHint = document.getElementById('pdAcUrlHint');
+      if (urlHint) urlHint.style.display = 'none';
       const urlInput = document.getElementById('pdAcUrl');
-      if (urlInput) urlInput.value = '';
+      if (urlInput) urlInput.placeholder = '亚马逊政策页 URL';
+      const urlFieldLabel = document.querySelector('#pdAcUrl')?.closest('.form-field')?.querySelector('label');
+      if (urlFieldLabel) urlFieldLabel.innerHTML = '<span class="req">*</span>采集链接';
+    }
+    function fillPdAcAddTable(available){
+      const wrap = document.getElementById('pdAcSiteTableWrap');
+      if (!wrap) return;
+      if (!available.length) {
+        wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub)">暂无可添加站点</div>';
+        return;
+      }
+      const esc = s => (s || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      wrap.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th style="width:44px"><input type="checkbox" id="pdAcAddCheckAll" title="全选" /></th>
+            <th style="width:72px">站点</th>
+            <th style="min-width:180px">政策内容</th>
+            <th style="min-width:150px">采集链接</th>
+            <th style="min-width:130px">所需认证</th>
+            <th style="width:88px">TIC验证</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${available.map((site, i) => `<tr class="pd-ac-add-row pd-ac-row-off" data-site="${esc(site)}">
+            <td class="pd-check"><input type="checkbox" class="pd-ac-add-cb" data-site="${esc(site)}" /></td>
+            <td style="white-space:nowrap;font-weight:600;padding-top:14px">${esc(site)}</td>
+            <td><textarea class="textarea pd-ac-add-content" rows="2" placeholder="该站政策内容" disabled></textarea></td>
+            <td><input class="input block pd-ac-add-url" placeholder="政策页 URL" disabled /></td>
+            <td>${certMultiSelectHtml('pdac-row-cert', [], false, `data-idx="${i}"`)}</td>
+            <td>
+              <select class="sel block pd-ac-add-tic" disabled>
+                <option value="">请选择</option>
+                <option value="是">是</option>
+                <option value="否">否</option>
+              </select>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+      wrap.querySelectorAll('.pd-ac-add-row').forEach(tr => {
+        const cb = tr.querySelector('.pd-ac-add-cb');
+        cb?.addEventListener('change', () => {
+          const on = cb.checked;
+          tr.classList.toggle('pd-ac-row-off', !on);
+          tr.querySelectorAll('.pd-ac-add-content,.pd-ac-add-url,.pd-ac-add-tic').forEach(el => { el.disabled = !on; });
+        });
+      });
+      wrap.querySelector('#pdAcAddCheckAll')?.addEventListener('change', e => {
+        const on = e.target.checked;
+        wrap.querySelectorAll('.pd-ac-add-cb').forEach(cb => {
+          if (cb.checked === on) return;
+          cb.checked = on;
+          cb.dispatchEvent(new Event('change'));
+        });
+      });
+    }
+    function collectPdAcAddRows(){
+      const rows = [];
+      document.querySelectorAll('#pdAcSiteTableWrap .pd-ac-add-row').forEach(tr => {
+        const cb = tr.querySelector('.pd-ac-add-cb');
+        if (!cb?.checked) return;
+        const site = cb.dataset.site || tr.dataset.site;
+        const content = (tr.querySelector('.pd-ac-add-content')?.value || '').trim();
+        const crawlUrl = (tr.querySelector('.pd-ac-add-url')?.value || '').trim();
+        const certs = certValuesFromBox(tr.querySelector('.pdac-row-cert'));
+        const ticVerify = (tr.querySelector('.pd-ac-add-tic')?.value || '').trim();
+        rows.push({ site, content, crawlUrl, certs, ticVerify });
+      });
+      return rows;
+    }
+    function openPdAddSiteModal(category){
+      const available = availableAmazonSites(category);
+      if (!available.length) { showToast('已添加全部亚马逊站点'); return; }
+      resetPdAcChrome();
+      pdAcPending = { mode: 'add', category };
+      showPdAcFormMode('table');
+      document.getElementById('pdAddContentModalTitle').textContent = '新增站点';
+      fillPdAcAddTable(available);
+      const confirmBtn = document.getElementById('confirmPdAddContentModal');
+      if (confirmBtn) confirmBtn.textContent = '确定添加';
+      document.getElementById('pdAddContentModal')?.classList.add('show');
+    }
+    function openPdEditSiteModal(row){
+      resetPdAcChrome();
+      pdAcPending = { mode: 'edit', rowId: row.id, category: row.category };
+      showPdAcFormMode('single');
+      const contentField = document.getElementById('pdAcContentField');
+      if (contentField) contentField.style.display = '';
+      document.getElementById('pdAddContentModalTitle').textContent = `编辑站点 — ${row.site}`;
+      const ta = document.getElementById('pdAcContent');
+      if (ta) ta.value = row.content || '';
+      const sel = document.getElementById('pdAcSiteSelect');
+      if (sel) {
+        sel.style.display = '';
+        sel.innerHTML = `<option value="${row.site}">${row.site}</option>`;
+        sel.disabled = true;
+      }
+      const urlInput = document.getElementById('pdAcUrl');
+      if (urlInput) urlInput.value = row.crawlUrl || '';
       const certWrap = document.getElementById('pdAcCertWrap');
-      if (certWrap) certWrap.innerHTML = certMultiSelectHtml('pdac-cert', [], false);
+      if (certWrap) certWrap.innerHTML = certMultiSelectHtml('pdac-cert', row.certs || [], false);
       const ticInput = document.getElementById('pdAcTic');
-      if (ticInput) ticInput.value = '';
+      if (ticInput) ticInput.value = row.ticVerify || '';
+      const confirmBtn = document.getElementById('confirmPdAddContentModal');
+      if (confirmBtn) confirmBtn.textContent = '保存';
+      document.getElementById('pdAddContentModal')?.classList.add('show');
+    }
+    function openPdBatchEditModal(rows){
+      resetPdAcChrome();
+      showPdAcFormMode('single');
+      const first = rows[0];
+      const sameContent = rows.every(r => (r.content || '') === (first.content || ''));
+      const sameCerts = rows.every(r => JSON.stringify(r.certs || []) === JSON.stringify(first.certs || []));
+      const sameTic = rows.every(r => (r.ticVerify || '') === (first.ticVerify || ''));
+      pdAcPending = {
+        mode: 'batch-edit',
+        category: first.category,
+        ids: rows.map(r => r.id),
+        sites: rows.map(r => r.site)
+      };
+      document.getElementById('pdAddContentModalTitle').textContent = `批量编辑 — ${rows.length} 个站点`;
+      const ta = document.getElementById('pdAcContent');
+      if (ta) ta.value = sameContent ? (first.content || '') : '';
+      const sel = document.getElementById('pdAcSiteSelect');
+      if (sel) {
+        sel.style.display = 'none';
+        sel.disabled = true;
+      }
+      const siteHint = document.getElementById('pdAcSiteHint');
+      if (siteHint) {
+        siteHint.style.display = '';
+        siteHint.textContent = `将应用到：${rows.map(r => r.site).join('、')}`;
+      }
+      const urlInput = document.getElementById('pdAcUrl');
+      if (urlInput) {
+        urlInput.value = '';
+        urlInput.placeholder = '可选，填写则覆盖全部所选站点';
+      }
+      const urlHint = document.getElementById('pdAcUrlHint');
+      if (urlHint) urlHint.style.display = '';
+      const urlFieldLabel = document.querySelector('#pdAcUrl')?.closest('.form-field')?.querySelector('label');
+      if (urlFieldLabel) urlFieldLabel.innerHTML = '采集链接';
+      const certWrap = document.getElementById('pdAcCertWrap');
+      if (certWrap) certWrap.innerHTML = certMultiSelectHtml('pdac-cert', sameCerts ? (first.certs || []) : [], false);
+      const ticInput = document.getElementById('pdAcTic');
+      if (ticInput) ticInput.value = sameTic ? (first.ticVerify || '') : '';
+      const confirmBtn = document.getElementById('confirmPdAddContentModal');
+      if (confirmBtn) confirmBtn.textContent = '下一步确认';
       document.getElementById('pdAddContentModal')?.classList.add('show');
     }
     function closePdAcModal(){
       document.getElementById('pdAddContentModal')?.classList.remove('show');
       pdAcPending = null;
+      resetPdAcChrome();
+      const confirmBtn = document.getElementById('confirmPdAddContentModal');
+      if (confirmBtn) confirmBtn.textContent = '确定';
     }
+    document.getElementById('pdAddSiteBtn')?.addEventListener('click', () => {
+      if (!policyModalCategory) return;
+      openPdAddSiteModal(policyModalCategory);
+    });
+    function closePdBatchMenu(){
+      const menu = document.getElementById('pdBatchMenu');
+      if (menu) menu.hidden = true;
+    }
+    document.getElementById('pdBatchBtn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      const menu = document.getElementById('pdBatchMenu');
+      if (!menu) return;
+      menu.hidden = !menu.hidden;
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#pdBatchDd')) closePdBatchMenu();
+    });
+    let pdBatchPending = null;
+    function openPdSiteOpConfirm(kind, row, category){
+      if (!row || !category) return;
+      const site = (row.site || '').replace(/</g, '&lt;');
+      const titleEl = document.getElementById('pdBatchConfirmTitle');
+      const descEl = document.getElementById('pdBatchConfirmDesc');
+      const okBtn = document.getElementById('confirmPdBatchConfirmModal');
+      if (kind === 'disable') {
+        pdBatchPending = { kind: 'single-disable', category, id: row.id };
+        if (titleEl) titleEl.textContent = '停用确认';
+        if (descEl) {
+          descEl.innerHTML =
+            `确认停用站点 <b>亚马逊 · ${site}</b>？<br/><span style="color:var(--sub)">停用后该站不参与检测/回扫，可随时重新启用。</span>`;
+        }
+        if (okBtn) okBtn.textContent = '确定停用';
+      } else if (kind === 'learn-off') {
+        pdBatchPending = { kind: 'single-learn-off', category, id: row.id };
+        if (titleEl) titleEl.textContent = '取消学习确认';
+        if (descEl) {
+          descEl.innerHTML =
+            `确认取消站点 <b>亚马逊 · ${site}</b> 的模型学习？<br/><span style="color:var(--sub)">取消后「模型是否学习」将变为未学习，可再次确认学习。</span>`;
+        }
+        if (okBtn) okBtn.textContent = '确定取消';
+      } else {
+        return;
+      }
+      document.getElementById('pdBatchConfirmModal')?.classList.add('show');
+    }
+    function openPdBatchConfirm(action){
+      if (!policyModalCategory) return;
+      const selected = getSelectedDetailRows(policyModalCategory);
+      if (!selected.length) {
+        showToast('请先勾选要操作的站点');
+        closePdBatchMenu();
+        return;
+      }
+      closePdBatchMenu();
+      if (action === 'edit') {
+        openPdBatchEditModal(selected);
+        return;
+      }
+      const enable = action === 'enable';
+      const sites = selected.map(r => r.site).join('、');
+      pdBatchPending = { kind: 'status', category: policyModalCategory, enable, ids: selected.map(r => r.id) };
+      document.getElementById('pdBatchConfirmTitle').textContent = enable ? '批量启用确认' : '批量停用确认';
+      document.getElementById('pdBatchConfirmDesc').innerHTML =
+        `确认对已选 <b>${selected.length}</b> 个站点执行<strong>${enable ? '启用' : '停用'}</strong>？<br/>站点：${sites.replace(/</g, '&lt;')}${enable ? '<br/><span style="color:var(--sub)">缺少政策内容或采集链接的站点将自动跳过。</span>' : ''}`;
+      const okBtn = document.getElementById('confirmPdBatchConfirmModal');
+      if (okBtn) okBtn.textContent = enable ? '确定启用' : '确定停用';
+      document.getElementById('pdBatchConfirmModal')?.classList.add('show');
+    }
+    function closePdBatchConfirm(){
+      const pending = pdBatchPending;
+      document.getElementById('pdBatchConfirmModal')?.classList.remove('show');
+      pdBatchPending = null;
+      const okBtn = document.getElementById('confirmPdBatchConfirmModal');
+      if (okBtn) okBtn.textContent = '确定';
+      // 批量编辑：取消确认时回到编辑表单
+      if (pending?.kind === 'edit' && pdAcPending?.mode === 'batch-edit') {
+        document.getElementById('pdAddContentModal')?.classList.add('show');
+      }
+    }
+    function applyPdBatchConfirm(){
+      if (!pdBatchPending) return;
+      if (pdBatchPending.kind === 'single-disable' || pdBatchPending.kind === 'single-learn-off') {
+        const { kind, category, id } = pdBatchPending;
+        const row = POLICY_STORE.find(x => x.id === id);
+        closePdBatchConfirm();
+        if (!row) return;
+        if (kind === 'single-disable') {
+          row.status = '已停用';
+          touchPolicyRow(row);
+          pushPolicyLog(row, '停用站点', '状态：停用');
+          showToast(`已停用：亚马逊 · ${row.site}`);
+        } else {
+          row.learned = false;
+          const body = getPolicyContent(row.content || '');
+          const key = bodyKeyByContent(row.content || '');
+          const siblings = sitesOfCategory(category).filter(x => bodyKeyByContent(x.content || '') === key);
+          body.learned = siblings.some(x => !!x.learned);
+          touchPolicyRow(row);
+          pushPolicyLog(row, '取消模型学习', '模型是否学习：未学习');
+          showToast(`已取消学习：亚马逊 · ${row.site}`);
+        }
+        renderPolicyDetailGrid(category);
+        refreshPolicyDetailChrome(category);
+        renderPolicyTable();
+        refreshRescanPolicySelect();
+        return;
+      }
+      if (pdBatchPending.kind === 'edit') {
+        const { category, ids, content, crawlUrl, certs, ticVerify } = pdBatchPending;
+        const idSet = new Set(ids);
+        const rows = sitesOfCategory(category).filter(r => idSet.has(r.id));
+        rows.forEach(row => {
+          row.content = content;
+          if (crawlUrl) row.crawlUrl = crawlUrl;
+          row.certs = certs.slice();
+          row.ticVerify = ticVerify;
+          touchPolicyRow(row);
+          pushPolicyLog(row, '批量编辑', crawlUrl ? '内容/链接/认证已更新' : '内容/认证已更新（链接未改）');
+        });
+        pdSelectedIds.clear();
+        pdAcPending = null;
+        document.getElementById('pdAddContentModal')?.classList.remove('show');
+        document.getElementById('pdBatchConfirmModal')?.classList.remove('show');
+        pdBatchPending = null;
+        const okBtn = document.getElementById('confirmPdBatchConfirmModal');
+        if (okBtn) okBtn.textContent = '确定';
+        resetPdAcChrome();
+        renderPolicyDetailGrid(category);
+        refreshPolicyDetailChrome(category);
+        renderPolicyTable();
+        refreshRescanPolicySelect();
+        showToast(`已批量更新 ${rows.length} 个站点`);
+        return;
+      }
+      const { category, enable, ids } = pdBatchPending;
+      const idSet = new Set(ids);
+      const rows = sitesOfCategory(category).filter(r => idSet.has(r.id));
+      let n = 0;
+      let skipped = 0;
+      rows.forEach(row => {
+        if (enable) {
+          if (!(row.content || '').trim() || !(row.crawlUrl || '').trim()) { skipped++; return; }
+          if (row.status === '启用') return;
+          row.status = '启用';
+          touchPolicyRow(row);
+          pushPolicyLog(row, '批量启用', '状态：启用');
+          n++;
+        } else {
+          if (row.status === '已停用') return;
+          row.status = '已停用';
+          touchPolicyRow(row);
+          pushPolicyLog(row, '批量停用', '状态：停用');
+          n++;
+        }
+      });
+      pdSelectedIds.clear();
+      closePdBatchConfirm();
+      renderPolicyDetailGrid(category);
+      refreshPolicyDetailChrome(category);
+      renderPolicyTable();
+      refreshRescanPolicySelect();
+      if (enable) {
+        showToast(n ? `已批量启用 ${n} 站${skipped ? `，${skipped} 站因缺少内容/链接跳过` : ''}` : (skipped ? '没有可启用站点（请先补全内容与链接）' : '所选站点均已是启用状态'));
+      } else {
+        showToast(n ? `已批量停用 ${n} 站` : '所选站点均已是停用状态');
+      }
+    }
+    document.getElementById('pdBatchMenu')?.addEventListener('click', e => {
+      const item = e.target.closest('.pd-batch-item');
+      if (!item) return;
+      openPdBatchConfirm(item.dataset.action);
+    });
+    document.getElementById('closePdBatchConfirmModal')?.addEventListener('click', closePdBatchConfirm);
+    document.getElementById('cancelPdBatchConfirmModal')?.addEventListener('click', closePdBatchConfirm);
+    document.getElementById('pdBatchConfirmModal')?.addEventListener('click', e => {
+      if (e.target.id === 'pdBatchConfirmModal') closePdBatchConfirm();
+    });
+    document.getElementById('confirmPdBatchConfirmModal')?.addEventListener('click', applyPdBatchConfirm);
     document.getElementById('closePdAddContentModal')?.addEventListener('click', closePdAcModal);
     document.getElementById('cancelPdAddContentModal')?.addEventListener('click', closePdAcModal);
     document.getElementById('pdAddContentModal')?.addEventListener('click', e => {
@@ -5622,100 +5915,91 @@
     });
     document.getElementById('confirmPdAddContentModal')?.addEventListener('click', () => {
       if (!pdAcPending) return;
-      const { category, fixedContent } = pdAcPending;
-      const content = fixedContent !== null
-        ? fixedContent
-        : (document.getElementById('pdAcContent')?.value || '').trim();
+      if (pdAcPending.mode === 'add') {
+        const category = pdAcPending.category;
+        const rows = collectPdAcAddRows();
+        if (!rows.length) { showToast('请勾选要新增的站点'); return; }
+        for (const r of rows) {
+          if (!r.content) { showToast(`请填写「${r.site}」的政策内容`); return; }
+          if (!r.crawlUrl) { showToast(`请填写「${r.site}」的采集链接`); return; }
+        }
+        const existed = rows.filter(r => sitesOfCategory(category).some(p => p.site === r.site));
+        if (existed.length) {
+          showToast(`「${existed.map(x => x.site).join('、')}」已存在`);
+          return;
+        }
+        const ts = Date.now();
+        rows.forEach((r, i) => {
+          const row = {
+            id: 'policy_' + ts + '_' + i,
+            category,
+            platform: '亚马逊',
+            site: r.site,
+            status: '启用',
+            learned: false,
+            crawlUrl: r.crawlUrl,
+            certs: (r.certs || []).slice(),
+            content: r.content,
+            ticVerify: r.ticVerify || '',
+            standard: '—',
+            tic: '待接入'
+          };
+          touchPolicyRow(row);
+          POLICY_STORE.push(row);
+          pushPolicyLog(row, '新增站点明细', `亚马逊：${r.site}，认证：${(r.certs || []).join('、') || '—'}`, '当前用户');
+        });
+        closePdAcModal();
+        const names = rows.map(r => r.site);
+        showToast(names.length === 1 ? `已新增：亚马逊 · ${names[0]}` : `已新增 ${names.length} 个站点：${names.join('、')}`);
+        renderPolicyDetailGrid(category);
+        refreshPolicyDetailChrome(category);
+        renderPolicyTable();
+        refreshRescanPolicySelect();
+        return;
+      }
+      const content = (document.getElementById('pdAcContent')?.value || '').trim();
       if (!content) { showToast('请填写政策内容'); return; }
-      const site = document.getElementById('pdAcSiteSelect')?.value;
-      if (!site) { showToast('请选择站点'); return; }
       const crawlUrl = (document.getElementById('pdAcUrl')?.value || '').trim();
-      if (!crawlUrl) { showToast('请填写采集链接'); return; }
       const certs = certValuesFromBox(document.querySelector('#pdAcCertWrap .pdac-cert'));
       const ticVerify = (document.getElementById('pdAcTic')?.value || '').trim();
-      POLICY_STORE.push({
-        id: 'policy_' + Date.now(),
-        category,
-        platform: '亚马逊',
-        site,
-        status: '待审核',
-        learned: false,
-        crawlUrl,
-        certs,
-        content,
-        ticVerify,
-        standard: '—',
-        tic: '待接入'
-      });
+      if (pdAcPending.mode === 'batch-edit') {
+        const sites = (pdAcPending.sites || []).join('、');
+        pdBatchPending = {
+          kind: 'edit',
+          category: pdAcPending.category,
+          ids: pdAcPending.ids.slice(),
+          content,
+          crawlUrl,
+          certs,
+          ticVerify
+        };
+        document.getElementById('pdBatchConfirmTitle').textContent = '批量编辑确认';
+        document.getElementById('pdBatchConfirmDesc').innerHTML =
+          `确认将以下内容写入已选 <b>${pdAcPending.ids.length}</b> 个站点？<br/>站点：${sites.replace(/</g, '&lt;')}<br/><span style="color:var(--sub)">政策内容、所需认证、TIC 将覆盖；采集链接${crawlUrl ? '一并覆盖' : '留空不改'}。</span>`;
+        const okBtn = document.getElementById('confirmPdBatchConfirmModal');
+        if (okBtn) okBtn.textContent = '确定保存';
+        document.getElementById('pdAddContentModal')?.classList.remove('show');
+        document.getElementById('pdBatchConfirmModal')?.classList.add('show');
+        return;
+      }
+      if (!crawlUrl) { showToast('请填写采集链接'); return; }
+      if (pdAcPending.mode !== 'edit') return;
+      const row = POLICY_STORE.find(x => x.id === pdAcPending.rowId);
+      if (!row) return;
+      row.content = content;
+      row.crawlUrl = crawlUrl;
+      row.certs = certs;
+      row.ticVerify = ticVerify;
+      touchPolicyRow(row);
+      const category = row.category;
+      pushPolicyLog(row, '编辑站点明细', `内容/链接/认证已更新`, '当前用户');
       closePdAcModal();
-      showToast(`已新增亚马逊：${site}`);
+      showToast(`已保存：亚马逊 · ${row.site}`);
       renderPolicyDetailGrid(category);
       refreshPolicyDetailChrome(category);
       renderPolicyTable();
-    });
-
-    // 「新增站点」按钮（每个内容组）
-    // 绑定在 renderPolicyDetailGrid 内部，此处只处理「新增政策内容」
-    document.getElementById('pdAddNewContentBtn')?.addEventListener('click', () => {
-      if (!policyModalCategory) return;
-      const category = policyModalCategory;
-      const usedSites = new Set(sitesOfCategory(category).map(r => r.site));
-      const available = amazonSiteList().filter(s => !usedSites.has(s));
-      if (!available.length) { showToast('已添加全部站点，无可用站点'); return; }
-      openPdAcModal(category, null, available);
-    });
-
-    function commitPolicyDetailSave() {
-      if (!policyModalCategory) return;
-      let contentOk = true;
-      document.querySelectorAll('#pdRegionGrid .pd-content').forEach(ta => {
-        const ckey = ta.dataset.ckey;
-        const newText = ta.value.trim();
-        if (!newText) { contentOk = false; return; }
-        const oldBody = POLICY_BODIES[ckey];
-        if (oldBody && canEditBody(oldBody)) {
-          const nb = getPolicyContent(newText);
-          if (oldBody.status !== '已通过') {
-            nb.status = oldBody.status;
-            nb.learned = oldBody.learned;
-          }
-          nb.content = newText;
-        }
-        sitesOfCategory(policyModalCategory).forEach(p => {
-          if (bodyKeyByContent(p.content) === ckey) p.content = newText;
-        });
-      });
-      if (!contentOk) { showToast('请填写各站政策内容'); return; }
-      document.querySelectorAll('#pdRegionGrid .pd-url').forEach(el => {
-        const p = POLICY_STORE.find(x => x.id === el.dataset.id);
-        if (p && canEditSite(p)) p.crawlUrl = el.value.trim();
-      });
-      document.querySelectorAll('#pdRegionGrid .pd-cert-ms').forEach(box => {
-        const p = POLICY_STORE.find(x => x.id === box.dataset.id);
-        if (p && canEditSite(p)) p.certs = certValuesFromBox(box);
-      });
-      document.querySelectorAll('#pdRegionGrid .pd-tic').forEach(el => {
-        const p = POLICY_STORE.find(x => x.id === el.dataset.id);
-        if (p && canEditSite(p)) p.ticVerify = el.value.trim();
-      });
-      const miss = sitesOfCategory(policyModalCategory).filter(p => canEditSite(p) && !p.crawlUrl);
-      if (miss.length) {
-        showToast(`请补全 ${miss.map(x => x.site).join('、')} 的采集链接`);
-        return;
-      }
-      renderPolicyDetailGrid(policyModalCategory);
-      renderPolicyTable();
       refreshRescanPolicySelect();
-      refreshPolicyDetailChrome(policyModalCategory);
-      closePolicySaveConfirm();
-      showToast('已保存。内容通过后推模型；站点通过后该站才生效');
-    }
-
-    document.getElementById('savePolicyDetailBtn')?.addEventListener('click', () => {
-      if (!policyModalCategory) return;
-      openPolicySaveConfirm();
     });
-    document.getElementById('confirmPolicySaveConfirm')?.addEventListener('click', commitPolicyDetailSave);
 
     let policyDisableCategory = null;
     function openPolicyDisableModal(category){
@@ -5748,7 +6032,7 @@
       let html = '';
       byPlat.forEach((list, plat) => {
         html += `<div>${list.map(p =>
-          `<div class="site-pop-item"><span>${(p.site || '').replace(/</g, '&lt;')}</span><span>${p.status}</span></div>`
+          `<div class="site-pop-item"><span>${(p.site || '').replace(/</g, '&lt;')}</span><span>${p.status === '已停用' ? '停用' : '启用'}</span></div>`
         ).join('')}</div>`;
       });
       return html || '<div class="hint">暂无站点</div>';
@@ -5826,15 +6110,13 @@
         openPolicySitesModal(pop.getAttribute('data-category'));
         return;
       }
-      const btn = e.target.closest('.policy-view-btn, .policy-audit-btn, .policy-disable-btn');
+      const btn = e.target.closest('.policy-view-btn');
       if (!btn) return;
       hidePolicySiteHover();
       hidePolicyContentHover();
       const category = btn.getAttribute('data-category');
       if (!category) return;
-      if (btn.classList.contains('policy-view-btn')) openPolicyDetailModal(category, 'view');
-      if (btn.classList.contains('policy-audit-btn')) openPolicyDetailModal(category, 'audit');
-      if (btn.classList.contains('policy-disable-btn')) openPolicyDisableModal(category);
+      openPolicyDetailModal(category, 'view');
     });
     document.getElementById('policyTableBody')?.addEventListener('mouseover', e => {
       const chip = e.target.closest('.policy-sites-pop');
