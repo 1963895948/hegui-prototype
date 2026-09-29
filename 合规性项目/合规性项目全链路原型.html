@@ -453,10 +453,86 @@
       display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
-    .chip .x-chip{
-      cursor:pointer;color:#999;margin-left:2px;font-size:13px;line-height:1;
+    .rescan-site-checks{
+      display:flex;flex-direction:column;gap:8px;padding-top:2px;min-height:28px;
     }
-    .chip .x-chip:hover{color:var(--danger)}
+    .rescan-site-tools{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:8px;font-size:12px;
+    }
+    .rescan-site-tools[hidden]{display:none!important}
+    .rescan-site-all{
+      display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:var(--text);
+    }
+    .rescan-site-item{
+      border:1px solid var(--line);border-radius:8px;background:#fafcff;padding:8px 10px;
+    }
+    .rescan-site-item.is-on{border-color:#91b4e8;background:#f3f8ff}
+    .rescan-site-item > label{
+      display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;
+      font-weight:600;color:var(--text);
+    }
+    .rescan-site-item .site-content{
+      margin-top:6px;padding:8px 10px;border-radius:6px;background:#fff;
+      border:1px dashed #d6e0ef;font-size:12px;line-height:1.55;color:var(--text);
+      white-space:pre-wrap;word-break:break-word;max-height:88px;overflow:auto;
+    }
+    .rescan-site-item .site-content .empty{color:var(--sub)}
+    #rescan-create .task-form{max-width:920px}
+    #rescan-create .form-cols{grid-template-columns:1fr;max-width:none}
+    #rescan-create .form-panel + .form-panel{margin-top:12px}
+    #rescan-create .form-section-tip{
+      margin:-4px 0 12px;font-size:12px;color:var(--sub);line-height:1.5;
+    }
+    .amz-cat-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin:-4px 0 12px}
+    .amz-cat-tab{
+      padding:8px 16px;font-size:13px;color:var(--sub);cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:0;border-left:0;border-right:0;
+    }
+    .amz-cat-tab.on{color:var(--pri);border-bottom-color:var(--pri);font-weight:600}
+    .amz-cat-path-row{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:10px;font-size:12px;min-height:32px;
+    }
+    .amz-cat-path{flex:1;min-width:0;color:var(--text);line-height:1.5;word-break:break-all}
+    .amz-cat-path .ph{color:var(--sub)}
+    .amz-cat-cols{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
+      border:1px solid var(--line);border-radius:4px;overflow:hidden;height:min(48vh,360px);
+      background:#fff;
+    }
+    .amz-cat-col{
+      overflow:auto;border-right:1px solid var(--line);background:#fff;
+    }
+    .amz-cat-col:last-child{border-right:none}
+    .amz-cat-item{
+      display:block;width:100%;text-align:left;border:0;background:transparent;
+      padding:8px 12px;font-size:12px;color:var(--text);cursor:pointer;line-height:1.45;
+    }
+    .amz-cat-item:hover{background:#f5f8fc}
+    .amz-cat-item.on{background:#e8f1ff;color:var(--pri)}
+    .amz-cat-search-pane{display:none}
+    .amz-cat-search-pane.on{display:block}
+    .amz-cat-pick-pane{display:none}
+    .amz-cat-pick-pane.on{display:block}
+    .amz-cat-search-bar{display:flex;gap:8px;margin-bottom:10px}
+    .amz-cat-search-bar .input{flex:1}
+    .amz-cat-search-list{
+      max-height:min(48vh,360px);overflow:auto;border:1px solid var(--line);
+      border-radius:4px;
+    }
+    .amz-cat-search-hit{
+      display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #f0f2f5;
+      background:#fff;padding:10px 12px;font-size:12px;cursor:pointer;color:var(--text);
+    }
+    .amz-cat-search-hit:last-child{border-bottom:none}
+    .amz-cat-search-hit:hover,.amz-cat-search-hit.on{background:#e8f1ff;color:var(--pri)}
+    .amz-cat-search-hit .path{color:var(--sub);font-size:11px;margin-top:2px}
+    .amz-cat-accum{
+      margin-top:10px;padding-top:10px;border-top:1px dashed #e8edf3;font-size:12px;
+    }
+    .amz-cat-accum .hd{color:var(--sub);margin-bottom:6px}
+    .amz-cat-accum .picked{margin-top:0}
     .cell-ellipsis{
       max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
@@ -1394,7 +1470,8 @@
 
             <div class="form-cols">
               <div class="form-panel scope-by-time" id="productScopePanel">
-                <h3 class="panel-title">产品范围</h3>
+                <h3 class="panel-title">1. 产品范围</h3>
+                <p class="form-section-tip">先圈定要回扫的商品；指定 SKU 时无需再填开发时间、类目等条件。</p>
 
                 <div class="form-field">
                   <label><span class="req">*</span>回扫SKU</label>
@@ -1417,6 +1494,13 @@
                   </div>
                 </div>
 
+                <div class="form-field scope-time-only">
+                  <label><span class="req">*</span>组合SKU</label>
+                  <div class="ctl">
+                    <select class="sel" style="width:240px"><option>否</option><option>是</option></select>
+                  </div>
+                </div>
+
                 <div class="form-field scope-hidden" id="fieldSpecifySku">
                   <label><span class="req">*</span>指定SKU</label>
                   <div class="ctl">
@@ -1424,13 +1508,6 @@
                       <textarea id="specifySkuInput" placeholder="一行一个SKU(最多20000个)"></textarea>
                       <span class="counter" id="specifySkuCounter">0 / 20000</span>
                     </div>
-                  </div>
-                </div>
-
-                <div class="form-field scope-time-only">
-                  <label><span class="req">*</span>组合SKU</label>
-                  <div class="ctl">
-                    <select class="sel block"><option>否</option><option>是</option></select>
                   </div>
                 </div>
 
@@ -1450,34 +1527,39 @@
                 <div class="form-field scope-time-only">
                   <label><span class="req">*</span>回扫产品类目</label>
                   <div class="ctl">
-                    <span class="add-chip" title="选择类目">+</span>
-                    <div class="picked">
-                      <span class="chip">玩具和游戏 ×</span>
-                      <span class="chip">婴儿用品 ×</span>
-                    </div>
+                    <span class="add-chip" id="openRescanCategoryModal" title="选择类目">+</span>
+                    <div class="picked" id="rescanCategoryPicked"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-panel">
+                <h3 class="panel-title">2. 合规分类与站点</h3>
+                <p class="form-section-tip">先选合规分类 → 勾选要回扫的站点；每个站点下方同步展示该站政策内容（只读）。</p>
+
+                <div class="form-field">
+                  <label><span class="req">*</span>合规分类</label>
+                  <div class="ctl">
+                    <select class="sel block" id="rescanPolicySelect">
+                      <option value="">请选择合规分类（仅启用）</option>
+                    </select>
                   </div>
                 </div>
 
                 <div class="form-field">
                   <label><span class="req">*</span>回扫站点</label>
                   <div class="ctl">
-                    <span class="add-chip" id="openPlatformModal" title="选择回扫站点">+</span>
-                    <div class="picked" id="platformPicked"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-panel">
-                <h3 class="panel-title">合规政策</h3>
-
-                <div class="form-field">
-                  <label><span class="req">*</span>合规政策</label>
-                  <div class="ctl">
-                    <select class="sel block" id="rescanPolicySelect">
-                      <option value="">请选择政策（仅启用）</option>
-                    </select>
-                    <div class="hint" style="margin-top:6px">选项为「政策分类（已学习站点）」；选择后下方带出政策内容可再编辑（仅影响本次任务）。回扫站点仅可勾选该分类已学习站点。</div>
-                    <textarea class="textarea lg" id="rescanPolicyContent" style="margin-top:8px" placeholder="选择政策后自动带出内容，也可继续修改">Amazon US 儿童产品需符合 CPSIA，12 岁以下玩具须提供 CPC 及第三方测试报告；产品页需展示合规信息…</textarea>
+                    <div class="rescan-site-tools" id="rescanSiteTools" hidden>
+                      <label class="rescan-site-all">
+                        <input type="checkbox" id="rescanSiteCheckAll" />
+                        全选
+                      </label>
+                      <span class="hint" style="margin:0" id="rescanSiteCount">已选 0</span>
+                    </div>
+                    <div class="rescan-site-checks" id="rescanSiteChecks">
+                      <span class="hint" style="margin:0;padding-top:4px">请先选择合规分类</span>
+                    </div>
+                    <div class="hint" style="margin-top:6px">每个站点下方展示该站政策内容（只读）；勾选表示纳入本次回扫。</div>
                   </div>
                 </div>
               </div>
@@ -1709,7 +1791,7 @@
             <thead>
               <tr>
                 <th><input type="checkbox" /></th>
-                <th>编号</th><th>产品图</th><th>SKU</th><th>产品相似度</th><th>产品名称 / 类目</th>
+                <th>编号</th><th>产品图</th><th>SKU</th><th>产品名称 / 类目</th>
                 <th>sku已标记合规站点</th><th>回扫站点</th><th>系统检测结果 / 说明</th><th>审核结果</th><th>审核说明</th><th>操作</th>
               </tr>
             </thead>
@@ -1719,10 +1801,6 @@
                 <td>200008-01</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">23110438</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="23110438">4</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.91</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">不锈钢灭烛罩带手柄，适用于生日蜡烛安全熄灭</div><div class="prod-cat">Home & Kitchen › Home Decor › …</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1736,10 +1814,6 @@
                 <td>200008-02</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-D3301</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-D3301">12</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.93</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">儿童毛绒玩具套装 带音乐功能</div><div class="prod-cat">Toys & Games › Stuffed Animals</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1753,7 +1827,6 @@
                 <td>200008-03</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-D3302</span></td>
-                <td>—</td>
                 <td class="cell-prod-info"><div class="prod-name">不锈钢厨房收纳架 三层</div><div class="prod-cat">Home & Kitchen › Storage</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1767,10 +1840,6 @@
                 <td>200008-04</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-C8821</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-C8821">3</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.85</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">儿童学习桌 可调节高度</div><div class="prod-cat">Home & Kitchen › Kids Furniture</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1784,10 +1853,6 @@
                 <td>200008-05</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-B2205</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-B2205">6</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.88</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">锂电池移动电源 10000mAh</div><div class="prod-cat">Electronics › Power Banks</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1801,7 +1866,6 @@
                 <td>200008-06</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-E3310</span></td>
-                <td>—</td>
                 <td class="cell-prod-info"><div class="prod-name">蓝牙音箱 便携防水</div><div class="prod-cat">Electronics › Audio</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1815,10 +1879,6 @@
                 <td>200008-07</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-F5501</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-F5501">2</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.79</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">儿童睡衣套装 纯棉</div><div class="prod-cat">Clothing › Sleepwear</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1832,7 +1892,6 @@
                 <td>200008-08</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-G6602</span></td>
-                <td>—</td>
                 <td class="cell-prod-info"><div class="prod-name">硅胶烘焙模具套装</div><div class="prod-cat">Home › Bakeware</div></td>
                 <td class="cell-sites">美国、英国</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1846,10 +1905,6 @@
                 <td>200008-09</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-H7703</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-H7703">5</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.90</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">婴儿安抚巾 带牙胶</div><div class="prod-cat">Baby › Comfort</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -1863,10 +1918,6 @@
                 <td>200008-10</td>
                 <td><div class="thumb"></div></td>
                 <td><span class="link rescan-view-btn">SKU-J8804</span></td>
-                <td class="cell-sim">
-                  <div class="sim-line"><span class="sim-label">相似SKU</span><span class="link sim-count" data-sim-sku="SKU-J8804">1</span></div>
-                  <div class="sim-line"><span class="sim-label">最高相似度</span><span class="sim-max"><b>0.72</b></span></div>
-                </td>
                 <td class="cell-prod-info"><div class="prod-name">无线充电器 三合一</div><div class="prod-cat">Electronics › Chargers</div></td>
                 <td class="cell-sites">—</td>
                 <td class="cell-sites">美国、加拿大</td>
@@ -2026,6 +2077,48 @@
       <div class="modal-ft">
         <button type="button" class="btn" id="cancelPlatformModal">取消</button>
         <button type="button" class="btn pri" id="confirmPlatformModal">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 创建回扫 · 选择 Amazon 类目 -->
+  <div class="modal-mask" id="rescanCategoryModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-labelledby="rescanCategoryModalTitle" style="width:min(860px,96vw)">
+      <div class="modal-hd">
+        <span id="rescanCategoryModalTitle">选择Amazon类目</span>
+        <button type="button" class="modal-x" id="closeRescanCategoryModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <div class="amz-cat-tabs" role="tablist">
+          <button type="button" class="amz-cat-tab on" data-amz-cat-tab="pick">类目选择</button>
+          <button type="button" class="amz-cat-tab" data-amz-cat-tab="search">类目搜索</button>
+        </div>
+        <div class="amz-cat-pick-pane on" id="amzCatPickPane">
+          <div class="amz-cat-path-row">
+            <div class="amz-cat-path" id="amzCatPath"><span class="ph">请选择类目</span></div>
+            <button type="button" class="btn pri" id="amzCatAccumulateBtn" style="height:28px;padding:0 14px;font-size:12px">累加</button>
+          </div>
+          <div class="amz-cat-cols" id="amzCatCols">
+            <div class="amz-cat-col" id="amzCatCol0"></div>
+            <div class="amz-cat-col" id="amzCatCol1"></div>
+            <div class="amz-cat-col" id="amzCatCol2"></div>
+          </div>
+        </div>
+        <div class="amz-cat-search-pane" id="amzCatSearchPane">
+          <div class="amz-cat-search-bar">
+            <input class="input" id="amzCatSearchInput" type="search" placeholder="输入类目关键词，如 Bass / 玩具" />
+            <button type="button" class="btn pri" id="amzCatSearchBtn" style="height:32px">搜索</button>
+          </div>
+          <div class="amz-cat-search-list" id="amzCatSearchList"></div>
+        </div>
+        <div class="amz-cat-accum">
+          <div class="hd">已累加 <b id="amzCatAccumCount">0</b> 项</div>
+          <div class="picked" id="amzCatAccumPicked"></div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn" id="cancelRescanCategoryModal">取消</button>
+        <button type="button" class="btn pri" id="confirmRescanCategoryModal">确定</button>
       </div>
     </div>
   </div>
@@ -2634,7 +2727,12 @@
       renderTabs(id);
       location.hash = id;
       document.title = routeMeta[id].title + ' - 合规品管理';
-      if (id === 'rescan-create') refreshRescanPolicySelect?.();
+      if (id === 'rescan-create') {
+        // 延迟到脚本初始化完成后再刷新，避免 const 暂存死区导致整页脚本中断
+        setTimeout(() => {
+          if (typeof refreshRescanPolicySelect === 'function') refreshRescanPolicySelect();
+        }, 0);
+      }
     }
 
     jumpers.forEach(v => v.addEventListener('click', e => {
@@ -2657,6 +2755,317 @@
     const specifySkuInput = document.getElementById('specifySkuInput');
     const specifySkuCounter = document.getElementById('specifySkuCounter');
     const platformPicked = document.getElementById('platformPicked');
+    /* Amazon 类目级联（原型演示数据，格式对齐线上：英文(数)(中文)） */
+    const AMAZON_CATEGORY_TREE = [
+      {
+        label: 'Toys & Games(12)(玩具和游戏)',
+        children: [
+          {
+            label: 'Stuffed Animals(4)(毛绒玩具)',
+            children: [
+              { label: 'Plush Toys(毛绒公仔)' },
+              { label: 'Interactive Plush(互动毛绒)' },
+              { label: 'Plush Sets(毛绒套装)' }
+            ]
+          },
+          {
+            label: 'Learning & Education(5)(益智玩具)',
+            children: [
+              { label: 'STEM Toys(STEM玩具)' },
+              { label: 'Puzzles(拼图)' },
+              { label: 'Building Sets(积木套装)' }
+            ]
+          },
+          {
+            label: 'Remote & App Controlled(3)(遥控玩具)',
+            children: [
+              { label: 'RC Cars(遥控车)' },
+              { label: 'Drones(无人机玩具)' }
+            ]
+          }
+        ]
+      },
+      {
+        label: 'Baby Products(9)(婴儿用品)',
+        children: [
+          {
+            label: 'Apparel(3)(婴儿服装)',
+            children: [
+              { label: 'Bodysuits(连体衣)' },
+              { label: 'Sleepwear(睡衣)' },
+              { label: 'Outerwear(外套)' }
+            ]
+          },
+          {
+            label: 'Nursery(4)(婴儿护理)',
+            children: [
+              { label: 'Diapering(尿裤护理)' },
+              { label: 'Bathing(沐浴)' },
+              { label: 'Health(健康护理)' }
+            ]
+          },
+          {
+            label: 'Feeding(2)(哺育用品)',
+            children: [
+              { label: 'Bottles(奶瓶)' },
+              { label: 'Bibs & Burp Cloths(围嘴)' }
+            ]
+          }
+        ]
+      },
+      {
+        label: 'Categories(15)(乐器)',
+        children: [
+          {
+            label: 'Bass Guitars(3)(低音吉他)',
+            children: [
+              { label: 'Bass Guitar Kits(贝斯套装)' },
+              { label: 'Electric Basses(电贝斯)' },
+              { label: 'Electro-Acoustic Bass Guitars(电箱贝斯)' }
+            ]
+          },
+          {
+            label: 'Guitars(5)(吉他)',
+            children: [
+              { label: 'Acoustic Guitars(木吉他)' },
+              { label: 'Electric Guitars(电吉他)' },
+              { label: 'Classical Guitars(古典吉他)' }
+            ]
+          },
+          {
+            label: 'Amplifiers(2)(音箱)',
+            children: [
+              { label: 'Bass Amplifiers(贝斯音箱)' },
+              { label: 'Guitar Amplifiers(吉他音箱)' }
+            ]
+          },
+          { label: 'Band & Orchestra(乐队与管弦)' }
+        ]
+      },
+      {
+        label: 'Electronics(8)(电子产品)',
+        children: [
+          {
+            label: 'Headphones(3)(耳机)',
+            children: [
+              { label: 'Over-Ear(头戴式)' },
+              { label: 'In-Ear(入耳式)' },
+              { label: 'Kids Headphones(儿童耳机)' }
+            ]
+          },
+          {
+            label: 'Wearable Technology(2)(智能穿戴)',
+            children: [
+              { label: 'Smartwatches(智能手表)' },
+              { label: 'Fitness Trackers(手环)' }
+            ]
+          }
+        ]
+      },
+      {
+        label: 'Home & Kitchen(6)(家居厨房)',
+        children: [
+          {
+            label: 'Kitchen Appliances(3)(厨房电器)',
+            children: [
+              { label: 'Blenders(搅拌机)' },
+              { label: 'Coffee Machines(咖啡机)' },
+              { label: 'Toasters(烤面包机)' }
+            ]
+          },
+          {
+            label: 'Bedding(2)(床上用品)',
+            children: [
+              { label: 'Sheets(床单)' },
+              { label: 'Blankets(毛毯)' }
+            ]
+          }
+        ]
+      }
+    ];
+    let rescanCategories = new Set();
+    let draftRescanCategories = new Set();
+    let amzCatPath = []; // nodes along current drill path
+
+    function amzCatLabel(node){ return node?.label || ''; }
+    function amzCatChildren(node){ return node?.children || []; }
+    function flattenAmzCategories(nodes, parents = [], out = []){
+      (nodes || []).forEach(n => {
+        const path = [...parents, n];
+        out.push({ node: n, path, label: amzCatLabel(n), pathText: path.map(amzCatLabel).join(' >> ') });
+        if (amzCatChildren(n).length) flattenAmzCategories(amzCatChildren(n), path, out);
+      });
+      return out;
+    }
+    const AMAZON_CATEGORY_FLAT = flattenAmzCategories(AMAZON_CATEGORY_TREE);
+
+    function renderRescanCategoryPicked(){
+      const box = document.getElementById('rescanCategoryPicked');
+      if (!box) return;
+      box.innerHTML = '';
+      [...rescanCategories].forEach(name => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `${name.replace(/</g, '&lt;')} <span class="x-chip" data-rm="${name.replace(/"/g, '&quot;')}">×</span>`;
+        box.appendChild(chip);
+      });
+      box.querySelectorAll('.x-chip').forEach(el => {
+        el.addEventListener('click', () => {
+          rescanCategories.delete(el.dataset.rm);
+          renderRescanCategoryPicked();
+        });
+      });
+    }
+    function renderAmzCatAccumPicked(){
+      const box = document.getElementById('amzCatAccumPicked');
+      const count = document.getElementById('amzCatAccumCount');
+      if (count) count.textContent = String(draftRescanCategories.size);
+      if (!box) return;
+      box.innerHTML = '';
+      [...draftRescanCategories].forEach(name => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `${name.replace(/</g, '&lt;')} <span class="x-chip" data-rm="${name.replace(/"/g, '&quot;')}">×</span>`;
+        box.appendChild(chip);
+      });
+      box.querySelectorAll('.x-chip').forEach(el => {
+        el.addEventListener('click', () => {
+          draftRescanCategories.delete(el.dataset.rm);
+          renderAmzCatAccumPicked();
+        });
+      });
+    }
+    function updateAmzCatPathText(){
+      const el = document.getElementById('amzCatPath');
+      if (!el) return;
+      if (!amzCatPath.length) {
+        el.innerHTML = '<span class="ph">请选择类目</span>';
+        return;
+      }
+      el.textContent = '已选择：' + amzCatPath.map(amzCatLabel).join(' >> ');
+    }
+    function renderAmzCatColumns(){
+      const levels = [
+        { el: document.getElementById('amzCatCol0'), list: AMAZON_CATEGORY_TREE, selected: amzCatPath[0] },
+        { el: document.getElementById('amzCatCol1'), list: amzCatPath[0] ? amzCatChildren(amzCatPath[0]) : [], selected: amzCatPath[1] },
+        { el: document.getElementById('amzCatCol2'), list: amzCatPath[1] ? amzCatChildren(amzCatPath[1]) : [], selected: amzCatPath[2] }
+      ];
+      levels.forEach((lv, depth) => {
+        if (!lv.el) return;
+        if (!lv.list.length) {
+          lv.el.innerHTML = depth === 0 ? '' : '<div style="padding:12px;color:var(--sub);font-size:12px">—</div>';
+          return;
+        }
+        lv.el.innerHTML = lv.list.map((node, idx) => {
+          const on = lv.selected === node ? 'on' : '';
+          return `<button type="button" class="amz-cat-item ${on}" data-depth="${depth}" data-idx="${idx}">${amzCatLabel(node).replace(/</g, '&lt;')}</button>`;
+        }).join('');
+        lv.el.querySelectorAll('.amz-cat-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const d = Number(btn.dataset.depth);
+            const node = lv.list[Number(btn.dataset.idx)];
+            amzCatPath = amzCatPath.slice(0, d);
+            amzCatPath[d] = node;
+            updateAmzCatPathText();
+            renderAmzCatColumns();
+          });
+        });
+      });
+      updateAmzCatPathText();
+    }
+    function setAmzCatTab(tab){
+      document.querySelectorAll('[data-amz-cat-tab]').forEach(btn => {
+        btn.classList.toggle('on', btn.dataset.amzCatTab === tab);
+      });
+      document.getElementById('amzCatPickPane')?.classList.toggle('on', tab === 'pick');
+      document.getElementById('amzCatSearchPane')?.classList.toggle('on', tab === 'search');
+    }
+    function accumulateCurrentAmzCat(){
+      if (!amzCatPath.length) {
+        showToast('请先选择类目');
+        return;
+      }
+      const leaf = amzCatLabel(amzCatPath[amzCatPath.length - 1]);
+      if (draftRescanCategories.has(leaf)) {
+        showToast('该类目已累加');
+        return;
+      }
+      draftRescanCategories.add(leaf);
+      renderAmzCatAccumPicked();
+      showToast(`已累加：${leaf}`);
+    }
+    function renderAmzCatSearch(keyword){
+      const list = document.getElementById('amzCatSearchList');
+      if (!list) return;
+      const q = (keyword || '').trim().toLowerCase();
+      if (!q) {
+        list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--sub);font-size:12px">输入关键词后搜索</div>';
+        return;
+      }
+      const hits = AMAZON_CATEGORY_FLAT.filter(x =>
+        x.label.toLowerCase().includes(q) || x.pathText.toLowerCase().includes(q)
+      ).slice(0, 80);
+      if (!hits.length) {
+        list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--sub);font-size:12px">无匹配类目</div>';
+        return;
+      }
+      list.innerHTML = hits.map((h, i) =>
+        `<button type="button" class="amz-cat-search-hit" data-idx="${i}">
+          <div>${h.label.replace(/</g, '&lt;')}</div>
+          <div class="path">${h.pathText.replace(/</g, '&lt;')}</div>
+        </button>`
+      ).join('');
+      list.querySelectorAll('.amz-cat-search-hit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const hit = hits[Number(btn.dataset.idx)];
+          if (!hit) return;
+          amzCatPath = hit.path.slice();
+          setAmzCatTab('pick');
+          renderAmzCatColumns();
+          accumulateCurrentAmzCat();
+        });
+      });
+    }
+    function openRescanCategoryModal(){
+      draftRescanCategories = new Set(rescanCategories);
+      amzCatPath = [];
+      setAmzCatTab('pick');
+      renderAmzCatColumns();
+      renderAmzCatAccumPicked();
+      const search = document.getElementById('amzCatSearchInput');
+      if (search) search.value = '';
+      renderAmzCatSearch('');
+      document.getElementById('rescanCategoryModal')?.classList.add('show');
+    }
+    function closeRescanCategoryModal(){
+      document.getElementById('rescanCategoryModal')?.classList.remove('show');
+    }
+    document.getElementById('openRescanCategoryModal')?.addEventListener('click', openRescanCategoryModal);
+    document.getElementById('closeRescanCategoryModal')?.addEventListener('click', closeRescanCategoryModal);
+    document.getElementById('cancelRescanCategoryModal')?.addEventListener('click', closeRescanCategoryModal);
+    document.getElementById('rescanCategoryModal')?.addEventListener('click', e => {
+      if (e.target.id === 'rescanCategoryModal') closeRescanCategoryModal();
+    });
+    document.getElementById('confirmRescanCategoryModal')?.addEventListener('click', () => {
+      rescanCategories = new Set(draftRescanCategories);
+      renderRescanCategoryPicked();
+      closeRescanCategoryModal();
+      if (!rescanCategories.size) showToast('未选择产品类目');
+    });
+    document.getElementById('amzCatAccumulateBtn')?.addEventListener('click', accumulateCurrentAmzCat);
+    document.querySelectorAll('[data-amz-cat-tab]').forEach(btn => {
+      btn.addEventListener('click', () => setAmzCatTab(btn.dataset.amzCatTab));
+    });
+    document.getElementById('amzCatSearchBtn')?.addEventListener('click', () => {
+      renderAmzCatSearch(document.getElementById('amzCatSearchInput')?.value || '');
+    });
+    document.getElementById('amzCatSearchInput')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        renderAmzCatSearch(e.target.value || '');
+      }
+    });
+    renderRescanCategoryPicked();
 
     function countSkus(text){
       return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean).length;
@@ -2675,7 +3084,6 @@
     }
     /* 合规政策：仅从政策管理选择（已通过） */
     const rescanPolicySelect = document.getElementById('rescanPolicySelect');
-    const rescanPolicyContent = document.getElementById('rescanPolicyContent');
     /* 合规分类：来自禁售列表（违禁类型=合规分类时的禁售分类） */
     const CERT_OPTIONS = [
       'BQB','TEST REPORT','CPC','EN71','DOT','CE','FDA','FCC','HDMI','EMC',
@@ -3101,7 +3509,7 @@
       if (!rescanPolicySelect) return;
       const list = getPolicyListFromTable().filter(p => p.status === '启用');
       const cur = rescanPolicySelect.value;
-      rescanPolicySelect.innerHTML = '<option value="">请选择政策（仅启用）</option>' + list.map((p, i) =>
+      rescanPolicySelect.innerHTML = '<option value="">请选择合规分类（仅启用）</option>' + list.map((p, i) =>
         `<option value="${i}">${p.category.replace(/</g, '&lt;')}（${(p.sitesLabel || '').replace(/</g, '&lt;')}）</option>`
       ).join('');
       if (cur && +cur < list.length) {
@@ -3133,7 +3541,7 @@
     const AMAZON_EU = ['德国','法国','意大利','西班牙','荷兰','波兰','瑞典','比利时'];
     const AMAZON_EUROPE = [...AMAZON_EU_UK, '土耳其'];
 
-    let confirmedSites = new Set(['亚马逊|美国']);
+    let confirmedSites = new Set();
     let detectSites = new Set(['亚马逊|美国']);
     let auditSites = new Set();
     let auditCertRows = [];
@@ -3168,16 +3576,89 @@
       if (!p || !(p.siteKeys || []).length) {
         rescanAllowedSiteKeys = null;
         confirmedSites = new Set();
-        renderPlatformPicked();
+        renderRescanSiteChecks();
         return;
       }
       rescanAllowedSiteKeys = new Set(p.siteKeys);
       confirmedSites = new Set([...confirmedSites].filter(k => rescanAllowedSiteKeys.has(k)));
       if (!confirmedSites.size) {
-        confirmedSites = new Set([p.siteKeys[0]]);
+        // 默认全选该政策下可用站点，业务可取消勾选
+        confirmedSites = new Set(p.siteKeys);
       }
-      renderPlatformPicked();
+      renderRescanSiteChecks();
     }
+    function getRescanSitePolicyContent(siteKeyStr){
+      const p = getSelectedRescanPolicy();
+      if (!p) return '';
+      const { platform, site } = parseKey(siteKeyStr);
+      const row = POLICY_STORE.find(x =>
+        x.category === p.category
+        && (x.platform || '亚马逊') === (platform || '亚马逊')
+        && x.site === site
+      );
+      return (row?.content || p.content || '').trim();
+    }
+    function syncRescanSiteCheckAllState(){
+      const allCb = document.getElementById('rescanSiteCheckAll');
+      const countEl = document.getElementById('rescanSiteCount');
+      const total = rescanAllowedSiteKeys ? rescanAllowedSiteKeys.size : 0;
+      const selected = [...(rescanAllowedSiteKeys || [])].filter(k => confirmedSites.has(k)).length;
+      if (countEl) countEl.textContent = total ? `已选 ${selected} / ${total}` : '已选 0';
+      if (!allCb) return;
+      if (!total) {
+        allCb.checked = false;
+        allCb.indeterminate = false;
+        return;
+      }
+      allCb.checked = selected === total;
+      allCb.indeterminate = selected > 0 && selected < total;
+    }
+    function renderRescanSiteChecks(){
+      const box = document.getElementById('rescanSiteChecks');
+      const tools = document.getElementById('rescanSiteTools');
+      if (!box) return;
+      if (!rescanAllowedSiteKeys || !rescanAllowedSiteKeys.size) {
+        box.innerHTML = '<span class="hint" style="margin:0;padding-top:4px">请先选择合规分类</span>';
+        if (tools) tools.hidden = true;
+        syncRescanSiteCheckAllState();
+        return;
+      }
+      if (tools) tools.hidden = false;
+      const keys = [...rescanAllowedSiteKeys].sort((a, b) => formatLabel(a).localeCompare(formatLabel(b), 'zh'));
+      box.innerHTML = keys.map(k => {
+        const on = confirmedSites.has(k);
+        const content = getRescanSitePolicyContent(k);
+        const body = content
+          ? content.replace(/</g, '&lt;')
+          : '<span class="empty">该站暂无政策内容</span>';
+        return `<div class="rescan-site-item ${on ? 'is-on' : ''}" data-key="${k.replace(/"/g, '&quot;')}">
+          <label>
+            <input type="checkbox" class="rescan-site-cb" data-key="${k.replace(/"/g, '&quot;')}" ${on ? 'checked' : ''} />
+            ${formatLabel(k).replace(/</g, '&lt;')}
+          </label>
+          <div class="site-content">${body}</div>
+        </div>`;
+      }).join('');
+      box.querySelectorAll('.rescan-site-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const key = cb.dataset.key;
+          if (cb.checked) confirmedSites.add(key);
+          else confirmedSites.delete(key);
+          cb.closest('.rescan-site-item')?.classList.toggle('is-on', cb.checked);
+          syncRescanSiteCheckAllState();
+          if (!confirmedSites.size) showToast('请至少勾选一个回扫站点');
+        });
+      });
+      syncRescanSiteCheckAllState();
+    }
+    document.getElementById('rescanSiteCheckAll')?.addEventListener('change', e => {
+      if (!rescanAllowedSiteKeys?.size) return;
+      const on = !!e.target.checked;
+      if (on) confirmedSites = new Set(rescanAllowedSiteKeys);
+      else confirmedSites = new Set();
+      renderRescanSiteChecks();
+      if (!on) showToast('请至少勾选一个回扫站点');
+    });
     function platformsForModal(){
       // 政策管理、检测提交、创建回扫：本期仅亚马逊；审核合规站点保留多平台
       if (modalTarget === 'policy' || modalTarget === 'detect' || modalTarget === 'rescan') {
@@ -3194,6 +3675,11 @@
     }
 
     function renderPlatformPicked(){
+      // 创建回扫已改为勾选展示；此函数仅兼容旧调用
+      if (document.getElementById('rescanSiteChecks')) {
+        renderRescanSiteChecks();
+        return;
+      }
       if (!platformPicked) return;
       platformPicked.innerHTML = '';
       [...confirmedSites].sort().forEach(k => {
@@ -3301,7 +3787,7 @@
             <div class="ps-sites">${siteCells}</div>
           </div>
         </div>`;
-      }).join('') : '<div class="hint">请先选择合规政策；可选站点仅为该政策已学习站点。</div>';
+      }).join('') : '<div class="hint">请先选择合规分类；可选站点仅为该分类已学习站点。</div>';
 
       bulk.querySelectorAll('.ps-bulk-cb').forEach(cb => {
         cb.addEventListener('change', () => {
@@ -3335,6 +3821,10 @@
     }
 
     function openPlatformModal(target = 'rescan'){
+      if (target === 'rescan') {
+        showToast('回扫站点请在合规分类下方直接勾选');
+        return;
+      }
       modalTarget = target;
       const modal = document.getElementById('platformModal');
       modal?.classList.toggle('above', target === 'audit');
@@ -3352,7 +3842,7 @@
       } else {
         const policy = getSelectedRescanPolicy();
         if (!policy) {
-          showToast('请先选择合规政策');
+          showToast('请先选择合规分类');
           return;
         }
         syncRescanSitesToPolicy(policy);
@@ -3546,17 +4036,14 @@
     });
     renderPlatformPicked();
     renderDetectPlatformPicked();
+    renderRescanSiteChecks();
 
     rescanPolicySelect?.addEventListener('change', () => {
       const list = getPolicyListFromTable().filter(p => p.status === '启用');
       const p = rescanPolicySelect.value === '' ? null : list[+rescanPolicySelect.value];
-      if (p && rescanPolicyContent) {
-        rescanPolicyContent.value = p.content || '';
-        const ruleName = document.querySelector('#rescan-create input.input.block[maxlength="30"]');
-        if (ruleName && !ruleName.value) ruleName.value = p.name.slice(0, 30);
-      } else if (rescanPolicyContent) {
-        rescanPolicyContent.value = '';
-      }
+      // 换政策时重置勾选为该政策全部可用站
+      if (p?.siteKeys?.length) confirmedSites = new Set(p.siteKeys);
+      else confirmedSites = new Set();
       syncRescanSitesToPolicy(p);
     });
 
@@ -4587,18 +5074,18 @@
       if (!row) return;
       const tds = [...row.children];
       const text = (i) => (tds[i]?.innerText || '').replace(/\s+/g, ' ').trim() || '—';
-      // 0勾选 1编号 2图 3SKU 4相似度 5名称 6已标记合规站点 7回扫站点 8系统结果 9审核结果 10审核说明 11操作
-      const markedRaw = text(6);
-      const sysResult = text(8);
+      // 0勾选 1编号 2图 3SKU 4名称 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9审核说明 10操作
+      const markedRaw = text(5);
+      const sysResult = text(7);
       openDetectDetailModal({
         sku: row.dataset.sku || text(3),
-        titleCn: row.dataset.titleCn || row.querySelector('.prod-name')?.textContent?.trim() || text(5),
+        titleCn: row.dataset.titleCn || row.querySelector('.prod-name')?.textContent?.trim() || text(4),
         category: row.querySelector('.prod-cat')?.textContent?.trim() || '—',
         riskSites: markedRaw,
         sysResult,
         sysDesc: row.dataset.sysDesc || (row.querySelector('.sys-desc')?.getAttribute('title') || row.querySelector('.sys-desc')?.textContent?.trim()) || (sysResult === '非合规品' ? '系统判定为非合规品，无需处理' : '—'),
-        audit: text(9),
-        auditRemark: text(10)
+        audit: text(8),
+        auditRemark: text(9)
       });
     }
     function closeDetectDetailModal(){
@@ -4617,10 +5104,10 @@
     const detectLogPager = document.getElementById('detectLogPager');
     function buildRescanLogs(row){
       const tds = row.querySelectorAll('td');
-      // 6已标记合规站点 7回扫站点 8系统结果 9审核结果 10审核说明
-      const audit = (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim();
-      const remark = (tds[10]?.innerText || '').replace(/\s+/g, ' ').trim();
-      const marked = (tds[6]?.innerText || '').replace(/\s+/g, ' ').trim();
+      // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9审核说明
+      const audit = (tds[8]?.innerText || '').replace(/\s+/g, ' ').trim();
+      const remark = (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim();
+      const marked = (tds[5]?.innerText || '').replace(/\s+/g, ' ').trim();
       const base = [
         { who: '系统', time: '2026-06-05 02:10:18', what: '【回扫任务】：进入回扫队列并完成检测' }
       ];
