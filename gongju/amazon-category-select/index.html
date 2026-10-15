@@ -82,9 +82,15 @@
   .cb.all::after{ content:""; position:absolute; left:5px; top:2px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
   .cb.some::after{ content:""; position:absolute; left:3px; top:3px; width:8px; height:8px; background:var(--primary); border-radius:1px; }
 
-  .search-input{ width:100%; height:32px; border:1px solid var(--border-2); border-radius:4px; padding:0 10px; font:inherit; margin-bottom:10px; }
+  .search-bar{ display:flex; margin-bottom:10px; }
+  .search-input{ width:260px; height:32px; border:1px solid var(--border-2); border-right:none; border-radius:4px 0 0 4px; padding:0 10px; font:inherit; }
   .search-input:focus{ outline:none; border-color:var(--primary); }
-  .search-list{ border:1px solid var(--primary-border); height:340px; overflow-y:auto; }
+  .search-bar .btn{ border-radius:0 4px 4px 0; }
+  .search-head{ display:flex; align-items:center; gap:8px; height:32px; margin-bottom:6px; font-size:12px; }
+  .search-head .lbl{ cursor:pointer; }
+  .search-head .btn{ margin-left:auto; height:26px; padding:0 12px; font-size:12px; }
+  .search-head .btn:disabled{ color:#c0c4cc; border-color:#ebeef5; background:#f5f7fa; cursor:not-allowed; }
+  .search-list{ border:1px solid var(--primary-border); height:320px; overflow-y:auto; }
   .search-tip{ color:var(--text-3); font-size:12px; padding:12px; }
 
   .modal-foot{ display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
@@ -120,14 +126,14 @@
     <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区，取消勾选即移出；在已选区点 × 删除，列表中对应勾选框同步取消。已选区最多显示 4 行，超出区域内滚动（建议值，待确认）。</span></div></div>
     <div class="note"><div class="no">4</div><div><b>末级名称直接点选</b><span>末级类目没有下一级，点名称等同点勾选框。</span></div></div>
     <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列；原「已选择」路径改为「当前浏览」路径，点任一级可回退。</span></div></div>
-    <div class="note"><div class="no">6</div><div><b>类目搜索同步适配</b><span>搜索结果前加勾选框，勾选即加入已选区。</span></div></div>
+    <div class="note"><div class="no">6</div><div><b>类目搜索：全选类目</b><span>搜索结果每条可勾选（规则同类目选择）；「全选类目」勾选当前全部搜索结果，再点一次取消；「清空」取消当前搜索结果中已勾选的类目。勾选结果实时同步到已选区。</span></div></div>
     <div class="note"><div class="no">7</div><div><b>确定 / 取消</b><span>确定后写回表单，提交展开后的末级类目路径，数据格式与现有一致；取消或关闭不保存本次改动。</span></div></div>
     <div class="divider"></div>
     <h3>本期不做</h3>
     <ul class="out-list">
       <li>已选区升级（计数、合并显示、折叠、一键清空、点击定位）</li>
       <li>行内已选数量角标</li>
-      <li>搜索结果全选、关键词高亮</li>
+      <li>搜索关键词高亮</li>
       <li>取消时二次确认</li>
       <li>一级类目显示真实英文名（当前均为 Categories）</li>
     </ul>
@@ -153,7 +159,15 @@
       <div class="cols" id="cols"></div>
     </div>
     <div id="paneSearch" style="display:none">
-      <input class="search-input" id="searchInput" placeholder="输入中文或英文关键词，如：面部、Spa" />
+      <div class="search-bar">
+        <input class="search-input" id="searchInput" placeholder="输入中文或英文关键词，如：面部、Spa" />
+        <button type="button" class="btn btn-primary" id="btnSearch">搜索</button>
+      </div>
+      <div class="search-head">
+        <span class="cb none" id="searchAllCb"></span>
+        <span class="lbl" id="searchAllLbl">全选类目</span>
+        <button type="button" class="btn" id="btnSearchClear" disabled>清空</button>
+      </div>
       <div class="search-list" id="searchList"></div>
     </div>
 
@@ -265,6 +279,7 @@ let activePath = pathIds(findByCn('电动面部护理仪')).slice(0, -1);
 let tab = 'browse';
 let lastPathKey = '';
 let colsScroll = 0;
+let searchResults = null;
 
 function triOf(leaves){
   let n = 0;
@@ -332,14 +347,33 @@ function renderCols(){
   }
 }
 
-function renderSearch(){
+const enPath = id => pathIds(id).map((x, i) => i === 0 ? 'Categories' : NODE[x].en).join('>>');
+
+function doSearch(){
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  searchResults = q
+    ? ORDER.filter(id => pathLabel(id).toLowerCase().includes(q) || pathIds(id).some(x => NODE[x].en.toLowerCase().includes(q)))
+    : null;
+  document.getElementById('searchList').scrollTop = 0;
+  renderSearch();
+}
+
+function searchLeaves(){
+  const s = new Set();
+  (searchResults || []).forEach(id => LEAVES[id].forEach(l => s.add(l)));
+  return ALL_LEAVES.filter(l => s.has(l));
+}
+
+function renderSearch(){
   const box = document.getElementById('searchList');
   const st = box.scrollTop;
-  if (!q) { box.innerHTML = '<div class="search-tip">输入关键词搜索类目</div>'; return; }
-  const results = ORDER.filter(id => NODE[id].cn.toLowerCase().includes(q) || NODE[id].en.toLowerCase().includes(q)).slice(0, 50);
-  box.innerHTML = results.length
-    ? results.map(id => `<div class="row" data-search="${id}"><span class="cb ${triOf(LEAVES[id])}" data-cb="${id}"></span><span class="txt">${esc(pathLabel(id))}</span></div>`).join('')
+  const leaves = searchLeaves();
+  const allCb = document.getElementById('searchAllCb');
+  allCb.className = 'cb ' + (leaves.length ? triOf(leaves) : 'none');
+  document.getElementById('btnSearchClear').disabled = !leaves.some(l => draft.has(l));
+  if (searchResults === null) { box.innerHTML = '<div class="search-tip">输入关键词后点击「搜索」</div>'; return; }
+  box.innerHTML = searchResults.length
+    ? searchResults.map(id => `<div class="row" data-search="${id}"><span class="cb ${triOf(LEAVES[id])}" data-cb="${id}"></span><span class="txt" title="${esc(enPath(id))} (${esc(pathLabel(id))})">${esc(enPath(id))} (${esc(pathLabel(id))})</span></div>`).join('')
     : '<div class="search-tip">未找到匹配的类目</div>';
   box.scrollTop = st;
 }
@@ -382,7 +416,12 @@ document.getElementById('btnOk').onclick = () => {
   toast(`已保存 ${committed.length} 个类目`);
 };
 document.querySelectorAll('.tab').forEach(el => el.onclick = () => setTab(el.dataset.tab));
-document.getElementById('searchInput').oninput = renderSearch;
+document.getElementById('btnSearch').onclick = doSearch;
+document.getElementById('searchInput').onkeydown = e => { if (e.key === 'Enter') doSearch(); };
+const toggleSearchAll = () => { const leaves = searchLeaves(); if (leaves.length) toggleLeaves(leaves); };
+document.getElementById('searchAllCb').onclick = toggleSearchAll;
+document.getElementById('searchAllLbl').onclick = toggleSearchAll;
+document.getElementById('btnSearchClear').onclick = () => { searchLeaves().forEach(l => draft.delete(l)); render(); };
 document.getElementById('cols').addEventListener('scroll', e => { if (tab === 'browse') colsScroll = e.target.scrollLeft; });
 
 document.getElementById('selBox').onclick = e => {
