@@ -33,9 +33,6 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
   .note b{ display:block; font-size:13px; margin-bottom:2px; }
   .note span{ color:var(--text-2); font-size:12px; line-height:1.6; }
-  .out-list{ margin:0; padding-left:18px; color:var(--text-3); font-size:12px; line-height:1.8; }
-  .divider{ height:1px; background:var(--border); margin:16px 0; }
-
   .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; z-index:100; }
   .overlay.show{ display:flex; }
   .modal{ background:#fff; border-radius:8px; width:1000px; max-width:96vw; max-height:94vh; overflow:auto; padding:20px 24px; position:relative; }
@@ -128,15 +125,6 @@
     <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列；原「已选择」路径改为「当前浏览」路径，点任一级可回退。</span></div></div>
     <div class="note"><div class="no">6</div><div><b>类目搜索：全选类目</b><span>搜索结果每条可勾选（规则同类目选择）；「全选类目」勾选当前全部搜索结果，再点一次取消；「清空」取消当前搜索结果中已勾选的类目。勾选结果实时同步到已选区。</span></div></div>
     <div class="note"><div class="no">7</div><div><b>确定 / 取消</b><span>确定后写回表单，提交展开后的末级类目路径，数据格式与现有一致；取消或关闭不保存本次改动。</span></div></div>
-    <div class="divider"></div>
-    <h3>本期不做</h3>
-    <ul class="out-list">
-      <li>已选区升级（计数、合并显示、折叠、一键清空、点击定位）</li>
-      <li>行内已选数量角标</li>
-      <li>搜索关键词高亮</li>
-      <li>取消时二次确认</li>
-      <li>一级类目显示真实英文名（当前均为 Categories）</li>
-    </ul>
   </div>
 </div>
 
