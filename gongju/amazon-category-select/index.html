@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>选择Amazon类目弹窗 · 勾选多选改造原型</title>
+<link rel="stylesheet" href="../../import/prototype-annotate.css" />
+<style>
+  :root{ --primary:#409eff; --primary-light:#ecf5ff; --primary-border:#b3d8ff; --border:#e4e7ed; --border-2:#dcdfe6;
+    --text:#303133; --text-2:#606266; --text-3:#909399; --danger:#f56c6c; --bg:#f3f5f8; }
+  *{ box-sizing:border-box; }
+  body{ font-family:"Microsoft YaHei",sans-serif; margin:0; background:var(--bg); color:var(--text); font-size:13px; }
+  .app{ max-width:1280px; margin:0 auto; padding:20px; display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; }
+  .card{ background:#fff; border-radius:8px; border:1px solid var(--border); padding:20px; }
+  h1{ font-size:18px; margin:0 0 4px; }
+  .sub{ color:var(--text-3); margin:0 0 18px; }
+  .form-row{ display:flex; gap:12px; margin-bottom:16px; align-items:flex-start; }
+  .form-label{ width:96px; flex-shrink:0; text-align:right; color:var(--text-2); line-height:32px; }
+  .form-label .req{ color:var(--danger); margin-right:2px; }
+  .input{ height:32px; border:1px solid var(--border-2); border-radius:4px; padding:0 10px; width:320px; font:inherit; }
+  .cat-field{ flex:1; min-width:0; }
+  .cat-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .cat-tag{ background:#f4f4f5; border:1px solid #e9e9eb; border-radius:4px; padding:2px 8px; font-size:12px; color:var(--text-2); }
+  .cat-empty{ color:var(--text-3); font-size:12px; line-height:32px; }
+  .btn{ height:32px; padding:0 16px; border-radius:4px; border:1px solid var(--border-2); background:#fff; color:var(--text); cursor:pointer; font:inherit; }
+  .btn:hover{ color:var(--primary); border-color:var(--primary-border); background:var(--primary-light); }
+  .btn-primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:#66b1ff; border-color:#66b1ff; color:#fff; }
+  .btn-text{ border:none; background:none; color:var(--primary); padding:0; height:auto; cursor:pointer; font:inherit; }
+  .side h3{ font-size:14px; margin:0 0 12px; }
+  .note{ display:flex; gap:10px; margin-bottom:12px; }
+  .note .no{ width:20px; height:20px; border-radius:50%; background:var(--primary); color:#fff; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .note b{ display:block; font-size:13px; margin-bottom:2px; }
+  .note span{ color:var(--text-2); font-size:12px; line-height:1.6; }
+  .out-list{ margin:0; padding-left:18px; color:var(--text-3); font-size:12px; line-height:1.8; }
+  .divider{ height:1px; background:var(--border); margin:16px 0; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; z-index:100; }
+  .overlay.show{ display:flex; }
+  .modal{ background:#fff; border-radius:8px; width:1000px; max-width:96vw; max-height:94vh; overflow:auto; padding:20px 24px; position:relative; }
+  .modal-head{ display:flex; align-items:center; margin-bottom:14px; }
+  .modal-title{ font-size:15px; font-weight:600; flex:1; }
+  .modal-close{ font-size:20px; color:var(--text-3); cursor:pointer; line-height:1; }
+  .modal-close:hover{ color:var(--primary); }
+
+  .sel-box{ max-height:146px; overflow-y:auto; margin-bottom:14px; padding-right:4px; }
+  .sel-item{ display:flex; align-items:center; height:30px; padding:0 10px; margin-bottom:6px; border-radius:4px;
+    background:var(--primary-light); border:1px solid var(--primary-border); color:var(--primary); font-size:12px; }
+  .sel-item .txt{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sel-del{ width:14px; height:14px; border-radius:50%; border:1px solid var(--danger); color:var(--danger); font-size:11px; line-height:12px;
+    text-align:center; cursor:pointer; flex-shrink:0; font-style:normal; }
+  .sel-del:hover{ background:var(--danger); color:#fff; }
+  .sel-empty{ color:var(--text-3); font-size:12px; padding:6px 0; }
+
+  .tabs{ display:flex; gap:28px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+  .tab{ padding:8px 0; cursor:pointer; color:var(--text-2); border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab.active{ color:var(--primary); border-bottom-color:var(--primary); }
+
+  .crumb{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:12px; margin-bottom:10px; min-height:22px; }
+  .crumb .lbl{ color:var(--text-2); }
+  .crumb a{ color:var(--primary); cursor:pointer; }
+  .crumb a.cur{ color:var(--text); cursor:default; }
+  .crumb .sep{ color:var(--text-3); }
+  .crumb .tip{ margin-left:auto; color:var(--text-3); }
+
+  .cols{ display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; scroll-behavior:smooth; }
+  .col{ width:300px; flex-shrink:0; border:1px solid var(--primary-border); border-radius:2px; display:flex; flex-direction:column; }
+  .col-head{ display:flex; align-items:center; gap:8px; height:34px; padding:0 10px; background:#f5f7fa; border-bottom:1px solid var(--border); font-size:12px; }
+  .col-head .lbl{ cursor:pointer; }
+  .col-head .lvl{ margin-left:auto; color:var(--text-3); }
+  .col-body{ height:340px; overflow-y:auto; }
+  .row{ display:flex; align-items:center; gap:8px; height:31px; padding:0 10px; border-bottom:1px solid #f0f2f5; cursor:pointer; font-size:12px; }
+  .row:hover{ background:#f5f7fa; }
+  .row.active{ background:var(--primary-light); }
+  .row .txt{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row .arrow{ color:var(--text-3); }
+
+  .cb{ width:16px; height:16px; border:1px solid #d9d9d9; border-radius:4px; background:#fff; flex-shrink:0; position:relative; cursor:pointer; transition:.15s; }
+  .cb:hover{ border-color:var(--primary); }
+  .cb.all{ background:var(--primary); border-color:var(--primary); }
+  .cb.all::after{ content:""; position:absolute; left:5px; top:2px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .cb.some::after{ content:""; position:absolute; left:3px; top:3px; width:8px; height:8px; background:var(--primary); border-radius:1px; }
+
+  .search-input{ width:100%; height:32px; border:1px solid var(--border-2); border-radius:4px; padding:0 10px; font:inherit; margin-bottom:10px; }
+  .search-input:focus{ outline:none; border-color:var(--primary); }
+  .search-list{ border:1px solid var(--primary-border); height:340px; overflow-y:auto; }
+  .search-tip{ color:var(--text-3); font-size:12px; padding:12px; }
+
+  .modal-foot{ display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+
+  .toast{ position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1f2733; color:#fff;
+    padding:10px 18px; border-radius:8px; z-index:500; opacity:0; transition:.25s; pointer-events:none; }
+  .toast.show{ opacity:1; top:34px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <h1>选择Amazon类目弹窗 · 勾选多选改造原型</h1>
+    <p class="sub">纯前端改造，适用于所有「添加类目」入口。下方表单为示意页面，点「添加类目」打开弹窗；类目为示意数据。</p>
+
+    <div class="form-row">
+      <div class="form-label">规则名称</div>
+      <input class="input" value="示例：美容仪器类禁售规则" />
+    </div>
+    <div class="form-row">
+      <div class="form-label"><span class="req">*</span>Amazon类目</div>
+      <div class="cat-field">
+        <div class="cat-tags" id="formTags"></div>
+        <button type="button" class="btn" id="btnOpen">添加类目</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card side">
+    <h3>本期改造点</h3>
+    <div class="note"><div class="no">1</div><div><b>每个类目前加勾选框</b><span>样式参考 Ant Design Cascader 多选。勾选父级 = 选中其下全部末级；子级部分选中时父级显示半选。点勾选框只勾选，点名称才展开下一级。</span></div></div>
+    <div class="note"><div class="no">2</div><div><b>一级类目全选 / 反选</b><span>仅一级类目列头提供。全选：勾选全部一级类目，再点一次取消。反选：全部末级类目的勾选状态取反（口径待确认）。</span></div></div>
+    <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区，取消勾选即移出；在已选区点 × 删除，列表中对应勾选框同步取消。已选区最多显示 4 行，超出区域内滚动（建议值，待确认）。</span></div></div>
+    <div class="note"><div class="no">4</div><div><b>末级名称直接点选</b><span>末级类目没有下一级，点名称等同点勾选框。</span></div></div>
+    <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列；原「已选择」路径改为「当前浏览」路径，点任一级可回退。</span></div></div>
+    <div class="note"><div class="no">6</div><div><b>类目搜索同步适配</b><span>搜索结果前加勾选框，勾选即加入已选区。</span></div></div>
+    <div class="note"><div class="no">7</div><div><b>确定 / 取消</b><span>确定后写回表单，提交展开后的末级类目路径，数据格式与现有一致；取消或关闭不保存本次改动。</span></div></div>
+    <div class="divider"></div>
+    <h3>本期不做</h3>
+    <ul class="out-list">
+      <li>已选区升级（计数、合并显示、折叠、一键清空、点击定位）</li>
+      <li>行内已选数量角标</li>
+      <li>搜索结果全选、关键词高亮</li>
+      <li>取消时二次确认</li>
+      <li>一级类目显示真实英文名（当前均为 Categories）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="overlay" id="catOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">选择Amazon类目</div>
+      <span class="modal-close" data-close title="关闭">×</span>
+    </div>
+
+    <div class="sel-box" id="selBox"></div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="browse">类目选择</div>
+      <div class="tab" data-tab="search" id="tabSearch">类目搜索</div>
+    </div>
+
+    <div id="paneBrowse">
+      <div class="crumb" id="crumb"></div>
+      <div class="cols" id="cols"></div>
+    </div>
+    <div id="paneSearch" style="display:none">
+      <input class="search-input" id="searchInput" placeholder="输入中文或英文关键词，如：面部、Spa" />
+      <div class="search-list" id="searchList"></div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn" data-close>取消</button>
+      <button type="button" class="btn btn-primary" id="btnOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+const RAW = [
+  ['Home & Kitchen', '家居、厨具、家装', [
+    ['Bedding', '床上用品', [['Sheets', '床单'], ['Pillows', '枕头'], ['Blankets', '毯子']]],
+    ['Kitchen & Dining', '厨房与餐厅', [['Cookware', '炊具'], ['Cutlery', '刀具'], ['Bakeware', '烘焙用具']]],
+    ['Furniture', '家具', [['Living Room Furniture', '客厅家具'], ['Bedroom Furniture', '卧室家具']]],
+  ]],
+  ['Office Products', '办公用品', [
+    ['Office Electronics', '办公电子', [['Calculators', '计算器'], ['Printers', '打印机']]],
+    ['Office Supplies', '办公耗材', [['Paper', '纸张'], ['Writing', '书写工具']]],
+  ]],
+  ['Beauty & Personal Care', '美容和个人护理', [
+    ['Foot, Hand & Nail Care', '足部、手部和指甲护理产品', [['Foot Care', '足部护理'], ['Hand Care', '手部护理'], ['Nail Art', '美甲装饰'], ['Nail Polish', '指甲油']]],
+    ['Fragrance', '香水', [["Women's", '女士香水'], ["Men's", '男士香水'], ["Children's", '儿童香水']]],
+    ['Hair Care', '美发护发', [['Shampoo', '洗发水'], ['Conditioner', '护发素'], ['Hair Color', '染发']]],
+    ['Makeup', '彩妆', [
+      ['Face', '面部', [['Bronzer', '古铜粉'], ['Foundation', '粉底'], ['Blush', '腮红'], ['Concealer', '遮瑕']]],
+      ['Eyes', '眼部', [['Eyeliner', '眼线'], ['Mascara', '睫毛膏'], ['Eyeshadow', '眼影']]],
+      ['Lips', '唇部', [['Lipstick', '口红'], ['Lip Gloss', '唇彩']]],
+    ]],
+    ['Personal Care', '沐浴', [['Bath', '沐浴露'], ['Deodorants', '止汗剂']]],
+    ['Salon & Spa Equipment', '美容水疗设备', [
+      ['Drying Hoods', '烘干罩'], ['Galvanic Machines', '电动面部护理仪'], ['Handheld Mirrors', '手持镜'],
+      ['High Frequency Machines', '高频面部按摩器'], ['Manicure Tables', '美甲桌'], ['Professional Massage Equipment', '按摩辅助设备'],
+      ['Salon & Spa Stools', '沙龙和水疗凳'], ['Spa Beds & Tables', '按摩床'], ['Spa Chairs', '水疗椅'],
+      ['Spa Storage Systems', '水疗中心储物系统'], ['Towel Warmers', '水疗热毛巾加热器'],
+    ]],
+    ['Shave & Hair Removal', '剃须和脱毛用品', [["Men's Shaving", '男士剃须'], ["Women's Hair Removal", '女士脱毛']]],
+    ['Skin Care', '身体护理', [['Body', '身体'], ['Face', '面部护肤'], ['Eyes', '眼部护理']]],
+    ['Tools & Accessories', '工具和配件', [['Makeup Brushes', '化妆刷'], ['Mirrors', '化妆镜']]],
+  ]],
+  ['Handmade', '手工制品', [
+    ['Jewelry', '首饰', [['Necklaces', '项链'], ['Rings', '戒指']]],
+    ['Home Decor', '家居装饰', [['Candles', '蜡烛']]],
+  ]],
+  ['Musical Instruments', '乐器', [
+    ['Guitars', '吉他', [['Electric Guitars', '电吉他'], ['Acoustic Guitars', '原声吉他']]],
+    ['Keyboards', '键盘乐器', [['Pianos', '钢琴'], ['Synthesizers', '合成器']]],
+  ]],
+  ['Automotive', '汽车用品', [
+    ['Interior Accessories', '内饰配件', [['Seat Covers', '座套'], ['Floor Mats', '脚垫']]],
+    ['Tools & Equipment', '工具与设备', [['Jump Starters', '应急启动电源'], ['Tire Inflators', '充气泵']]],
+  ]],
+  ['Toys & Games', '玩具和游戏', [
+    ['Puzzles', '拼图', [['Jigsaw Puzzles', '拼图板'], ['Brain Teasers', '益智玩具']]],
+    ['Building Toys', '积木', [['Building Sets', '积木套装']]],
+  ]],
+  ['Baby', '婴儿用品', [
+    ['Feeding', '喂养', [['Bottles', '奶瓶'], ['Breast Pumps', '吸奶器']]],
+    ['Diapering', '尿布', [['Diapers', '纸尿裤'], ['Wipes', '湿巾']]],
+  ]],
+];
+
+const NODE = {}, PARENT = {}, LEAVES = {}, ALL_LEAVES = [], ORDER = [];
+function build(raw, prefix){
+  return raw.map(([en, cn, kids], i) => {
+    const id = prefix ? `${prefix}-${i}` : `${i}`;
+    return { id, en, cn, children: kids && kids.length ? build(kids, id) : null };
+  });
+}
+function indexTree(nodes, parent){
+  const acc = [];
+  nodes.forEach(n => {
+    NODE[n.id] = n; PARENT[n.id] = parent; ORDER.push(n.id);
+    const leaves = n.children ? indexTree(n.children, n.id) : (ALL_LEAVES.push(n.id), [n.id]);
+    LEAVES[n.id] = leaves;
+    acc.push(...leaves);
+  });
+  return acc;
+}
+const TREE = build(RAW, '');
+indexTree(TREE, null);
+
+function pathIds(id){
+  const out = [];
+  for (let cur = id; cur != null; cur = PARENT[cur]) out.unshift(cur);
+  return out;
+}
+const pathLabel = id => pathIds(id).map(x => NODE[x].cn).join('>>');
+const findByCn = cn => ORDER.find(id => NODE[id].cn === cn);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function nodeLabel(n, level){
+  const cnt = n.children ? n.children.length : 0;
+  return `${level === 0 ? 'Categories' : esc(n.en)}(${cnt})(${esc(n.cn)})`;
+}
+
+let committed = [findByCn('古铜粉'), findByCn('电动面部护理仪')];
+let draft = new Set(committed);
+let activePath = pathIds(findByCn('电动面部护理仪')).slice(0, -1);
+let tab = 'browse';
+let lastPathKey = '';
+let colsScroll = 0;
+
+function triOf(leaves){
+  let n = 0;
+  leaves.forEach(l => { if (draft.has(l)) n++; });
+  return n === 0 ? 'none' : n === leaves.length ? 'all' : 'some';
+}
+function toggleLeaves(leaves){
+  const on = triOf(leaves) !== 'all';
+  leaves.forEach(l => on ? draft.add(l) : draft.delete(l));
+  render();
+}
+function invertAll(){
+  ALL_LEAVES.forEach(l => draft.has(l) ? draft.delete(l) : draft.add(l));
+  render();
+}
+const orderedDraft = () => ALL_LEAVES.filter(l => draft.has(l));
+
+function renderSel(){
+  const box = document.getElementById('selBox');
+  const list = orderedDraft();
+  box.innerHTML = list.length
+    ? list.map(id => `<div class="sel-item"><span class="txt" title="${esc(pathLabel(id))}">${esc(pathLabel(id))}</span><i class="sel-del" data-del="${id}" title="移除">×</i></div>`).join('')
+    : '<div class="sel-empty">暂未选择类目，勾选下方类目即可添加</div>';
+}
+
+function renderCrumb(){
+  const parts = ['<span class="lbl">当前浏览：</span>', `<a data-crumb="-1" class="${activePath.length ? '' : 'cur'}">全部</a>`];
+  activePath.forEach((id, i) => {
+    parts.push('<span class="sep">&gt;&gt;</span>');
+    parts.push(`<a data-crumb="${i}" class="${i === activePath.length - 1 ? 'cur' : ''}">${esc(NODE[id].cn)}</a>`);
+  });
+  parts.push('<span class="tip">勾选即加入已选，无需「累加」</span>');
+  document.getElementById('crumb').innerHTML = parts.join('');
+}
+
+function renderCols(){
+  const wrap = document.getElementById('cols');
+  const scrollTops = [...wrap.querySelectorAll('.col-body')].map(b => b.scrollTop);
+  const cols = [{ items: TREE, level: 0 }];
+  activePath.forEach((id, i) => { if (NODE[id] && NODE[id].children) cols.push({ items: NODE[id].children, level: i + 1 }); });
+  const lvName = ['一级类目', '二级类目', '三级类目', '四级类目', '五级类目'];
+  wrap.innerHTML = cols.map(col => {
+    const head = col.level === 0
+      ? `<div class="col-head" id="level1Head"><span class="cb ${triOf(ALL_LEAVES)}" data-act="all"></span><span class="lbl" data-act="all">全选</span><button type="button" class="btn-text" data-act="invert">反选</button><span class="lvl">${lvName[0]}</span></div>`
+      : '';
+    const rows = col.items.map(n => {
+      const active = activePath[col.level] === n.id ? 'active' : '';
+      return `<div class="row ${active}" data-id="${n.id}" data-level="${col.level}">
+        <span class="cb ${triOf(LEAVES[n.id])}" data-cb="${n.id}"></span>
+        <span class="txt" title="${nodeLabel(n, col.level)}">${nodeLabel(n, col.level)}</span>
+        ${n.children ? '<span class="arrow">›</span>' : ''}
+      </div>`;
+    }).join('');
+    return `<div class="col">${head}<div class="col-body">${rows}</div></div>`;
+  }).join('');
+  wrap.querySelectorAll('.col-body').forEach((b, i) => { if (scrollTops[i] != null) b.scrollTop = scrollTops[i]; });
+  const key = activePath.join('/');
+  if (key !== lastPathKey) {
+    lastPathKey = key;
+    wrap.scrollLeft = wrap.scrollWidth;
+  } else {
+    wrap.style.scrollBehavior = 'auto';
+    wrap.scrollLeft = colsScroll;
+    wrap.style.scrollBehavior = '';
+  }
+}
+
+function renderSearch(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const box = document.getElementById('searchList');
+  const st = box.scrollTop;
+  if (!q) { box.innerHTML = '<div class="search-tip">输入关键词搜索类目</div>'; return; }
+  const results = ORDER.filter(id => NODE[id].cn.toLowerCase().includes(q) || NODE[id].en.toLowerCase().includes(q)).slice(0, 50);
+  box.innerHTML = results.length
+    ? results.map(id => `<div class="row" data-search="${id}"><span class="cb ${triOf(LEAVES[id])}" data-cb="${id}"></span><span class="txt">${esc(pathLabel(id))}</span></div>`).join('')
+    : '<div class="search-tip">未找到匹配的类目</div>';
+  box.scrollTop = st;
+}
+
+function renderForm(){
+  const box = document.getElementById('formTags');
+  box.innerHTML = committed.length
+    ? committed.map(id => `<span class="cat-tag">${esc(pathLabel(id))}</span>`).join('')
+    : '<span class="cat-empty">未选择类目</span>';
+}
+
+function render(){
+  renderSel();
+  if (tab === 'browse') { renderCrumb(); renderCols(); } else renderSearch();
+}
+
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+  document.getElementById('paneBrowse').style.display = t === 'browse' ? '' : 'none';
+  document.getElementById('paneSearch').style.display = t === 'search' ? '' : 'none';
+  render();
+}
+
+function openModal(){
+  draft = new Set(committed);
+  document.getElementById('catOverlay').classList.add('show');
+  render();
+}
+function closeModal(){
+  document.getElementById('catOverlay').classList.remove('show');
+}
+
+document.getElementById('btnOpen').onclick = openModal;
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { closeModal(); toast('已取消，本次勾选不保存'); });
+document.getElementById('btnOk').onclick = () => {
+  committed = orderedDraft();
+  renderForm();
+  closeModal();
+  toast(`已保存 ${committed.length} 个类目`);
+};
+document.querySelectorAll('.tab').forEach(el => el.onclick = () => setTab(el.dataset.tab));
+document.getElementById('searchInput').oninput = renderSearch;
+document.getElementById('cols').addEventListener('scroll', e => { if (tab === 'browse') colsScroll = e.target.scrollLeft; });
+
+document.getElementById('selBox').onclick = e => {
+  const del = e.target.closest('[data-del]');
+  if (del) { draft.delete(del.dataset.del); render(); }
+};
+document.getElementById('crumb').onclick = e => {
+  const a = e.target.closest('[data-crumb]');
+  if (!a || a.classList.contains('cur')) return;
+  activePath = activePath.slice(0, +a.dataset.crumb + 1);
+  render();
+};
+document.getElementById('cols').onclick = e => {
+  const act = e.target.closest('[data-act]');
+  if (act) { act.dataset.act === 'all' ? toggleLeaves(ALL_LEAVES) : invertAll(); return; }
+  const cb = e.target.closest('[data-cb]');
+  if (cb) { toggleLeaves(LEAVES[cb.dataset.cb]); return; }
+  const row = e.target.closest('.row');
+  if (!row) return;
+  const n = NODE[row.dataset.id];
+  if (!n.children) { toggleLeaves(LEAVES[n.id]); return; }
+  activePath = [...activePath.slice(0, +row.dataset.level), n.id];
+  render();
+};
+document.getElementById('searchList').onclick = e => {
+  const row = e.target.closest('[data-search]');
+  if (row) toggleLeaves(LEAVES[row.dataset.search]);
+};
+
+renderForm();
+openModal();
+</script>
+<script src="../../import/prototype-annotate.js"></script>
+<script>
+PrototypeAnnotate.init({
+  storageKey: 'amazon-category-select-annotations',
+  exportTitle: '选择Amazon类目弹窗 · 勾选多选改造原型',
+  exportFilename: '选择Amazon类目弹窗-原型标注.md',
+  scopeLabels: { page: '页面', catOverlay: '选择Amazon类目弹窗' },
+  builtins: [],
+  toast
+});
+</script>
+</body>
+</html>
