@@ -113,7 +113,7 @@
     <h3>本期改造点</h3>
     <div class="note"><div class="no">1</div><div><b>每个类目前加勾选框</b><span>样式参考 Ant Design Cascader 多选。勾选父级 = 选中其下全部末级；子级部分选中时父级显示半选。点勾选框只勾选，点名称才展开下一级。</span></div></div>
     <div class="note"><div class="no">2</div><div><b>一级类目全选 / 反选</b><span>仅一级类目列头提供。全选：勾选全部一级类目，再点一次取消。反选：全部末级类目的勾选状态取反（口径待确认）。</span></div></div>
-    <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区。仅当一级类目整支全选时，已选区只显示这一条一级类目；勾选二级/三级时按实际路径展示到该级（例如勾选蜡烛显示「手工艺品>>家居装饰>>蜡烛」）。点 × 删除该类目及其全部末级。已选区最多显示 4 行，超出区域内滚动。</span></div></div>
+    <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区。点到哪一级，已选区就展示到哪一级：勾选二级只显示到二级，下级未再点击则不展开；勾选三级才显示三级路径。点 × 删除该类目及其全部末级。已选区最多显示 4 行，超出区域内滚动。</span></div></div>
     <div class="note"><div class="no">4</div><div><b>末级名称直接点选</b><span>末级类目没有下一级，点名称等同点勾选框。</span></div></div>
     <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列。不展示「当前浏览」路径。</span></div></div>
     <div class="note"><div class="no">6</div><div><b>类目搜索：全选类目</b><span>搜索结果每条可勾选（规则同类目选择）；「全选类目」勾选当前全部搜索结果，再点一次取消；「清空」取消当前搜索结果中已勾选的类目。勾选结果实时同步到已选区。</span></div></div>
@@ -253,8 +253,10 @@ function nodeLabel(n, level){
   return `${level === 0 ? 'Categories' : esc(n.en)}(${cnt})(${esc(n.cn)})`;
 }
 
-let committed = [findByCn('古铜粉'), findByCn('电动面部护理仪')];
+let committedNodes = [findByCn('古铜粉'), findByCn('电动面部护理仪')];
+let committed = committedNodes.flatMap(id => LEAVES[id]);
 let draft = new Set(committed);
+let selectedNodes = new Set(committedNodes);
 let activePath = pathIds(findByCn('电动面部护理仪')).slice(0, -1);
 let tab = 'browse';
 let lastPathKey = '';
@@ -266,33 +268,70 @@ function triOf(leaves){
   leaves.forEach(l => { if (draft.has(l)) n++; });
   return n === 0 ? 'none' : n === leaves.length ? 'all' : 'some';
 }
-function toggleLeaves(leaves){
-  const on = triOf(leaves) !== 'all';
-  leaves.forEach(l => on ? draft.add(l) : draft.delete(l));
+function isDesc(sid, anc){
+  return sid !== anc && pathIds(sid).includes(anc);
+}
+function displayIds(){
+  return ORDER.filter(id => selectedNodes.has(id));
+}
+function coverUncovered(){
+  const covered = new Set();
+  selectedNodes.forEach(sid => LEAVES[sid].forEach(l => covered.add(l)));
+  ALL_LEAVES.forEach(l => { if (draft.has(l) && !covered.has(l)) selectedNodes.add(l); });
+}
+function pruneDisplay(){
+  [...selectedNodes].forEach(sid => {
+    if (!LEAVES[sid].every(l => draft.has(l))) selectedNodes.delete(sid);
+  });
+  [...selectedNodes].forEach(sid => {
+    if ([...selectedNodes].some(anc => isDesc(sid, anc))) selectedNodes.delete(sid);
+  });
+  coverUncovered();
+}
+function uncheckLeaves(leaves){
+  const ls = new Set(leaves);
+  ls.forEach(l => draft.delete(l));
+  [...selectedNodes].forEach(sid => {
+    if (LEAVES[sid].some(l => ls.has(l))) selectedNodes.delete(sid);
+  });
+  pruneDisplay();
+}
+function toggleNode(id){
+  const leaves = LEAVES[id];
+  if (triOf(leaves) !== 'all') {
+    leaves.forEach(l => draft.add(l));
+    [...selectedNodes].forEach(sid => { if (sid === id || isDesc(sid, id)) selectedNodes.delete(sid); });
+    selectedNodes.add(id);
+    pruneDisplay();
+  } else {
+    uncheckLeaves(leaves);
+  }
+  render();
+}
+function toggleAllL1(){
+  if (triOf(ALL_LEAVES) !== 'all') {
+    ALL_LEAVES.forEach(l => draft.add(l));
+    selectedNodes = new Set(TREE.map(n => n.id));
+  } else {
+    draft.clear();
+    selectedNodes.clear();
+  }
   render();
 }
 function invertAll(){
   ALL_LEAVES.forEach(l => draft.has(l) ? draft.delete(l) : draft.add(l));
+  selectedNodes.clear();
+  TREE.forEach(l1 => {
+    if (triOf(LEAVES[l1.id]) === 'all') selectedNodes.add(l1.id);
+  });
+  pruneDisplay();
   render();
 }
 const orderedDraft = () => ALL_LEAVES.filter(l => draft.has(l));
 
-function mergedTags(leafSet){
-  const out = [];
-  TREE.forEach(l1 => {
-    const leaves = LEAVES[l1.id];
-    let hit = 0;
-    leaves.forEach(l => { if (leafSet.has(l)) hit++; });
-    if (hit === 0) return;
-    if (hit === leaves.length) out.push(l1.id);
-    else leaves.forEach(l => { if (leafSet.has(l)) out.push(l); });
-  });
-  return out;
-}
-
 function renderSel(){
   const box = document.getElementById('selBox');
-  const list = mergedTags(draft);
+  const list = displayIds();
   box.innerHTML = list.length
     ? list.map(id => `<div class="sel-item"><span class="txt" title="${esc(pathLabel(id))}">${esc(pathLabel(id))}</span><i class="sel-del" data-del="${id}" title="移除">×</i></div>`).join('')
     : '<div class="sel-empty">暂未选择类目，勾选下方类目即可添加</div>';
@@ -363,9 +402,8 @@ function renderSearch(){
 
 function renderForm(){
   const box = document.getElementById('formTags');
-  const tags = mergedTags(new Set(committed));
-  box.innerHTML = tags.length
-    ? tags.map(id => `<span class="cat-tag">${esc(pathLabel(id))}</span>`).join('')
+  box.innerHTML = committedNodes.length
+    ? committedNodes.map(id => `<span class="cat-tag">${esc(pathLabel(id))}</span>`).join('')
     : '<span class="cat-empty">未选择类目</span>';
 }
 
@@ -384,6 +422,7 @@ function setTab(t){
 
 function openModal(){
   draft = new Set(committed);
+  selectedNodes = new Set(committedNodes);
   document.getElementById('catOverlay').classList.add('show');
   render();
 }
@@ -394,6 +433,7 @@ function closeModal(){
 document.getElementById('btnOpen').onclick = openModal;
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { closeModal(); toast('已取消，本次勾选不保存'); });
 document.getElementById('btnOk').onclick = () => {
+  committedNodes = displayIds();
   committed = orderedDraft();
   renderForm();
   closeModal();
@@ -402,31 +442,43 @@ document.getElementById('btnOk').onclick = () => {
 document.querySelectorAll('.tab').forEach(el => el.onclick = () => setTab(el.dataset.tab));
 document.getElementById('btnSearch').onclick = doSearch;
 document.getElementById('searchInput').onkeydown = e => { if (e.key === 'Enter') doSearch(); };
-const toggleSearchAll = () => { const leaves = searchLeaves(); if (leaves.length) toggleLeaves(leaves); };
+const toggleSearchAll = () => {
+  const ids = searchResults || [];
+  if (!ids.length) return;
+  const leaves = searchLeaves();
+  if (triOf(leaves) !== 'all') {
+    leaves.forEach(l => draft.add(l));
+    ids.forEach(id => selectedNodes.add(id));
+    pruneDisplay();
+  } else {
+    uncheckLeaves(leaves);
+  }
+  render();
+};
 document.getElementById('searchAllCb').onclick = toggleSearchAll;
 document.getElementById('searchAllLbl').onclick = toggleSearchAll;
-document.getElementById('btnSearchClear').onclick = () => { searchLeaves().forEach(l => draft.delete(l)); render(); };
+document.getElementById('btnSearchClear').onclick = () => { uncheckLeaves(searchLeaves()); render(); };
 document.getElementById('cols').addEventListener('scroll', e => { if (tab === 'browse') colsScroll = e.target.scrollLeft; });
 
 document.getElementById('selBox').onclick = e => {
   const del = e.target.closest('[data-del]');
-  if (del) { LEAVES[del.dataset.del].forEach(l => draft.delete(l)); render(); }
+  if (del) toggleNode(del.dataset.del);
 };
 document.getElementById('cols').onclick = e => {
   const act = e.target.closest('[data-act]');
-  if (act) { act.dataset.act === 'all' ? toggleLeaves(ALL_LEAVES) : invertAll(); return; }
+  if (act) { act.dataset.act === 'all' ? toggleAllL1() : invertAll(); return; }
   const cb = e.target.closest('[data-cb]');
-  if (cb) { toggleLeaves(LEAVES[cb.dataset.cb]); return; }
+  if (cb) { toggleNode(cb.dataset.cb); return; }
   const row = e.target.closest('.row');
   if (!row) return;
   const n = NODE[row.dataset.id];
-  if (!n.children) { toggleLeaves(LEAVES[n.id]); return; }
+  if (!n.children) { toggleNode(n.id); return; }
   activePath = [...activePath.slice(0, +row.dataset.level), n.id];
   render();
 };
 document.getElementById('searchList').onclick = e => {
   const row = e.target.closest('[data-search]');
-  if (row) toggleLeaves(LEAVES[row.dataset.search]);
+  if (row) toggleNode(row.dataset.search);
 };
 
 renderForm();
