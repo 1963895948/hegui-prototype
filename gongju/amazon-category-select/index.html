@@ -113,7 +113,7 @@
     <h3>本期改造点</h3>
     <div class="note"><div class="no">1</div><div><b>每个类目前加勾选框</b><span>样式参考 Ant Design Cascader 多选。勾选父级 = 选中其下全部末级；子级部分选中时父级显示半选。点勾选框只勾选，点名称才展开下一级。</span></div></div>
     <div class="note"><div class="no">2</div><div><b>一级类目全选 / 反选</b><span>仅一级类目列头提供。全选：勾选全部一级类目，再点一次取消。反选：全部末级类目的勾选状态取反（口径待确认）。</span></div></div>
-    <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区。父级全选时已选区只显示该父级（勾选一级类目只显示一级，不再列出其下全部末级）；部分勾选时才展开到更细一级。点 × 删除该类目及其全部末级。已选区最多显示 4 行，超出区域内滚动。</span></div></div>
+    <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区。仅当一级类目整支全选时，已选区只显示这一条一级类目；勾选二级/三级时按实际路径展示到该级（例如勾选蜡烛显示「手工艺品>>家居装饰>>蜡烛」）。点 × 删除该类目及其全部末级。已选区最多显示 4 行，超出区域内滚动。</span></div></div>
     <div class="note"><div class="no">4</div><div><b>末级名称直接点选</b><span>末级类目没有下一级，点名称等同点勾选框。</span></div></div>
     <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列。不展示「当前浏览」路径。</span></div></div>
     <div class="note"><div class="no">6</div><div><b>类目搜索：全选类目</b><span>搜索结果每条可勾选（规则同类目选择）；「全选类目」勾选当前全部搜索结果，再点一次取消；「清空」取消当前搜索结果中已勾选的类目。勾选结果实时同步到已选区。</span></div></div>
@@ -279,16 +279,14 @@ const orderedDraft = () => ALL_LEAVES.filter(l => draft.has(l));
 
 function mergedTags(leafSet){
   const out = [];
-  const walk = nodes => {
-    nodes.forEach(n => {
-      const leaves = LEAVES[n.id];
-      let hit = 0;
-      leaves.forEach(l => { if (leafSet.has(l)) hit++; });
-      if (hit === leaves.length) out.push(n.id);
-      else if (hit > 0 && n.children) walk(n.children);
-    });
-  };
-  walk(TREE);
+  TREE.forEach(l1 => {
+    const leaves = LEAVES[l1.id];
+    let hit = 0;
+    leaves.forEach(l => { if (leafSet.has(l)) hit++; });
+    if (hit === 0) return;
+    if (hit === leaves.length) out.push(l1.id);
+    else leaves.forEach(l => { if (leafSet.has(l)) out.push(l); });
+  });
   return out;
 }
 
