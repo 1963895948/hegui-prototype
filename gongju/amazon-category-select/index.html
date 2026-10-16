@@ -54,13 +54,6 @@
   .tab{ padding:8px 0; cursor:pointer; color:var(--text-2); border-bottom:2px solid transparent; margin-bottom:-1px; }
   .tab.active{ color:var(--primary); border-bottom-color:var(--primary); }
 
-  .crumb{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:12px; margin-bottom:10px; min-height:22px; }
-  .crumb .lbl{ color:var(--text-2); }
-  .crumb a{ color:var(--primary); cursor:pointer; }
-  .crumb a.cur{ color:var(--text); cursor:default; }
-  .crumb .sep{ color:var(--text-3); }
-  .crumb .tip{ margin-left:auto; color:var(--text-3); }
-
   .cols{ display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; scroll-behavior:smooth; }
   .col{ width:300px; flex-shrink:0; border:1px solid var(--primary-border); border-radius:2px; display:flex; flex-direction:column; }
   .col-head{ display:flex; align-items:center; gap:8px; height:34px; padding:0 10px; background:#f5f7fa; border-bottom:1px solid var(--border); font-size:12px; }
@@ -122,7 +115,7 @@
     <div class="note"><div class="no">2</div><div><b>一级类目全选 / 反选</b><span>仅一级类目列头提供。全选：勾选全部一级类目，再点一次取消。反选：全部末级类目的勾选状态取反（口径待确认）。</span></div></div>
     <div class="note"><div class="no">3</div><div><b>去掉「累加」按钮</b><span>勾选即加入已选区。父级全选时已选区只显示该父级（勾选一级类目只显示一级，不再列出其下全部末级）；部分勾选时才展开到更细一级。点 × 删除该类目及其全部末级。已选区最多显示 4 行，超出区域内滚动。</span></div></div>
     <div class="note"><div class="no">4</div><div><b>末级名称直接点选</b><span>末级类目没有下一级，点名称等同点勾选框。</span></div></div>
-    <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列；原「已选择」路径改为「当前浏览」路径，点任一级可回退。</span></div></div>
+    <div class="note"><div class="no">5</div><div><b>多级自动横向滚动</b><span>展开新一级时自动滚到最右列。不展示「当前浏览」路径。</span></div></div>
     <div class="note"><div class="no">6</div><div><b>类目搜索：全选类目</b><span>搜索结果每条可勾选（规则同类目选择）；「全选类目」勾选当前全部搜索结果，再点一次取消；「清空」取消当前搜索结果中已勾选的类目。勾选结果实时同步到已选区。</span></div></div>
     <div class="note"><div class="no">7</div><div><b>确定 / 取消</b><span>确定后写回表单，提交展开后的末级类目路径，数据格式与现有一致；取消或关闭不保存本次改动。</span></div></div>
   </div>
@@ -143,7 +136,6 @@
     </div>
 
     <div id="paneBrowse">
-      <div class="crumb" id="crumb"></div>
       <div class="cols" id="cols"></div>
     </div>
     <div id="paneSearch" style="display:none">
@@ -308,16 +300,6 @@ function renderSel(){
     : '<div class="sel-empty">暂未选择类目，勾选下方类目即可添加</div>';
 }
 
-function renderCrumb(){
-  const parts = ['<span class="lbl">当前浏览：</span>', `<a data-crumb="-1" class="${activePath.length ? '' : 'cur'}">全部</a>`];
-  activePath.forEach((id, i) => {
-    parts.push('<span class="sep">&gt;&gt;</span>');
-    parts.push(`<a data-crumb="${i}" class="${i === activePath.length - 1 ? 'cur' : ''}">${esc(NODE[id].cn)}</a>`);
-  });
-  parts.push('<span class="tip">勾选即加入已选，无需「累加」</span>');
-  document.getElementById('crumb').innerHTML = parts.join('');
-}
-
 function renderCols(){
   const wrap = document.getElementById('cols');
   const scrollTops = [...wrap.querySelectorAll('.col-body')].map(b => b.scrollTop);
@@ -391,7 +373,7 @@ function renderForm(){
 
 function render(){
   renderSel();
-  if (tab === 'browse') { renderCrumb(); renderCols(); } else renderSearch();
+  if (tab === 'browse') renderCols(); else renderSearch();
 }
 
 function setTab(t){
@@ -431,12 +413,6 @@ document.getElementById('cols').addEventListener('scroll', e => { if (tab === 'b
 document.getElementById('selBox').onclick = e => {
   const del = e.target.closest('[data-del]');
   if (del) { LEAVES[del.dataset.del].forEach(l => draft.delete(l)); render(); }
-};
-document.getElementById('crumb').onclick = e => {
-  const a = e.target.closest('[data-crumb]');
-  if (!a || a.classList.contains('cur')) return;
-  activePath = activePath.slice(0, +a.dataset.crumb + 1);
-  render();
 };
 document.getElementById('cols').onclick = e => {
   const act = e.target.closest('[data-act]');
