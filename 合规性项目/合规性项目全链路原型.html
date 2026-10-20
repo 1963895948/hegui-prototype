@@ -2134,11 +2134,10 @@
         <div class="form-field">
           <label><span class="req">*</span>审核结果</label>
           <div class="ctl">
-            <select class="sel block" id="batchAuditResult">
-              <option value="">请选择</option>
-              <option value="合规品">合规品</option>
-              <option value="非合规品">非合规品</option>
-            </select>
+            <div class="radio-group" id="batchAuditResult">
+              <label><input type="radio" name="batchAuditResult" value="合规品" /> 合规品</label>
+              <label><input type="radio" name="batchAuditResult" value="非合规品" /> 非合规品</label>
+            </div>
           </div>
         </div>
         <div class="form-field" id="auditComplianceSitesField" hidden>
@@ -4822,7 +4821,7 @@
 
     const batchAuditModal = document.getElementById('batchAuditModal');
     const batchAuditDetail = document.getElementById('batchAuditDetail');
-    const batchAuditResultSel = document.getElementById('batchAuditResult');
+    const batchAuditResultBox = document.getElementById('batchAuditResult');
     const auditRiskSitesField = document.getElementById('auditRiskSitesField');
     const auditComplianceSitesField = document.getElementById('auditComplianceSitesField');
     let auditMode = 'batch';
@@ -4886,7 +4885,12 @@
       return getRowAuditResult(row) === '合规品' && row.dataset.synced !== '1';
     }
     function getBatchAuditResult(){
-      return batchAuditResultSel?.value || '';
+      return batchAuditResultBox?.querySelector('input[name="batchAuditResult"]:checked')?.value || '';
+    }
+    function setBatchAuditResult(value){
+      batchAuditResultBox?.querySelectorAll('input[name="batchAuditResult"]').forEach(r => {
+        r.checked = !!value && r.value === value;
+      });
     }
     function syncAuditRiskSitesField(){
       const show = getBatchAuditResult() === '合规品';
@@ -4909,7 +4913,7 @@
       }
     }
     function resetBatchAuditForm(prefillsSites){
-      if (batchAuditResultSel) batchAuditResultSel.value = '';
+      setBatchAuditResult('');
       if (batchAuditDetail) batchAuditDetail.value = '';
       auditCertRows = [];
       auditSites = prefillsSites instanceof Set ? new Set(prefillsSites) : new Set();
@@ -4917,7 +4921,7 @@
       renderAuditSitePicked();
       syncAuditRiskSitesField();
     }
-    batchAuditResultSel?.addEventListener('change', syncAuditRiskSitesField);
+    batchAuditResultBox?.addEventListener('change', syncAuditRiskSitesField);
     function openBatchAuditModal(mode = 'batch', row = null, source = 'detect'){
       if (mode === 'single' && row && !canAuditRow(row)) {
         showWarnToast('仅系统检测结果为合规品且待审核的记录可审核');
@@ -4970,7 +4974,7 @@
       const result = getBatchAuditResult();
       if (!result) {
         showToast('请选择审核结果');
-        batchAuditResultSel?.focus();
+        batchAuditResultBox?.querySelector('input[name="batchAuditResult"]')?.focus();
         return;
       }
       if (result === '合规品') {
