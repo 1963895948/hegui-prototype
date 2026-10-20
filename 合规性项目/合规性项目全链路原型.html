@@ -2149,7 +2149,7 @@
           </div>
         </div>
         <div class="form-field audit-cert-field" id="auditRiskSitesField" hidden>
-          <label><span class="req">*</span>所需相关认证</label>
+          <label>所需相关认证</label>
           <div class="ctl">
             <table class="audit-cert-table" id="auditCertTable">
               <thead>
@@ -4979,10 +4979,11 @@
           document.getElementById('openAuditSiteModal')?.focus();
           return;
         }
-        auditCertRows = collectAuditCertRows();
+        auditCertRows = collectAuditCertRows().filter(r => r.cert || (r.countries && r.countries.length));
+        // 非必填：允许全部为空；若填了某一行则须认证+国家都完整
         const invalid = auditCertRows.some(r => !r.cert || !(r.countries && r.countries.length));
-        if (!auditCertRows.length || invalid) {
-          showToast('请先选择所需认证，再多选对应国家');
+        if (invalid) {
+          showToast('若填写认证，请同时选择产品认证与国家');
           return;
         }
       }
@@ -4993,8 +4994,11 @@
           : getDetectRowCbs().filter(cb => cb.checked).length;
       }
       const label = auditMode === 'single' ? (auditSingleSku || '当前记录') : `${n} 条`;
+      const certTip = auditCertRows.length
+        ? `；认证：${auditCertRows.map(r => `${r.cert}（${r.countries.join('、')}）`).join('；')}`
+        : '';
       const siteTip = result === '合规品'
-        ? `，合规站点：${[...auditSites].sort().map(formatLabel).join('、')}；认证：${auditCertRows.map(r => `${r.cert}（${r.countries.join('、')}）`).join('；')}`
+        ? `，合规站点：${[...auditSites].sort().map(formatLabel).join('、')}${certTip}`
         : '';
       closeBatchAuditModal();
       showToast(`已对 ${label} 审核为「${result}」${siteTip}`);
