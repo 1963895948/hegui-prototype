@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高危品管理 - 交互原型 | 风控系统</title>
+  <style>
+    :root {
+      --bg: #f0f2f5; --border: #e8e8e8; --border-light: #f0f0f0;
+      --text: #262626; --text-2: #595959; --text-3: #8c8c8c;
+      --primary: #1890ff; --primary-hover: #40a9ff;
+      --success: #52c41a; --danger: #ff4d4f; --warning: #faad14;
+      --sidebar: #001529; --radius: 4px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; min-height: 100vh; }
+    a { color: var(--primary); text-decoration: none; } a:hover { color: var(--primary-hover); }
+
+    .shell { display: flex; min-height: 100vh; }
+    /* 对齐风控系统 TRO 管理：左侧文字菜单 + 可展开父级 */
+    .sidebar {
+      width: 200px; flex-shrink: 0; background: #fff; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: auto;
+    }
+    .menu { padding: 8px 0 16px; }
+    .menu-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; color: var(--text); cursor: default; user-select: none;
+    }
+    .menu-item .ico {
+      width: 18px; height: 18px; border-radius: 3px; background: #f0f0f0;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--text-3); flex-shrink: 0;
+    }
+    .menu-group-hd {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; color: var(--text); cursor: pointer; font-weight: 500;
+    }
+    .menu-group-hd:hover { background: #fafafa; }
+    .menu-group-hd .arrow { margin-left: auto; color: var(--text-3); font-size: 10px; }
+    .menu-group-hd.open .arrow { transform: rotate(0); }
+    .menu-sub { display: none; }
+    .menu-group.open .menu-sub { display: block; }
+    .menu-sub-item {
+      display: block; padding: 9px 16px 9px 42px; color: var(--text-2); cursor: pointer;
+    }
+    .menu-sub-item:hover { color: var(--primary); background: #f5f5f5; }
+    .menu-sub-item.active {
+      color: var(--primary); background: #e6f7ff; font-weight: 500;
+    }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 100vh; }
+    .topbar { height: 48px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; }
+    .sys-name { font-weight: 600; font-size: 15px; color: var(--primary); }
+    .top-tabs { display: flex; gap: 2px; margin-left: 16px; flex: 1; overflow: auto; }
+    .top-tab {
+      padding: 6px 14px; border-radius: 4px 4px 0 0; color: var(--text-2); cursor: pointer;
+      border: 1px solid transparent; white-space: nowrap; background: transparent;
+    }
+    .top-tab.active { color: var(--primary); background: #e6f7ff; border-color: #91d5ff; font-weight: 500; }
+    .user { color: var(--text-2); margin-left: auto; white-space: nowrap; }
+    .content { flex: 1; padding: 12px 16px 32px; min-width: 0; overflow: auto; }
+
+    .note { background: #fffbe6; border: 1px solid #ffe58f; border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px; color: #614700; font-size: 12px; }
+    .note a { margin-right: 8px; }
+    .note strong { color: #ad6800; }
+
+    .mod-panel { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px 16px; display: none; }
+    .mod-panel.active { display: block; }
+    .page-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+
+    .filter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px; margin-bottom: 12px; }
+    @media (max-width: 1100px) { .filter { grid-template-columns: repeat(2, 1fr); } }
+    .field label { display: block; color: var(--text-2); margin-bottom: 4px; font-size: 12px; }
+    .field input, .field select, .field textarea {
+      width: 100%; height: 32px; padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--radius); font: inherit; background: #fff;
+    }
+    .field textarea { height: auto; min-height: 72px; padding: 8px 10px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,.15); }
+    .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
+
+    .btn { height: 32px; padding: 0 14px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; cursor: pointer; font: inherit; color: var(--text); display: inline-flex; align-items: center; gap: 4px; }
+    .btn:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+    .btn-success { background: #52c41a; border-color: #52c41a; color: #fff; }
+    .btn-success:hover { background: #73d13d; color: #fff; }
+    .btn-danger { background: #ff4d4f; border-color: #ff4d4f; color: #fff; }
+    .btn-danger:hover { background: #ff7875; color: #fff; }
+    .btn-warn { background: #faad14; border-color: #faad14; color: #fff; }
+    .btn-ghost { background: transparent; border: none; font-size: 18px; line-height: 1; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; align-items: center; }
+    .toolbar .spacer { flex: 1; }
+    .meta-count { color: var(--text-3); font-size: 12px; }
+    .hint { color: var(--text-3); font-size: 12px; }
+
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+    table.data { width: 100%; border-collapse: collapse; min-width: 860px; }
+    table.data th, table.data td { border-bottom: 1px solid var(--border-light); padding: 10px 12px; text-align: left; vertical-align: middle; }
+    table.data th { background: #fafafa; color: var(--text-2); font-weight: 500; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+    table.data tr:hover td { background: #fafafa; }
+    .thumb { width: 48px; height: 48px; border-radius: 4px; background: linear-gradient(135deg, #e6f7ff, #f9f0ff); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 11px; }
+    .tag { display: inline-block; padding: 0 7px; height: 22px; line-height: 20px; border-radius: 4px; font-size: 12px; border: 1px solid transparent; }
+    .tag-red { color: #cf1322; background: #fff1f0; border-color: #ffa39e; }
+    .tag-orange { color: #d46b08; background: #fff7e6; border-color: #ffd591; }
+    .tag-blue { color: #096dd9; background: #e6f7ff; border-color: #91d5ff; }
+    .tag-green { color: #389e0d; background: #f6ffed; border-color: #b7eb8f; }
+    .tag-gray { color: #595959; background: #fafafa; border-color: #d9d9d9; }
+    .link-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ops a { margin-right: 10px; cursor: pointer; }
+    .empty { text-align: center; padding: 48px 16px; color: var(--text-3); }
+    .pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; color: var(--text-2); }
+    .threshold-tip { display: inline-flex; align-items: center; gap: 6px; background: #e6f7ff; border: 1px solid #91d5ff; color: #096dd9; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+
+    /* 回扫：以原图为维度（对齐 TRO 回扫结果） */
+    .rescan-row {
+      display: grid; grid-template-columns: 240px 1fr; gap: 12px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px; margin-bottom: 12px; background: #fff;
+    }
+    @media (max-width: 900px) { .rescan-row { grid-template-columns: 1fr; } }
+    .src-card {
+      border: 1px solid var(--border-light); border-radius: var(--radius);
+      padding: 10px; background: #fafafa;
+    }
+    .src-card .src-img {
+      width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff1f0, #fff7e6);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-3); border: 1px solid var(--border); font-size: 12px;
+      position: relative; overflow: hidden;
+    }
+    .src-card .badge { position: absolute; top: 6px; left: 6px; }
+    .src-meta { font-size: 12px; color: var(--text-2); line-height: 1.7; }
+    .src-meta b { color: var(--text); font-weight: 500; }
+    .match-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; color: var(--text-2); font-size: 12px;
+    }
+    .match-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
+    }
+    .match-card {
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; background: #fff;
+    }
+    .match-card.risk { border-color: #ffa39e; background: #fffafa; }
+    .match-card.safe { border-color: #b7eb8f; background: #f6ffed; }
+    .match-card .m-img {
+      width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 6px;
+      background: linear-gradient(135deg, #e6f7ff, #f0f5ff);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-3); font-size: 11px; border: 1px solid var(--border-light);
+    }
+    .match-card .sim { font-weight: 600; color: var(--danger); font-size: 12px; }
+    .match-card .sim.mid { color: var(--warning); }
+    .match-card .sku { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+    .match-card .title {
+      font-size: 12px; color: var(--text-2); margin-top: 2px; min-height: 36px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .match-card .check { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 12px; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 8px; width: 560px; max-width: 96vw; max-height: 90vh; overflow: auto; box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+    .modal-hd { padding: 14px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; }
+    .modal-bd { padding: 16px 20px; }
+    .modal-ft { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: #fff; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .span2 { grid-column: 1 / -1; }
+    .req::before { content: "*"; color: var(--danger); margin-right: 2px; }
+    .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1f1f1f; color: #fff; padding: 10px 18px; border-radius: 6px; z-index: 200; opacity: 0; transition: .25s; pointer-events: none; }
+    .toast.show { opacity: 1; top: 36px; }
+
+    /* Amazon 类目选择（对齐既有弹窗原型） */
+    .cat-pick { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .cat-tags { display:flex; flex-wrap:wrap; gap:6px; min-height:24px; align-items:center; }
+    .cat-tag { background:#f4f4f5; border:1px solid #e9e9eb; border-radius:4px; padding:2px 8px; font-size:12px; color:var(--text-2); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cat-empty { color:var(--text-3); font-size:12px; }
+    .cat-pick-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn-text { border:none; background:none; color:var(--primary); padding:0; height:auto; cursor:pointer; font:inherit; font-size:12px; }
+    .btn-text:hover { color:var(--primary-hover); }
+    .overlay.cat-overlay { z-index:150; }
+    .cat-modal { background:#fff; border-radius:8px; width:1000px; max-width:96vw; max-height:94vh; overflow:auto; padding:16px 20px 18px; position:relative; box-shadow:0 8px 28px rgba(0,0,0,.15); }
+    .cat-modal-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .cat-modal-title { font-size:15px; font-weight:600; flex:1; }
+    .cat-modal-head .head-acts { display:flex; gap:8px; align-items:center; }
+    .cat-preview { color:var(--text-2); font-size:12px; margin-bottom:10px; }
+    .cat-sel-box { max-height:120px; overflow-y:auto; margin-bottom:12px; padding-right:4px; }
+    .cat-sel-item { display:flex; align-items:center; height:30px; padding:0 10px; margin-bottom:6px; border-radius:4px;
+      background:#e6f7ff; border:1px solid #91d5ff; color:var(--primary); font-size:12px; }
+    .cat-sel-item .txt { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cat-sel-del { width:14px; height:14px; border-radius:50%; border:1px solid var(--danger); color:var(--danger); font-size:11px; line-height:12px;
+      text-align:center; cursor:pointer; flex-shrink:0; font-style:normal; }
+    .cat-sel-del:hover { background:var(--danger); color:#fff; }
+    .cat-sel-empty { color:var(--text-3); font-size:12px; padding:6px 0; }
+    .cat-tabs { display:flex; gap:28px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+    .cat-tab { padding:8px 0; cursor:pointer; color:var(--text-2); border-bottom:2px solid transparent; margin-bottom:-1px; background:none; border-top:none; border-left:none; border-right:none; font:inherit; }
+    .cat-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:500; }
+    .cat-cols { display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; scroll-behavior:smooth; }
+    .cat-col { width:300px; flex-shrink:0; border:1px solid #91d5ff; border-radius:2px; display:flex; flex-direction:column; }
+    .cat-col-head { display:flex; align-items:center; gap:8px; height:34px; padding:0 10px; background:#f5f7fa; border-bottom:1px solid var(--border); font-size:12px; }
+    .cat-col-head .lbl { cursor:pointer; }
+    .cat-col-head .lvl { margin-left:auto; color:var(--text-3); }
+    .cat-col-body { height:320px; overflow-y:auto; }
+    .cat-row { display:flex; align-items:center; gap:8px; height:31px; padding:0 10px; border-bottom:1px solid #f0f2f5; cursor:pointer; font-size:12px; }
+    .cat-row:hover { background:#f5f7fa; }
+    .cat-row.active { background:#e6f7ff; }
+    .cat-row .txt { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cat-row .arrow { color:var(--text-3); }
+    .cb { width:16px; height:16px; border:1px solid #d9d9d9; border-radius:4px; background:#fff; flex-shrink:0; position:relative; cursor:pointer; transition:.15s; }
+    .cb:hover { border-color:var(--primary); }
+    .cb.all { background:var(--primary); border-color:var(--primary); }
+    .cb.all::after { content:""; position:absolute; left:5px; top:2px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+    .cb.some::after { content:""; position:absolute; left:3px; top:3px; width:8px; height:8px; background:var(--primary); border-radius:1px; }
+    .cat-search-bar { display:flex; margin-bottom:10px; }
+    .cat-search-input { width:260px; height:32px; border:1px solid var(--border); border-right:none; border-radius:4px 0 0 4px; padding:0 10px; font:inherit; }
+    .cat-search-input:focus { outline:none; border-color:var(--primary); }
+    .cat-search-bar .btn { border-radius:0 4px 4px 0; }
+    .cat-search-head { display:flex; align-items:center; gap:8px; height:32px; margin-bottom:6px; font-size:12px; }
+    .cat-search-head .lbl { cursor:pointer; }
+    .cat-search-head .btn { margin-left:auto; height:26px; padding:0 12px; font-size:12px; }
+    .cat-search-head .btn:disabled { color:#c0c4cc; border-color:#ebeef5; background:#f5f7fa; cursor:not-allowed; }
+    .cat-search-list { border:1px solid #91d5ff; height:300px; overflow-y:auto; }
+    .cat-search-tip { color:var(--text-3); font-size:12px; padding:12px; }
+    .cat-modal-foot { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" aria-label="风控系统菜单">
+    <div class="menu">
+      <div class="menu-item"><span class="ico">审</span>新品风险审核</div>
+      <div class="menu-group open" id="menuBanSale">
+        <div class="menu-group-hd open">
+          <span class="ico" style="background:#fff1f0;color:#cf1322;">禁</span>禁售品管理
+          <span class="arrow">▼</span>
+        </div>
+        <div class="menu-sub">
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁售品检测</div>
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁售品回扫</div>
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁售品管理</div>
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁售知识库</div>
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁售产品提报</div>
+          <div class="menu-sub-item" title="现有菜单，本原型不演示">禁用词管理</div>
+          <div class="menu-sub-item active" data-tab="data">高危品数据</div>
+          <div class="menu-sub-item" data-tab="rescan">回扫审核结果</div>
+        </div>
+      </div>
+      <div class="menu-item"><span class="ico">合</span>合规管理</div>
+      <div class="menu-item"><span class="ico">专</span>专利管理</div>
+      <div class="menu-item"><span class="ico">版</span>版权管理</div>
+      <div class="menu-item"><span class="ico">刊</span>刊登队列管理</div>
+      <div class="menu-item"><span class="ico">题</span>问题品处理</div>
+      <div class="menu-item"><span class="ico">词</span>负向及禁用词清单</div>
+      <div class="menu-item"><span class="ico">T</span>TRO管理</div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="sys-name">风控系统</div>
+      <div class="top-tabs" id="topTabs">
+        <div class="top-tab active" data-tab="data">高危品数据</div>
+      </div>
+      <div class="user">原型演示账号</div>
+    </header>
+
+    <div class="content">
+      <div class="note">
+        <strong>说明：</strong>本原型挂在<strong>禁售品管理</strong>下。「高危品数据」「回扫审核结果」为新增菜单；其余禁售子菜单为现有能力示意。高危品 = 挂过店 / 易导致店铺停用；SKU / 提报单共用同一套字段与产品库查询；保存后按<strong>原图</strong>实时回扫（交互参考禁售品回扫 / TRO）。
+      </div>
+
+      <!-- 高危品数据（原存量+增量合并） -->
+      <section class="mod-panel active" id="panel-data">
+        <div class="page-title">高危品数据</div>
+        <div class="filter">
+          <div class="field"><label>SKU</label><input id="data-sku" placeholder="请输入SKU" /></div>
+          <div class="field"><label>提报单</label><input id="data-order" placeholder="请输入提报单号" /></div>
+          <div class="field">
+            <label>禁售主类</label>
+            <select id="data-cat">
+              <option value="">全部</option>
+              <option>吸毒</option><option>武器</option><option>色情</option>
+              <option>冒犯</option><option>非法</option><option>监听</option>
+            </select>
+          </div>
+          <div class="field span2" style="grid-column:1/-1;">
+            <label>类目</label>
+            <div class="cat-pick">
+              <div class="cat-tags" id="filter-cate-tags"><span class="cat-empty">未选择类目（点击选择）</span></div>
+              <div class="cat-pick-actions">
+                <button class="btn" type="button" data-act="open-cate-filter">选择类目</button>
+                <button class="btn-text" type="button" data-act="clear-cate-filter">清空</button>
+              </div>
+            </div>
+          </div>
+          <div class="field filter-actions">
+            <button class="btn btn-primary" type="button" data-act="search-data">搜 索</button>
+            <button class="btn" type="button" data-act="reset-data">重 置</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" type="button" data-act="add-data">+ 新 增</button>
+          <button class="btn" type="button" data-act="export-data">导 出</button>
+          <span class="hint">编号类型可选 SKU 或提报单，查询同一产品库；保存后自动回扫</span>
+          <span class="spacer"></span>
+          <span class="meta-count" id="data-count"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="data-check-all" /></th>
+                <th>标识类型</th>
+                <th>SKU/提报单</th>
+                <th>禁售主类</th>
+                <th>中文名</th>
+                <th>类目</th>
+                <th>图片</th>
+                <th>采购链接</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="data-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="data-pager"></div>
+      </section>
+
+      <!-- 回扫：以原图为维度（左原图 + 右产品库命中，对齐 TRO 回扫） -->
+      <section class="mod-panel" id="panel-rescan">
+        <div class="page-title">回扫审核结果</div>
+        <div class="filter">
+          <div class="field"><label>命中SKU</label><input id="rs-sku" placeholder="请输入SKU" /></div>
+          <div class="field">
+            <label>审核结果</label>
+            <select id="rs-result"><option value="">全部</option><option>待审核</option><option>有风险</option><option>无风险</option></select>
+          </div>
+          <div class="field">
+            <label>原图标识类型</label>
+            <select id="rs-source">
+              <option value="">全部</option>
+              <option value="sku">SKU</option>
+              <option value="order">提报单</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>禁售主类（原图）</label>
+            <select id="rs-cat">
+              <option value="">全部</option>
+              <option>吸毒</option><option>武器</option><option>色情</option>
+              <option>冒犯</option><option>非法</option><option>监听</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>相似度</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input id="rs-sim-min" type="number" min="0" max="1" step="0.01" value="0.85" placeholder="最小" style="flex:1;" />
+              <span style="color:var(--text-3);">~</span>
+              <input id="rs-sim-max" type="number" min="0" max="1" step="0.01" value="1" placeholder="最大" style="flex:1;" />
+            </div>
+          </div>
+          <div class="field"><label>产品线</label><input id="rs-line" placeholder="请输入产品线" /></div>
+          <div class="field filter-actions">
+            <button class="btn btn-primary" type="button" data-act="search-rs">搜 索</button>
+            <button class="btn" type="button" data-act="reset-rs">重 置</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-success" type="button" data-act="batch-safe">批量无风险</button>
+          <button class="btn btn-danger" type="button" data-act="batch-risk">批量有风险</button>
+          <button class="btn" type="button" data-act="batch-sku">批量提取SKU</button>
+          <button class="btn" type="button" data-act="rs-stat">审核统计</button>
+          <button class="btn" type="button" data-act="rs-log">操作日志</button>
+          <span class="spacer"></span>
+          <span class="threshold-tip">以原图为维度 · 存量/增量新增后用其图片实时回扫产品库 · 相似度区间筛选</span>
+          <span class="meta-count" id="rs-count"></span>
+        </div>
+        <div id="rs-list"></div>
+        <div class="pager" id="rs-pager"></div>
+      </section>
+    </div><!-- content -->
+  </div><!-- main -->
+</div><!-- shell -->
+
+<!-- 审核统计 -->
+<div class="overlay" id="statOverlay">
+  <div class="modal" style="width:520px;">
+    <div class="modal-hd">
+      <span>审核统计</span>
+      <button class="btn btn-ghost" type="button" data-close-stat>×</button>
+    </div>
+    <div class="modal-bd" id="statBody"></div>
+    <div class="modal-ft">
+      <button class="btn btn-primary" type="button" data-close-stat>关 闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作日志（对齐 TRO 回扫日志） -->
+<div class="overlay" id="logOverlay">
+  <div class="modal" style="width:920px;max-width:96vw;">
+    <div class="modal-hd">
+      <span>操作日志</span>
+      <button class="btn btn-ghost" type="button" data-close-log>×</button>
+    </div>
+    <div class="modal-bd">
+      <div class="filter" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:12px;">
+        <div class="field"><label>SKU</label><input id="log-sku" placeholder="请输入SKU" /></div>
+        <div class="field">
+          <label>操作人</label>
+          <select id="log-user">
+            <option value="">请选择操作人</option>
+            <option>袁效国</option><option>马婷婷</option><option>原型用户</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>操作时间</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input id="log-date-from" type="date" style="flex:1;" />
+            <span style="color:var(--text-3);">→</span>
+            <input id="log-date-to" type="date" style="flex:1;" />
+          </div>
+        </div>
+        <div class="field filter-actions">
+          <button class="btn btn-primary" type="button" data-act="search-log">搜 索</button>
+          <button class="btn" type="button" data-act="reset-log">重 置</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data" style="min-width:0;">
+          <thead>
+            <tr>
+              <th>回扫ID</th>
+              <th>sku</th>
+              <th>操作内容</th>
+              <th>操作人</th>
+              <th>操作时间</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pager" style="margin-top:10px;">
+        <span class="meta-count" id="log-count">共 0 条</span>
+        <span class="hint">20 条/页</span>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn" type="button" data-close-log>关 闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/编辑：存量(批量SKU) or 增量/存量编辑(单条) -->
+<div class="overlay" id="editOverlay">
+  <div class="modal" id="editModal" style="width:920px;max-width:96vw;">
+    <div class="modal-hd">
+      <span id="editTitle">新增</span>
+      <button class="btn btn-ghost" type="button" data-close-edit>×</button>
+    </div>
+    <div class="modal-bd">
+      <!-- 批量新增：粘贴编号 → 下方可编辑列表 -->
+      <div id="edit-batch" style="display:none;">
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div class="field">
+            <label class="req">标识类型</label>
+            <select id="batch-idtype">
+              <option value="sku">SKU</option>
+              <option value="order">提报单</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>统一设置禁售主类（可选）</label>
+            <select id="batch-cat-all">
+              <option value="">不统一设置</option>
+              <option>吸毒</option><option>武器</option><option>色情</option>
+              <option>冒犯</option><option>非法</option><option>监听</option>
+            </select>
+          </div>
+          <div class="field span2">
+            <label class="req" id="batch-code-label">SKU（支持批量）</label>
+            <textarea id="batch-skus" rows="3" placeholder="粘贴多个编号，支持换行 / 逗号 / 空格分隔&#10;示例：14334713&#10;10086001,10086002"></textarea>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" type="button" data-act="parse-batch">解析并带出</button>
+              <span class="hint">SKU/提报单均查同一产品库，自动带出中文名、类目、采购链接、主图；下列表可改</span>
+            </div>
+            <div class="hint" id="batch-status" style="margin-top:6px;display:none;"></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" style="min-width:0;">
+            <thead>
+              <tr>
+                <th style="width:120px;" id="batch-th-code">SKU</th>
+                <th style="width:90px;">图片（系统带出）</th>
+                <th>中文名</th>
+                <th style="width:120px;">类目</th>
+                <th style="width:160px;">采购链接</th>
+                <th style="width:110px;">禁售主类</th>
+                <th style="width:70px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="batch-tbody"></tbody>
+          </table>
+        </div>
+        <div class="meta-count" id="batch-count" style="margin-top:8px;">共 0 条待新增</div>
+      </div>
+
+      <!-- 编辑单条 -->
+      <div id="edit-single" class="form-grid">
+        <div class="field">
+          <label class="req">标识类型</label>
+          <select id="edit-idtype">
+            <option value="sku">SKU</option>
+            <option value="order">提报单</option>
+          </select>
+        </div>
+        <div class="field" id="edit-key-field">
+          <label class="req" id="edit-key-label">SKU/提报单</label>
+          <input id="edit-key" />
+          <div class="hint" id="edit-sku-hint" style="margin-top:4px;">输入编号后自动从产品库带出信息（含主图），可修改</div>
+          <div class="hint" id="edit-sku-status" style="margin-top:4px;display:none;"></div>
+        </div>
+        <div class="field">
+          <label class="req">禁售主类</label>
+          <select id="edit-cat">
+            <option>吸毒</option><option>武器</option><option>色情</option>
+            <option>冒犯</option><option>非法</option><option>监听</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label class="req">中文名</label>
+          <input id="edit-name" placeholder="请输入中文名" />
+        </div>
+        <div class="field span2">
+          <label>类目</label>
+          <div class="cat-pick">
+            <div class="cat-tags" id="edit-cate-tags"><span class="cat-empty">未选择类目</span></div>
+            <div class="cat-pick-actions">
+              <button class="btn" type="button" data-act="open-cate-edit">选择类目</button>
+              <button class="btn-text" type="button" data-act="clear-cate-edit">清空</button>
+            </div>
+            <input type="hidden" id="edit-cate" value="" />
+          </div>
+        </div>
+        <div class="field">
+          <label>采购链接</label>
+          <input id="edit-link" placeholder="https://" />
+        </div>
+        <div class="field span2">
+          <label class="req">图片</label>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="thumb" id="edit-thumb" style="width:72px;height:72px;">预览</div>
+            <button class="btn" type="button" data-act="upload-img">更换图片</button>
+            <span class="hint" id="edit-img-hint">图片由系统带出，可更换；保存后自动实时回扫</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn" type="button" data-close-edit>取 消</button>
+      <button class="btn btn-primary" type="button" data-act="save-edit">确 定</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 选择 Amazon 类目 -->
+<div class="overlay cat-overlay" id="cateOverlay">
+  <div class="cat-modal" id="cateModal">
+    <div class="cat-modal-head">
+      <div class="cat-modal-title">选择Amazon类目</div>
+      <div class="head-acts">
+        <button type="button" class="btn" data-act="cate-clear-all">一键清空</button>
+        <button type="button" class="btn" data-act="cate-cancel">取消</button>
+        <button type="button" class="btn btn-primary" data-act="cate-ok">确定</button>
+      </div>
+      <button class="btn btn-ghost" type="button" data-act="cate-cancel" title="关闭">×</button>
+    </div>
+    <div class="cat-preview" id="catePreview">当前预览：全部类目</div>
+    <div class="cat-sel-box" id="cateSelBox"></div>
+    <div class="cat-tabs">
+      <button type="button" class="cat-tab active" data-cate-tab="browse">类目选择</button>
+      <button type="button" class="cat-tab" data-cate-tab="search">类目搜索</button>
+    </div>
+    <div id="catePaneBrowse">
+      <div class="cat-cols" id="cateCols"></div>
+    </div>
+    <div id="catePaneSearch" style="display:none;">
+      <div class="cat-search-bar">
+        <input class="cat-search-input" id="cateSearchInput" placeholder="输入中文或英文关键词，如：面部、Spa" />
+        <button type="button" class="btn btn-primary" data-act="cate-search">搜索</button>
+      </div>
+      <div class="cat-search-head">
+        <span class="cb none" id="cateSearchAllCb"></span>
+        <span class="lbl" id="cateSearchAllLbl">全选类目</span>
+        <button type="button" class="btn" id="cateSearchClear" disabled data-act="cate-search-clear">清空</button>
+      </div>
+      <div class="cat-search-list" id="cateSearchList"></div>
+    </div>
+    <div class="cat-modal-foot">
+      <button type="button" class="btn" data-act="cate-cancel">取消</button>
+      <button type="button" class="btn btn-primary" data-act="cate-ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const CATS = ["吸毒", "武器", "色情", "冒犯", "非法", "监听"];
+  const LINES = ["泛铺", "精品", "综合平台海外仓", "半托管"];
+  const PLATS = ["Amazon US", "Amazon UK", "Amazon DE", "Walmart", "全平台站点"];
+  const LVS = ["高", "中", "低"];
+
+  function toast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._tm);
+    toast._tm = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+  function catTag(c) {
+    const map = { 吸毒: "tag-red", 武器: "tag-red", 色情: "tag-orange", 冒犯: "tag-orange", 非法: "tag-red", 监听: "tag-blue" };
+    return `<span class="tag ${map[c] || "tag-gray"}">${c}</span>`;
+  }
+  function riskTag(lv) {
+    const map = { 高: "tag-red", 中: "tag-orange", 低: "tag-blue" };
+    return `<span class="tag ${map[lv] || "tag-gray"}">${lv}</span>`;
+  }
+  function thumb(t) { return `<div class="thumb">${(t || "图").slice(0, 2)}</div>`; }
+
+  // 原型：模拟产品库，按编号（SKU/提报单）查询带出（正式对接同一产品库接口）
+  const skuCatalog = {
+    "13430831": { name: "登山手杖伸缩三节碎砖甩棍橡胶手柄", cate: "家居、厨具、家装>>家具>>客厅家具", link: "https://1688.com/offer/s1", img: "登山" },
+    "14334713": { name: "鱼缸玻璃进出水管", cate: "家居、厨具、家装>>厨房与餐厅>>炊具", link: "https://1688.com/offer/s2", img: "水管" },
+    "12921582": { name: "调教束缚反手捆绑手颈套", cate: "美容和个人护理>>彩妆>>口红", link: "https://1688.com/offer/s3", img: "成人" },
+    "66018821": { name: "迷你摄像头隐蔽录音笔二合一", cate: "办公用品>>办公电子>>打印机", link: "https://1688.com/offer/s4", img: "摄像" },
+    "44887766": { name: "敏感政治图案印花T恤", cate: "手工制品>>首饰>>项链", link: "https://1688.com/offer/s5", img: "印花" },
+    "33776655": { name: "仿真证件外壳套装", cate: "办公用品>>办公耗材>>纸张", link: "https://1688.com/offer/s6", img: "证件" },
+    "10086001": { name: "战术折叠刀不锈钢户外求生刀", cate: "汽车用品>>工具与设备>>应急启动电源", link: "https://1688.com/offer/demo-10086001", img: "刀具" },
+    "10086002": { name: "金属烟斗造型装饰摆件", cate: "手工制品>>家居装饰>>蜡烛", link: "https://1688.com/offer/demo-10086002", img: "烟斗" },
+    "10086003": { name: "超薄磁吸GPS定位追踪器", cate: "办公用品>>办公电子>>计算器", link: "https://1688.com/offer/demo-10086003", img: "定位" },
+    "XB20261027001": { name: "合金弹弓高强度户外弹弓", cate: "玩具和游戏>>积木>>积木套装", link: "https://1688.com/offer/i1", img: "弹弓" },
+    "XB20261025088": { name: "超薄GPS定位器磁吸款", cate: "办公用品>>办公电子>>计算器", link: "https://1688.com/offer/i2", img: "定位" },
+    "XB20261022015": { name: "研磨器金属粉碎器", cate: "家居、厨具、家装>>床上用品>>枕头", link: "https://1688.com/offer/i3", img: "研磨" },
+  };
+
+  // 统一高危品数据：字段通用，仅标识类型名称不同（sku / order）
+  const productData = [
+    { id: 1, idType: "sku", code: "13430831", cat: "武器", name: "登山手杖伸缩三节碎砖甩棍橡胶手柄", cate: "家居、厨具、家装>>家具>>客厅家具", link: "https://1688.com/offer/s1", checked: false, hasImg: true },
+    { id: 2, idType: "sku", code: "14334713", cat: "吸毒", name: "鱼缸玻璃进出水管", cate: "家居、厨具、家装>>厨房与餐厅>>炊具", link: "https://1688.com/offer/s2", checked: false, hasImg: true },
+    { id: 3, idType: "sku", code: "12921582", cat: "色情", name: "调教束缚反手捆绑手颈套", cate: "美容和个人护理>>彩妆>>口红", link: "https://1688.com/offer/s3", checked: false, hasImg: true },
+    { id: 4, idType: "sku", code: "66018821", cat: "监听", name: "迷你摄像头隐蔽录音笔二合一", cate: "办公用品>>办公电子>>打印机", link: "https://1688.com/offer/s4", checked: false, hasImg: true },
+    { id: 5, idType: "order", code: "XB20261027001", cat: "武器", name: "合金弹弓高强度户外弹弓", cate: "玩具和游戏>>积木>>积木套装", link: "https://1688.com/offer/i1", checked: false, hasImg: true },
+    { id: 6, idType: "order", code: "XB20261025088", cat: "监听", name: "超薄GPS定位器磁吸款", cate: "办公用品>>办公电子>>计算器", link: "https://1688.com/offer/i2", checked: false, hasImg: true },
+    { id: 7, idType: "order", code: "XB20261022015", cat: "吸毒", name: "研磨器金属粉碎器", cate: "家居、厨具、家装>>床上用品>>枕头", link: "https://1688.com/offer/i3", checked: false, hasImg: true },
+    { id: 8, idType: "sku", code: "44887766", cat: "冒犯", name: "敏感政治图案印花T恤", cate: "手工制品>>首饰>>项链", link: "https://1688.com/offer/s5", checked: false, hasImg: true },
+  ];
+  function idTypeLabel(t) { return t === "order" ? "提报单" : "SKU"; }
+
+  function buildMatches(seed, n) {
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const sim = +(0.85 + (seed * 7 + i * 13) % 13 / 100).toFixed(5);
+      arr.push({
+        id: `${seed}-${i}`,
+        sim,
+        sku: String(11000000 + seed * 1000 + i * 37),
+        line: LINES[(seed + i) % LINES.length],
+        name: ["相似造型商品样例", "图搜命中近似SKU", "库内同主图变体", "近似品名命中款"][i % 4] + `-${i + 1}`,
+        cate: ["户外/配件", "家居/装饰", "数码/周边", "服装/印花"][i % 4],
+        link: "https://1688.com/offer/match-" + seed + "-" + i,
+        platforms: PLATS[i % PLATS.length],
+        riskLv: LVS[i % 3],
+        status: "待审核",
+        checked: false,
+      });
+    }
+    return arr;
+  }
+
+  // 以原图为维度：每组 = 高危品原图 + 产品库命中
+  const rescanGroups = [
+    {
+      id: 1, idType: "sku", cat: "武器",
+      refKey: "13430831", refName: "登山手杖伸缩三节碎砖甩棍橡胶手柄", refCate: "户外/登山",
+      refLink: "https://1688.com/offer/s1",
+      matches: buildMatches(1, 6),
+    },
+    {
+      id: 2, idType: "sku", cat: "吸毒",
+      refKey: "14334713", refName: "鱼缸玻璃进出水管", refCate: "宠物/水族",
+      refLink: "https://1688.com/offer/s2",
+      matches: buildMatches(2, 5),
+    },
+    {
+      id: 3, idType: "order", cat: "监听",
+      refKey: "XB20261025088", refName: "超薄GPS定位器磁吸款", refCate: "数码/定位",
+      refLink: "https://1688.com/offer/i2",
+      matches: buildMatches(3, 4),
+    },
+  ];
+  rescanGroups[0].matches[0].status = "有风险";
+  rescanGroups[0].matches[0].checked = true;
+
+  const TAB_LABEL = { data: "高危品数据", rescan: "回扫审核结果" };
+
+  function switchTab(key) {
+    document.querySelectorAll(".menu-sub-item").forEach((t) => t.classList.toggle("active", t.dataset.tab === key));
+    document.querySelectorAll(".mod-panel").forEach((p) => p.classList.remove("active"));
+    document.getElementById("panel-" + key).classList.add("active");
+    // 顶部页签（与风控打开页一致）
+    const tabs = document.getElementById("topTabs");
+    let tab = tabs.querySelector(`[data-tab="${key}"]`);
+    if (!tab) {
+      tab = document.createElement("div");
+      tab.className = "top-tab";
+      tab.dataset.tab = key;
+      tab.textContent = TAB_LABEL[key];
+      tabs.appendChild(tab);
+    }
+    tabs.querySelectorAll(".top-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === key));
+  }
+
+  document.querySelectorAll(".menu-sub-item").forEach((el) => {
+    el.addEventListener("click", () => {
+      if (!el.dataset.tab) { toast("现有菜单，本原型仅演示「高危品数据 / 回扫审核结果」"); return; }
+      switchTab(el.dataset.tab);
+    });
+  });
+  document.getElementById("topTabs").addEventListener("click", (e) => {
+    const t = e.target.closest(".top-tab");
+    if (t && t.dataset.tab) switchTab(t.dataset.tab);
+  });
+  document.querySelector("#menuBanSale .menu-group-hd").addEventListener("click", () => {
+    document.getElementById("menuBanSale").classList.toggle("open");
+  });
+
+  function filteredData() {
+    const sku = document.getElementById("data-sku").value.trim();
+    const order = document.getElementById("data-order").value.trim();
+    const cat = document.getElementById("data-cat").value;
+    const cateLabels = filterCateNodes.map(amzPathLabel);
+    return productData.filter((r) => {
+      if (sku) {
+        if (r.idType !== "sku" || !r.code.includes(sku)) return false;
+      }
+      if (order) {
+        if (r.idType !== "order" || !r.code.includes(order)) return false;
+      }
+      if (cat && r.cat !== cat) return false;
+      if (cateLabels.length) {
+        const hit = cateLabels.some((lb) => r.cate === lb || r.cate.includes(lb) || lb.includes(r.cate));
+        if (!hit) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderData() {
+    const list = filteredData();
+    document.getElementById("data-count").textContent = `共 ${list.length} 条`;
+    document.getElementById("data-tbody").innerHTML = list.map((r) => `
+      <tr>
+        <td><input type="checkbox" data-data-id="${r.id}" ${r.checked ? "checked" : ""} /></td>
+        <td><span class="tag ${r.idType === "order" ? "tag-blue" : "tag-gray"}">${idTypeLabel(r.idType)}</span></td>
+        <td><code>${r.code}</code></td>
+        <td>${catTag(r.cat)}</td>
+        <td>${r.name}</td>
+        <td>${r.cate}</td>
+        <td>${thumb(r.cat)}</td>
+        <td class="link-cell"><a href="${r.link}" target="_blank" rel="noopener">${r.link}</a></td>
+        <td class="ops"><a data-edit-data="${r.id}">编辑</a><a data-log-data="${r.id}">日志</a></td>
+      </tr>`).join("") || `<tr><td colspan="9"><div class="empty">暂无数据，请点击「新增」</div></td></tr>`;
+  }
+
+  function filteredRescanGroups() {
+    const sku = document.getElementById("rs-sku").value.trim();
+    const line = document.getElementById("rs-line").value.trim();
+    const source = document.getElementById("rs-source").value;
+    const cat = document.getElementById("rs-cat").value;
+    const simMinRaw = document.getElementById("rs-sim-min").value;
+    const simMaxRaw = document.getElementById("rs-sim-max").value;
+    const simMin = simMinRaw === "" ? 0 : parseFloat(simMinRaw);
+    const simMax = simMaxRaw === "" ? 1 : parseFloat(simMaxRaw);
+    const result = document.getElementById("rs-result").value;
+    return rescanGroups
+      .filter((g) => {
+        if (source && g.idType !== source) return false;
+        if (cat && g.cat !== cat) return false;
+        return true;
+      })
+      .map((g) => {
+        const matches = g.matches.filter((m) => {
+          if (m.sim < simMin || m.sim > simMax) return false;
+          if (sku && !m.sku.includes(sku)) return false;
+          if (line && !m.line.includes(line)) return false;
+          if (result && m.status !== result) return false;
+          return true;
+        });
+        return { ...g, matches };
+      })
+      .filter((g) => g.matches.length > 0);
+  }
+
+  function calcRescanStats() {
+    let total = 0, pending = 0, risk = 0, safe = 0;
+    rescanGroups.forEach((g) => g.matches.forEach((m) => {
+      total++;
+      if (m.status === "有风险") risk++;
+      else if (m.status === "无风险") safe++;
+      else pending++;
+    }));
+    return { groups: rescanGroups.length, total, pending, risk, safe };
+  }
+
+  let logIdSeq = 274320;
+  // 仅记录操作类型=审核 的数据；页面不展示操作类型
+  const opLogs = [
+    { scanId: 274316, sku: "23624434", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274315, sku: "23624370", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274314, sku: "22921255", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274313, sku: "21164371", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274312, sku: "17752036", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274311, sku: "13509742", content: "审核为无风险", user: "袁效国", time: "2026-10-27 17:46:46" },
+    { scanId: 274310, sku: "11006447", content: "审核为有风险", user: "马婷婷", time: "2026-10-27 16:20:11" },
+  ];
+
+  function filteredLogs() {
+    const sku = document.getElementById("log-sku").value.trim();
+    const user = document.getElementById("log-user").value;
+    const from = document.getElementById("log-date-from").value;
+    const to = document.getElementById("log-date-to").value;
+    return opLogs.filter((r) => {
+      if (sku && !String(r.sku).includes(sku)) return false;
+      if (user && r.user !== user) return false;
+      const day = (r.time || "").slice(0, 10);
+      if (from && day < from) return false;
+      if (to && day > to) return false;
+      return true;
+    });
+  }
+
+  function renderLogs() {
+    const list = filteredLogs();
+    document.getElementById("log-count").textContent = `共 ${list.length} 条`;
+    document.getElementById("log-tbody").innerHTML = list.map((r) => `
+      <tr>
+        <td>${r.scanId}</td>
+        <td>${r.sku}</td>
+        <td>${r.content}</td>
+        <td>${r.user}</td>
+        <td style="white-space:nowrap;">${r.time}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="5"><div class="empty">暂无日志</div></td></tr>`;
+  }
+
+  function pushAuditLog({ sku, content, user }) {
+    opLogs.unshift({
+      scanId: ++logIdSeq,
+      sku: sku || "-",
+      content,
+      user: user || "原型用户",
+      time: new Date().toISOString().slice(0, 19).replace("T", " "),
+    });
+  }
+
+  function openStat() {
+    const s = calcRescanStats();
+    document.getElementById("statBody").innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="border:1px solid var(--border);border-radius:6px;padding:14px;">
+          <div class="hint">原图组数</div>
+          <div style="font-size:24px;font-weight:600;margin-top:4px;">${s.groups}</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:6px;padding:14px;">
+          <div class="hint">命中SKU总数</div>
+          <div style="font-size:24px;font-weight:600;margin-top:4px;">${s.total}</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:6px;padding:14px;">
+          <div class="hint">待审核</div>
+          <div style="font-size:24px;font-weight:600;margin-top:4px;color:var(--warning);">${s.pending}</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:6px;padding:14px;">
+          <div class="hint">有风险 / 无风险</div>
+          <div style="font-size:24px;font-weight:600;margin-top:4px;">
+            <span style="color:var(--danger);">${s.risk}</span>
+            <span style="color:var(--text-3);font-weight:400;"> / </span>
+            <span style="color:var(--success);">${s.safe}</span>
+          </div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px;">统计范围为当前全部回扫结果（非筛选后子集）。正式环境可按时间/审核人下钻。</p>
+    `;
+    document.getElementById("statOverlay").classList.add("show");
+  }
+
+  function openLog() {
+    renderLogs();
+    document.getElementById("logOverlay").classList.add("show");
+  }
+
+  function matchStatusClass(st) {
+    if (st === "有风险") return "risk";
+    if (st === "无风险") return "safe";
+    return "";
+  }
+
+  function renderRescan() {
+    const list = filteredRescanGroups();
+    const totalMatch = list.reduce((s, g) => s + g.matches.length, 0);
+    document.getElementById("rs-count").textContent = `共 ${list.length} 组原图 · ${totalMatch} 条命中SKU`;
+    const box = document.getElementById("rs-list");
+    if (!list.length) {
+      box.innerHTML = `<div class="empty">暂无回扫命中；高危品新增后会用原图自动回扫产品库，也可调低相似度阈值</div>`;
+      return;
+    }
+    box.innerHTML = list.map((g) => {
+      const keyLabel = idTypeLabel(g.idType);
+      return `
+      <div class="rescan-row" data-group="${g.id}">
+        <div class="src-card">
+          <div class="src-img">
+            <span class="badge">${catTag(g.cat)}</span>
+            原图示意
+          </div>
+          <div class="src-meta">
+            <div><b>标识类型：</b>${keyLabel}</div>
+            <div><b>${keyLabel}：</b>${g.refKey}</div>
+            <div><b>中文名：</b>${g.refName}</div>
+            <div><b>类目：</b>${g.refCate}</div>
+            <div><b>采购链接：</b><a href="${g.refLink}" target="_blank" rel="noopener">查看</a></div>
+          </div>
+        </div>
+        <div>
+          <div class="match-head">
+            <span>产品库回扫结果（相似度区间内）</span>
+            <span>
+              <button class="btn" type="button" data-select-all="${g.id}">全 选</button>
+              <button class="btn" type="button" data-select-inv="${g.id}">反 选</button>
+            </span>
+          </div>
+          <div class="match-grid">
+            ${g.matches.map((m) => `
+              <div class="match-card ${matchStatusClass(m.status)}" data-match="${m.id}">
+                <div class="m-img">库内图</div>
+                <div class="sim ${m.sim >= 0.9 ? "" : "mid"}">相似度：${m.sim}</div>
+                <div class="sku">SKU：${m.sku}</div>
+                <div style="font-size:12px;color:var(--text-2);">产品线：${m.line}</div>
+                <div class="title" title="${m.name}">${m.name}</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:4px;">类目：${m.cate}</div>
+                <div style="font-size:11px;margin-top:2px;">禁售站点：${m.platforms}</div>
+                <div style="margin-top:4px;">风险等级：${riskTag(m.riskLv)}</div>
+                <div class="check">
+                  <label><input type="checkbox" data-match-check="${g.id}|${m.id}" ${m.checked ? "checked" : ""} /> ${m.status === "待审核" ? "有风险" : m.status}</label>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  let batchRows = [];
+  let editMode = { type: "data", id: null, batch: false };
+
+  function setSkuStatus(ok, text) {
+    const el = document.getElementById("edit-sku-status");
+    el.style.display = text ? "block" : "none";
+    el.style.color = ok ? "#389e0d" : "#cf1322";
+    el.textContent = text || "";
+  }
+
+  function lookupSku(code) {
+    return skuCatalog[code] || null;
+  }
+
+  function fillFromSku(code, { silent } = {}) {
+    const info = lookupSku(code);
+    if (!code) {
+      setSkuStatus(false, "");
+      return false;
+    }
+    if (!info) {
+      setSkuStatus(false, "未查询到该编号，可手工填写下方信息");
+      if (!silent) toast("未查到编号，请手工填写");
+      return false;
+    }
+    document.getElementById("edit-name").value = info.name;
+    document.getElementById("edit-cate").value = info.cate;
+    editCateNodes = amzFindNodesFromCateStr(info.cate);
+    renderCateTags("edit-cate-tags", editCateNodes);
+    document.getElementById("edit-link").value = info.link;
+    document.getElementById("edit-thumb").textContent = info.img;
+    document.getElementById("edit-thumb").dataset.has = "1";
+    setSkuStatus(true, "已从产品库带出（含主图），可修改");
+    if (!silent) toast("已带出产品信息");
+    return true;
+  }
+
+  let skuLookupTimer = null;
+  function onSkuInput() {
+    if (editMode.batch) return;
+    const code = document.getElementById("edit-key").value.trim();
+    clearTimeout(skuLookupTimer);
+    if (!code) {
+      setSkuStatus(false, "");
+      return;
+    }
+    setSkuStatus(true, "查询中…");
+    document.getElementById("edit-sku-status").style.color = "var(--text-3)";
+    skuLookupTimer = setTimeout(() => fillFromSku(code), 350);
+  }
+
+  function parseSkuText(text) {
+    const parts = String(text || "").split(/[\s,，;；|]+/).map((s) => s.trim()).filter(Boolean);
+    return [...new Set(parts)];
+  }
+
+  function syncBatchIdTypeUI() {
+    const idType = document.getElementById("batch-idtype").value;
+    const label = idTypeLabel(idType);
+    document.getElementById("batch-code-label").textContent = label + "（支持批量）";
+    document.getElementById("batch-th-code").textContent = label;
+    document.getElementById("batch-skus").placeholder =
+      "粘贴多个" + label + "，支持换行 / 逗号 / 空格分隔\n示例：14334713\n10086001,10086002";
+  }
+
+  function renderBatchList() {
+    const tb = document.getElementById("batch-tbody");
+    const label = idTypeLabel(document.getElementById("batch-idtype").value);
+    document.getElementById("batch-count").textContent = `共 ${batchRows.length} 条待新增`;
+    if (!batchRows.length) {
+      tb.innerHTML = `<tr><td colspan="7"><div class="empty">粘贴${label}后点击「解析并带出」</div></td></tr>`;
+      return;
+    }
+    tb.innerHTML = batchRows.map((r, idx) => `
+      <tr data-batch-idx="${idx}">
+        <td><code>${r.code}</code>${r.found ? "" : '<div class="hint" style="color:#cf1322;">未命中产品库</div>'}</td>
+        <td>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+            <div class="thumb" style="width:56px;height:56px;">${r.img || "无图"}</div>
+            <a href="javascript:;" data-batch-img="${idx}" style="font-size:12px;">更换</a>
+          </div>
+        </td>
+        <td><input data-batch-field="name" data-batch-idx="${idx}" value="${r.name.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
+        <td><input data-batch-field="cate" data-batch-idx="${idx}" value="${r.cate.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
+        <td><input data-batch-field="link" data-batch-idx="${idx}" value="${r.link.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
+        <td>
+          <select data-batch-field="cat" data-batch-idx="${idx}" style="width:100%;height:28px;border:1px solid var(--border);border-radius:4px;font:inherit;">
+            ${CATS.map((c) => `<option value="${c}" ${c === r.cat ? "selected" : ""}>${c}</option>`).join("")}
+          </select>
+        </td>
+        <td><a href="javascript:;" data-batch-remove="${idx}">移除</a></td>
+      </tr>
+    `).join("");
+  }
+
+  function parseBatchSkus() {
+    const codes = parseSkuText(document.getElementById("batch-skus").value);
+    const label = idTypeLabel(document.getElementById("batch-idtype").value);
+    const status = document.getElementById("batch-status");
+    if (!codes.length) {
+      status.style.display = "block";
+      status.style.color = "#cf1322";
+      status.textContent = "请先粘贴至少一个" + label;
+      return;
+    }
+    const defaultCat = document.getElementById("batch-cat-all").value || CATS[0];
+    let hit = 0;
+    batchRows = codes.map((code) => {
+      const info = lookupSku(code);
+      if (info) hit++;
+      return {
+        code,
+        found: !!info,
+        name: info ? info.name : "",
+        cate: info ? info.cate : "",
+        link: info ? info.link : "",
+        img: info ? info.img : "",
+        hasImg: !!info,
+        cat: defaultCat,
+      };
+    });
+    status.style.display = "block";
+    status.style.color = "#389e0d";
+    status.textContent = `已解析 ${codes.length} 个${label}，产品库命中 ${hit} 个（含主图），可在下列表修改`;
+    renderBatchList();
+    toast(`已带出 ${hit}/${codes.length} 条`);
+  }
+
+  function openEdit(row) {
+    const isBatch = !row;
+    editMode = { type: "data", id: row ? row.id : null, batch: isBatch };
+    batchRows = [];
+    document.getElementById("editTitle").textContent = row ? "编辑高危品" : "新增高危品";
+    document.getElementById("edit-batch").style.display = isBatch ? "block" : "none";
+    document.getElementById("edit-single").style.display = isBatch ? "none" : "grid";
+    document.getElementById("editModal").style.width = isBatch ? "920px" : "640px";
+
+    if (isBatch) {
+      document.getElementById("batch-idtype").value = "sku";
+      document.getElementById("batch-skus").value = "";
+      document.getElementById("batch-cat-all").value = "";
+      document.getElementById("batch-status").style.display = "none";
+      editCateNodes = [];
+      renderCateTags("edit-cate-tags", editCateNodes);
+      syncEditCateHidden();
+      syncBatchIdTypeUI();
+      renderBatchList();
+      document.getElementById("editOverlay").classList.add("show");
+      setTimeout(() => document.getElementById("batch-skus").focus(), 50);
+      return;
+    }
+
+    const label = idTypeLabel(row.idType);
+    document.getElementById("edit-idtype").value = row.idType;
+    document.getElementById("edit-idtype").disabled = true;
+    document.getElementById("edit-key-label").textContent = label;
+    document.getElementById("edit-key").placeholder = "请输入" + label + "，自动带出信息";
+    document.getElementById("edit-cat").value = row.cat;
+    document.getElementById("edit-key").value = row.code;
+    document.getElementById("edit-name").value = row.name;
+    document.getElementById("edit-cate").value = row.cate;
+    editCateNodes = amzFindNodesFromCateStr(row.cate);
+    renderCateTags("edit-cate-tags", editCateNodes);
+    document.getElementById("edit-link").value = row.link;
+    document.getElementById("edit-thumb").textContent = row.hasImg ? (row.cat || "图").slice(0, 2) : "预览";
+    document.getElementById("edit-thumb").dataset.has = row.hasImg ? "1" : "0";
+    setSkuStatus(false, "");
+    document.getElementById("editOverlay").classList.add("show");
+  }
+  function closeEdit() {
+    clearTimeout(skuLookupTimer);
+    document.getElementById("edit-idtype").disabled = false;
+    document.getElementById("editOverlay").classList.remove("show");
+  }
+
+  function addRescanForItem(idType, item, seed) {
+    rescanGroups.unshift({
+      id: seed,
+      idType,
+      cat: item.cat,
+      refKey: item.code,
+      refName: item.name,
+      refCate: item.cate || "-",
+      refLink: item.link || "#",
+      matches: buildMatches(seed % 1000, 4),
+    });
+  }
+
+  function saveEdit() {
+    if (editMode.batch) {
+      const idType = document.getElementById("batch-idtype").value;
+      const label = idTypeLabel(idType);
+      if (!batchRows.length) { toast("请先解析 " + label + " 列表"); return; }
+      const bad = batchRows.find((r) => !r.name.trim());
+      if (bad) { toast(label + " " + bad.code + " 缺少中文名，请补全或移除"); return; }
+      const missImg = batchRows.find((r) => !r.hasImg && !r.img);
+      if (missImg) { toast(label + " " + missImg.code + " 无主图，请更换图片或移除"); return; }
+
+      let base = Date.now();
+      batchRows.slice().reverse().forEach((r, i) => {
+        const id = base + i;
+        const row = {
+          id, idType, code: r.code, cat: r.cat, name: r.name.trim(), cate: r.cate.trim(),
+          link: r.link.trim(), checked: false, hasImg: true,
+        };
+        productData.unshift(row);
+        addRescanForItem(idType, row, id);
+      });
+      renderData();
+      renderRescan();
+      closeEdit();
+      toast(`已新增 ${batchRows.length} 条，并按原图自动回扫`);
+      switchTab("rescan");
+      return;
+    }
+
+    const idType = document.getElementById("edit-idtype").value;
+    const cat = document.getElementById("edit-cat").value;
+    const key = document.getElementById("edit-key").value.trim();
+    const name = document.getElementById("edit-name").value.trim();
+    const cate = document.getElementById("edit-cate").value.trim();
+    const link = document.getElementById("edit-link").value.trim();
+    const hasImg = document.getElementById("edit-thumb").dataset.has === "1";
+    if (!key || !name) { toast("请填写必填项：标识与中文名"); return; }
+    if (!hasImg && !editMode.id) { toast("请确保已带出/更换主图（实时回扫依赖主图）"); return; }
+
+    if (editMode.id) {
+      Object.assign(productData.find((x) => x.id === editMode.id), {
+        idType, code: key, cat, name, cate, link, hasImg: true,
+      });
+      renderData();
+      closeEdit();
+      toast("已保存");
+      return;
+    }
+
+    const id = Date.now();
+    const row = { id, idType, code: key, cat, name, cate, link, checked: false, hasImg: true };
+    productData.unshift(row);
+    addRescanForItem(idType, row, id);
+    renderData();
+    renderRescan();
+    closeEdit();
+    toast("已保存，并用该原图自动回扫产品库");
+    switchTab("rescan");
+  }
+
+  document.body.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-act],[data-edit-data],[data-log-data],[data-close-edit],[data-close-stat],[data-close-log],[data-select-all],[data-select-inv],[data-batch-remove],[data-batch-img]");
+    if (!t) return;
+    if (t.hasAttribute("data-close-edit")) { closeEdit(); return; }
+    if (t.hasAttribute("data-close-stat")) { document.getElementById("statOverlay").classList.remove("show"); return; }
+    if (t.hasAttribute("data-close-log")) { document.getElementById("logOverlay").classList.remove("show"); return; }
+
+    const br = t.getAttribute("data-batch-remove");
+    if (br != null) {
+      batchRows.splice(+br, 1);
+      renderBatchList();
+      return;
+    }
+    const bi = t.getAttribute("data-batch-img");
+    if (bi != null) {
+      const row = batchRows[+bi];
+      if (row) {
+        row.img = "已换";
+        row.hasImg = true;
+        renderBatchList();
+        toast("原型：已更换主图");
+      }
+      return;
+    }
+
+    const act = t.getAttribute("data-act");
+    if (act === "parse-batch") { parseBatchSkus(); return; }
+    if (act === "open-cate-filter") { openCateModal("filter"); return; }
+    if (act === "open-cate-edit") { openCateModal("edit"); return; }
+    if (act === "clear-cate-filter") {
+      filterCateNodes = [];
+      renderCateTags("filter-cate-tags", filterCateNodes);
+      toast("已清空类目筛选");
+      return;
+    }
+    if (act === "clear-cate-edit") {
+      editCateNodes = [];
+      renderCateTags("edit-cate-tags", editCateNodes);
+      syncEditCateHidden();
+      return;
+    }
+    if (act === "cate-cancel") { closeCateModal(); return; }
+    if (act === "cate-ok") { commitCateModal(); return; }
+    if (act === "cate-clear-all") {
+      cateDraft.clear(); cateSelectedNodes.clear(); cateRender(); return;
+    }
+    if (act === "cate-search") { cateDoSearch(); return; }
+    if (act === "cate-search-clear") { cateUncheckLeaves(cateSearchLeaves()); cateRender(); return; }
+    if (act === "search-data" || act === "reset-data") {
+      if (act === "reset-data") {
+        ["data-sku","data-order","data-cat"].forEach((id) => { document.getElementById(id).value = ""; });
+        filterCateNodes = [];
+        renderCateTags("filter-cate-tags", filterCateNodes);
+      }
+      renderData(); toast(act === "reset-data" ? "已重置" : "已搜索"); return;
+    }
+    if (act === "search-rs" || act === "reset-rs") {
+      if (act === "reset-rs") {
+        ["rs-sku","rs-line","rs-source","rs-cat","rs-result"].forEach((id) => { document.getElementById(id).value = ""; });
+        document.getElementById("rs-sim-min").value = "0.85";
+        document.getElementById("rs-sim-max").value = "1";
+      }
+      renderRescan(); toast(act === "reset-rs" ? "已重置" : "已搜索"); return;
+    }
+    if (act === "add-data") { openEdit(null); return; }
+    if (act === "save-edit") { saveEdit(); return; }
+    if (act === "upload-img") {
+      document.getElementById("edit-thumb").textContent = "已传";
+      document.getElementById("edit-thumb").dataset.has = "1";
+      toast("原型：图片已选择");
+      return;
+    }
+    if (act === "export-data") { toast("原型：按当前条件导出"); return; }
+    if (act === "batch-safe" || act === "batch-risk") {
+      const to = act === "batch-safe" ? "无风险" : "有风险";
+      let n = 0;
+      rescanGroups.forEach((g) => g.matches.forEach((m) => {
+        if (m.checked) { m.status = to; n++; }
+      }));
+      renderRescan();
+      if (n) {
+        rescanGroups.forEach((g) => g.matches.forEach((m) => {
+          if (m.checked) pushAuditLog({ sku: m.sku, content: `审核为${to}` });
+        }));
+      }
+      toast(n ? `已将 ${n} 条标为「${to}」` : "请先勾选命中SKU");
+      return;
+    }
+    if (act === "batch-sku") {
+      const skus = [];
+      rescanGroups.forEach((g) => g.matches.forEach((m) => { if (m.checked) skus.push(m.sku); }));
+      if (!skus.length) { toast("请先勾选SKU"); return; }
+      navigator.clipboard?.writeText(skus.join("\n")).catch(() => {});
+      toast(`已提取 ${skus.length} 个SKU`);
+      return;
+    }
+    if (act === "rs-stat") { openStat(); return; }
+    if (act === "rs-log") { openLog(); return; }
+    if (act === "search-log") { renderLogs(); toast("已搜索"); return; }
+    if (act === "reset-log") {
+      ["log-sku", "log-user", "log-date-from", "log-date-to"].forEach((id) => { document.getElementById(id).value = ""; });
+      renderLogs();
+      toast("已重置");
+      return;
+    }
+    const ed = t.getAttribute("data-edit-data");
+    if (ed) { openEdit(productData.find((x) => x.id === +ed)); return; }
+    if (t.hasAttribute("data-log-data")) {
+      toast("原型：查看操作日志");
+      return;
+    }
+    const sa = t.getAttribute("data-select-all");
+    if (sa) {
+      const g = rescanGroups.find((x) => String(x.id) === String(sa));
+      if (g) g.matches.forEach((m) => { m.checked = true; if (m.status === "待审核") m.status = "有风险"; });
+      renderRescan();
+      return;
+    }
+    const si = t.getAttribute("data-select-inv");
+    if (si) {
+      const g = rescanGroups.find((x) => String(x.id) === String(si));
+      if (g) g.matches.forEach((m) => { m.checked = !m.checked; });
+      renderRescan();
+      return;
+    }
+  });
+
+  document.body.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.id === "batch-idtype") {
+      syncBatchIdTypeUI();
+      batchRows = [];
+      document.getElementById("batch-status").style.display = "none";
+      renderBatchList();
+      return;
+    }
+    if (t.id === "batch-cat-all" && t.value) {
+      batchRows.forEach((r) => { r.cat = t.value; });
+      renderBatchList();
+      return;
+    }
+    if (t.matches("[data-batch-field]")) {
+      const idx = +t.dataset.batchIdx;
+      const field = t.dataset.batchField;
+      if (batchRows[idx]) batchRows[idx][field] = t.value;
+      return;
+    }
+    if (t.matches("[data-data-id]")) {
+      const r = productData.find((x) => x.id === +t.dataset.dataId);
+      if (r) r.checked = t.checked;
+    }
+    if (t.matches("[data-match-check]")) {
+      const [gid, mid] = t.dataset.matchCheck.split("|");
+      const g = rescanGroups.find((x) => String(x.id) === String(gid));
+      const m = g && g.matches.find((x) => x.id === mid);
+      if (m) {
+        m.checked = t.checked;
+        if (t.checked && m.status === "待审核") m.status = "有风险";
+        if (!t.checked && m.status === "有风险") m.status = "待审核";
+        renderRescan();
+      }
+    }
+    if (t.id === "data-check-all") {
+      filteredData().forEach((r) => { r.checked = t.checked; });
+      renderData();
+    }
+    if (t.id === "edit-idtype") {
+      const label = idTypeLabel(t.value);
+      document.getElementById("edit-key-label").textContent = label;
+      document.getElementById("edit-key").placeholder = "请输入" + label + "，自动带出信息";
+    }
+  });
+
+  document.getElementById("editOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "editOverlay") closeEdit();
+  });
+  document.getElementById("statOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "statOverlay") document.getElementById("statOverlay").classList.remove("show");
+  });
+  document.getElementById("logOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "logOverlay") document.getElementById("logOverlay").classList.remove("show");
+  });
+
+  const editKeyEl = document.getElementById("edit-key");
+  editKeyEl.addEventListener("input", onSkuInput);
+  editKeyEl.addEventListener("blur", () => {
+    if (editMode.batch) return;
+    const code = editKeyEl.value.trim();
+    if (code) fillFromSku(code, { silent: true });
+  });
+  editKeyEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !editMode.batch) {
+      e.preventDefault();
+      fillFromSku(editKeyEl.value.trim());
+    }
+  });
+  document.getElementById("batch-skus").addEventListener("paste", () => {
+    setTimeout(() => {
+      const codes = parseSkuText(document.getElementById("batch-skus").value);
+      if (codes.length >= 1) parseBatchSkus();
+    }, 0);
+  });
+
+
+  // —— Amazon 类目选择（筛选 / 编辑共用，对齐 amazon-category-select 原型）——
+  const AMZ_RAW = [
+    ['Home & Kitchen', '家居、厨具、家装', [
+      ['Bedding', '床上用品', [['Sheets', '床单'], ['Pillows', '枕头'], ['Blankets', '毯子']]],
+      ['Kitchen & Dining', '厨房与餐厅', [['Cookware', '炊具'], ['Cutlery', '刀具'], ['Bakeware', '烘焙用具']]],
+      ['Furniture', '家具', [['Living Room Furniture', '客厅家具'], ['Bedroom Furniture', '卧室家具']]],
+    ]],
+    ['Office Products', '办公用品', [
+      ['Office Electronics', '办公电子', [['Calculators', '计算器'], ['Printers', '打印机']]],
+      ['Office Supplies', '办公耗材', [['Paper', '纸张'], ['Writing', '书写工具']]],
+    ]],
+    ['Beauty & Personal Care', '美容和个人护理', [
+      ['Makeup', '彩妆', [
+        ['Lips', '唇部', [['Lipstick', '口红'], ['Lip Gloss', '唇彩']]],
+        ['Face', '面部', [['Foundation', '粉底'], ['Blush', '腮红']]],
+      ]],
+      ['Hair Care', '美发护发', [['Shampoo', '洗发水'], ['Conditioner', '护发素']]],
+      ['Skin Care', '身体护理', [['Body', '身体'], ['Face', '面部护肤']]],
+    ]],
+    ['Handmade', '手工制品', [
+      ['Jewelry', '首饰', [['Necklaces', '项链'], ['Rings', '戒指']]],
+      ['Home Decor', '家居装饰', [['Candles', '蜡烛']]],
+    ]],
+    ['Musical Instruments', '乐器', [
+      ['Guitars', '吉他', [['Electric Guitars', '电吉他'], ['Acoustic Guitars', '原声吉他']]],
+    ]],
+    ['Automotive', '汽车用品', [
+      ['Interior Accessories', '内饰配件', [['Seat Covers', '座套'], ['Floor Mats', '脚垫']]],
+      ['Tools & Equipment', '工具与设备', [['Jump Starters', '应急启动电源'], ['Tire Inflators', '充气泵']]],
+    ]],
+    ['Toys & Games', '玩具和游戏', [
+      ['Puzzles', '拼图', [['Jigsaw Puzzles', '拼图板']]],
+      ['Building Toys', '积木', [['Building Sets', '积木套装']]],
+    ]],
+    ['Baby', '婴儿用品', [
+      ['Feeding', '喂养', [['Bottles', '奶瓶'], ['Breast Pumps', '吸奶器']]],
+    ]],
+  ];
+  const AMZ_NODE = {}, AMZ_PARENT = {}, AMZ_LEAVES = {}, AMZ_ALL_LEAVES = [], AMZ_ORDER = [];
+  function amzBuild(raw, prefix) {
+    return raw.map(([en, cn, kids], i) => {
+      const id = prefix ? `${prefix}-${i}` : `${i}`;
+      return { id, en, cn, children: kids && kids.length ? amzBuild(kids, id) : null };
+    });
+  }
+  function amzIndex(nodes, parent) {
+    const acc = [];
+    nodes.forEach((n) => {
+      AMZ_NODE[n.id] = n; AMZ_PARENT[n.id] = parent; AMZ_ORDER.push(n.id);
+      const leaves = n.children ? amzIndex(n.children, n.id) : (AMZ_ALL_LEAVES.push(n.id), [n.id]);
+      AMZ_LEAVES[n.id] = leaves;
+      acc.push(...leaves);
+    });
+    return acc;
+  }
+  const AMZ_TREE = amzBuild(AMZ_RAW, "");
+  amzIndex(AMZ_TREE, null);
+  function amzPathIds(id) {
+    const out = [];
+    for (let cur = id; cur != null; cur = AMZ_PARENT[cur]) out.unshift(cur);
+    return out;
+  }
+  const amzPathLabel = (id) => amzPathIds(id).map((x) => AMZ_NODE[x].cn).join(">>");
+  const amzEsc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function amzNodeLabel(n, level) {
+    const cnt = n.children ? n.children.length : 0;
+    return `${level === 0 ? "Categories" : amzEsc(n.en)}(${cnt})(${amzEsc(n.cn)})`;
+  }
+  function amzFindByPathLabel(label) {
+    if (!label) return null;
+    return AMZ_ORDER.find((id) => amzPathLabel(id) === label) || null;
+  }
+  function amzFindNodesFromCateStr(str) {
+    if (!str) return [];
+    const parts = String(str).split(/[；;]/).map((s) => s.trim()).filter(Boolean);
+    const ids = [];
+    parts.forEach((p) => {
+      const id = amzFindByPathLabel(p) || AMZ_ORDER.find((x) => amzPathLabel(x).includes(p) || AMZ_NODE[x].cn === p);
+      if (id && !ids.includes(id)) ids.push(id);
+    });
+    return ids;
+  }
+
+  let cateTarget = "filter"; // filter | edit
+  let filterCateNodes = [];
+  let editCateNodes = [];
+  let cateDraft = new Set();
+  let cateSelectedNodes = new Set();
+  let cateActivePath = [];
+  let cateTab = "browse";
+  let cateLastPathKey = "";
+  let cateColsScroll = 0;
+  let cateSearchResults = null;
+
+  function cateTriOf(leaves) {
+    let n = 0;
+    leaves.forEach((l) => { if (cateDraft.has(l)) n++; });
+    return n === 0 ? "none" : n === leaves.length ? "all" : "some";
+  }
+  function cateIsDesc(sid, anc) {
+    return sid !== anc && amzPathIds(sid).includes(anc);
+  }
+  function cateDisplayIds() {
+    return AMZ_ORDER.filter((id) => cateSelectedNodes.has(id));
+  }
+  function cateCoverUncovered() {
+    const covered = new Set();
+    cateSelectedNodes.forEach((sid) => AMZ_LEAVES[sid].forEach((l) => covered.add(l)));
+    AMZ_ALL_LEAVES.forEach((l) => { if (cateDraft.has(l) && !covered.has(l)) cateSelectedNodes.add(l); });
+  }
+  function catePruneDisplay() {
+    [...cateSelectedNodes].forEach((sid) => {
+      if (!AMZ_LEAVES[sid].every((l) => cateDraft.has(l))) cateSelectedNodes.delete(sid);
+    });
+    [...cateSelectedNodes].forEach((sid) => {
+      if ([...cateSelectedNodes].some((anc) => cateIsDesc(sid, anc))) cateSelectedNodes.delete(sid);
+    });
+    cateCoverUncovered();
+  }
+  function cateUncheckLeaves(leaves) {
+    const ls = new Set(leaves);
+    ls.forEach((l) => cateDraft.delete(l));
+    [...cateSelectedNodes].forEach((sid) => {
+      if (AMZ_LEAVES[sid].some((l) => ls.has(l))) cateSelectedNodes.delete(sid);
+    });
+    catePruneDisplay();
+  }
+  function cateToggleNode(id) {
+    const leaves = AMZ_LEAVES[id];
+    if (cateTriOf(leaves) !== "all") {
+      leaves.forEach((l) => cateDraft.add(l));
+      [...cateSelectedNodes].forEach((sid) => { if (sid === id || cateIsDesc(sid, id)) cateSelectedNodes.delete(sid); });
+      cateSelectedNodes.add(id);
+      catePruneDisplay();
+    } else {
+      cateUncheckLeaves(leaves);
+    }
+    cateRender();
+  }
+  function cateToggleAllL1() {
+    if (cateTriOf(AMZ_ALL_LEAVES) !== "all") {
+      AMZ_ALL_LEAVES.forEach((l) => cateDraft.add(l));
+      cateSelectedNodes = new Set(AMZ_TREE.map((n) => n.id));
+    } else {
+      cateDraft.clear();
+      cateSelectedNodes.clear();
+    }
+    cateRender();
+  }
+  function cateInvertAll() {
+    AMZ_ALL_LEAVES.forEach((l) => (cateDraft.has(l) ? cateDraft.delete(l) : cateDraft.add(l)));
+    cateSelectedNodes.clear();
+    AMZ_TREE.forEach((l1) => {
+      if (cateTriOf(AMZ_LEAVES[l1.id]) === "all") cateSelectedNodes.add(l1.id);
+    });
+    catePruneDisplay();
+    cateRender();
+  }
+  function cateRenderSel() {
+    const box = document.getElementById("cateSelBox");
+    const list = cateDisplayIds();
+    box.innerHTML = list.length
+      ? list.map((id) => `<div class="cat-sel-item"><span class="txt" title="${amzEsc(amzPathLabel(id))}">${amzEsc(amzPathLabel(id))}</span><i class="cat-sel-del" data-cate-del="${id}" title="移除">×</i></div>`).join("")
+      : '<div class="cat-sel-empty">暂未选择类目，勾选下方类目即可添加</div>';
+  }
+  function cateRenderPreview() {
+    const path = cateActivePath.map((id) => AMZ_NODE[id].cn);
+    document.getElementById("catePreview").textContent = "当前预览：" + (path.length ? path.join(" >> ") : "全部类目");
+  }
+  function cateRenderCols() {
+    const wrap = document.getElementById("cateCols");
+    const scrollTops = [...wrap.querySelectorAll(".cat-col-body")].map((b) => b.scrollTop);
+    const cols = [{ items: AMZ_TREE, level: 0 }];
+    cateActivePath.forEach((id, i) => {
+      if (AMZ_NODE[id] && AMZ_NODE[id].children) cols.push({ items: AMZ_NODE[id].children, level: i + 1 });
+    });
+    const lvName = ["一级类目", "二级类目", "三级类目", "四级类目", "五级类目"];
+    wrap.innerHTML = cols.map((col) => {
+      const head = col.level === 0
+        ? `<div class="cat-col-head"><span class="cb ${cateTriOf(AMZ_ALL_LEAVES)}" data-cate-act="all"></span><span class="lbl" data-cate-act="all">全选</span><button type="button" class="btn-text" data-cate-act="invert">反选</button><span class="lvl">${lvName[0]}</span></div>`
+        : `<div class="cat-col-head"><span class="lvl" style="margin-left:0;">${lvName[col.level] || (col.level + 1) + "级类目"}</span></div>`;
+      const rows = col.items.map((n) => {
+        const active = cateActivePath[col.level] === n.id ? "active" : "";
+        return `<div class="cat-row ${active}" data-cate-id="${n.id}" data-cate-level="${col.level}">
+          <span class="cb ${cateTriOf(AMZ_LEAVES[n.id])}" data-cate-cb="${n.id}"></span>
+          <span class="txt" title="${amzNodeLabel(n, col.level)}">${amzNodeLabel(n, col.level)}</span>
+          ${n.children ? '<span class="arrow">›</span>' : ""}
+        </div>`;
+      }).join("");
+      return `<div class="cat-col">${head}<div class="cat-col-body">${rows}</div></div>`;
+    }).join("");
+    wrap.querySelectorAll(".cat-col-body").forEach((b, i) => { if (scrollTops[i] != null) b.scrollTop = scrollTops[i]; });
+    const key = cateActivePath.join("/");
+    if (key !== cateLastPathKey) {
+      cateLastPathKey = key;
+      wrap.scrollLeft = wrap.scrollWidth;
+    } else {
+      wrap.style.scrollBehavior = "auto";
+      wrap.scrollLeft = cateColsScroll;
+      wrap.style.scrollBehavior = "";
+    }
+  }
+  function cateDoSearch() {
+    const q = document.getElementById("cateSearchInput").value.trim().toLowerCase();
+    cateSearchResults = q
+      ? AMZ_ORDER.filter((id) => amzPathLabel(id).toLowerCase().includes(q) || amzPathIds(id).some((x) => AMZ_NODE[x].en.toLowerCase().includes(q)))
+      : null;
+    document.getElementById("cateSearchList").scrollTop = 0;
+    cateRenderSearch();
+  }
+  function cateSearchLeaves() {
+    const s = new Set();
+    (cateSearchResults || []).forEach((id) => AMZ_LEAVES[id].forEach((l) => s.add(l)));
+    return AMZ_ALL_LEAVES.filter((l) => s.has(l));
+  }
+  function cateRenderSearch() {
+    const box = document.getElementById("cateSearchList");
+    const leaves = cateSearchLeaves();
+    document.getElementById("cateSearchAllCb").className = "cb " + (leaves.length ? cateTriOf(leaves) : "none");
+    document.getElementById("cateSearchClear").disabled = !leaves.some((l) => cateDraft.has(l));
+    if (cateSearchResults === null) { box.innerHTML = '<div class="cat-search-tip">输入关键词后点击「搜索」</div>'; return; }
+    box.innerHTML = cateSearchResults.length
+      ? cateSearchResults.map((id) => `<div class="cat-row" data-cate-search="${id}"><span class="cb ${cateTriOf(AMZ_LEAVES[id])}" data-cate-cb="${id}"></span><span class="txt" title="${amzEsc(amzPathLabel(id))}">${amzEsc(amzPathLabel(id))}</span></div>`).join("")
+      : '<div class="cat-search-tip">未找到匹配的类目</div>';
+  }
+  function cateRender() {
+    cateRenderSel();
+    cateRenderPreview();
+    if (cateTab === "browse") cateRenderCols();
+    else cateRenderSearch();
+  }
+  function cateSetTab(t) {
+    cateTab = t;
+    document.querySelectorAll("[data-cate-tab]").forEach((el) => el.classList.toggle("active", el.dataset.cateTab === t));
+    document.getElementById("catePaneBrowse").style.display = t === "browse" ? "" : "none";
+    document.getElementById("catePaneSearch").style.display = t === "search" ? "" : "none";
+    cateRender();
+  }
+  function renderCateTags(elId, nodeIds) {
+    const box = document.getElementById(elId);
+    if (!box) return;
+    box.innerHTML = nodeIds.length
+      ? nodeIds.map((id) => `<span class="cat-tag" title="${amzEsc(amzPathLabel(id))}">${amzEsc(amzPathLabel(id))}</span>`).join("")
+      : '<span class="cat-empty">未选择类目</span>';
+  }
+  function syncEditCateHidden() {
+    document.getElementById("edit-cate").value = editCateNodes.map(amzPathLabel).join("；");
+  }
+  function openCateModal(target) {
+    cateTarget = target;
+    const src = target === "filter" ? filterCateNodes : editCateNodes;
+    cateSelectedNodes = new Set(src);
+    cateDraft = new Set();
+    src.forEach((id) => AMZ_LEAVES[id].forEach((l) => cateDraft.add(l)));
+    cateActivePath = src.length ? amzPathIds(src[0]).slice(0, -1) : [];
+    cateSearchResults = null;
+    document.getElementById("cateSearchInput").value = "";
+    cateSetTab("browse");
+    document.getElementById("cateOverlay").classList.add("show");
+    cateRender();
+  }
+  function closeCateModal() {
+    document.getElementById("cateOverlay").classList.remove("show");
+  }
+  function commitCateModal() {
+    const ids = cateDisplayIds();
+    if (cateTarget === "filter") {
+      filterCateNodes = ids;
+      renderCateTags("filter-cate-tags", filterCateNodes);
+    } else {
+      editCateNodes = ids;
+      renderCateTags("edit-cate-tags", editCateNodes);
+      syncEditCateHidden();
+    }
+    closeCateModal();
+    toast(ids.length ? `已选择 ${ids.length} 个类目` : "已清空类目");
+  }
+
+
+
+  document.querySelectorAll("[data-cate-tab]").forEach((el) => {
+    el.addEventListener("click", () => cateSetTab(el.dataset.cateTab));
+  });
+  document.getElementById("cateSearchInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); cateDoSearch(); }
+  });
+  document.getElementById("cateSearchAllCb").addEventListener("click", () => {
+    const ids = cateSearchResults || [];
+    if (!ids.length) return;
+    const leaves = cateSearchLeaves();
+    if (cateTriOf(leaves) !== "all") {
+      leaves.forEach((l) => cateDraft.add(l));
+      ids.forEach((id) => cateSelectedNodes.add(id));
+      catePruneDisplay();
+    } else {
+      cateUncheckLeaves(leaves);
+    }
+    cateRender();
+  });
+  document.getElementById("cateSearchAllLbl").addEventListener("click", () => document.getElementById("cateSearchAllCb").click());
+  document.getElementById("cateCols").addEventListener("scroll", (e) => { if (cateTab === "browse") cateColsScroll = e.target.scrollLeft; });
+  document.getElementById("cateSelBox").addEventListener("click", (e) => {
+    const del = e.target.closest("[data-cate-del]");
+    if (del) cateToggleNode(del.dataset.cateDel);
+  });
+  document.getElementById("cateCols").addEventListener("click", (e) => {
+    const actEl = e.target.closest("[data-cate-act]");
+    if (actEl) { actEl.dataset.cateAct === "all" ? cateToggleAllL1() : cateInvertAll(); return; }
+    const cb = e.target.closest("[data-cate-cb]");
+    if (cb) { cateToggleNode(cb.dataset.cateCb); return; }
+    const row = e.target.closest(".cat-row");
+    if (!row || !row.dataset.cateId) return;
+    const n = AMZ_NODE[row.dataset.cateId];
+    if (!n.children) { cateToggleNode(n.id); return; }
+    cateActivePath = [...cateActivePath.slice(0, +row.dataset.cateLevel), n.id];
+    cateRender();
+  });
+  document.getElementById("cateSearchList").addEventListener("click", (e) => {
+    const row = e.target.closest("[data-cate-search]");
+    if (row) cateToggleNode(row.dataset.cateSearch);
+  });
+  document.getElementById("cateOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "cateOverlay") closeCateModal();
+  });
+
+
+  renderData();
+  renderRescan();
+})();
+</script>
+</body>
+</html>
