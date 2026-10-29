@@ -109,6 +109,7 @@
     .tag-green { color: #389e0d; background: #f6ffed; border-color: #b7eb8f; }
     .tag-gray { color: #595959; background: #fafafa; border-color: #d9d9d9; }
     .link-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .reply-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); }
     .ops a { margin-right: 10px; cursor: pointer; }
     .empty { text-align: center; padding: 48px 16px; color: var(--text-3); }
     .pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; color: var(--text-2); }
@@ -317,6 +318,7 @@
                 <th>SKU/提报单</th>
                 <th>禁售主类</th>
                 <th>中文名</th>
+                <th>风控回复</th>
                 <th>类目</th>
                 <th>图片</th>
                 <th>采购链接</th>
@@ -497,6 +499,7 @@
                 <th style="width:120px;" id="batch-th-code">SKU</th>
                 <th style="width:90px;">图片（系统带出）</th>
                 <th>中文名</th>
+                <th style="width:140px;">风控回复</th>
                 <th style="width:120px;">类目</th>
                 <th style="width:160px;">采购链接</th>
                 <th style="width:110px;">禁售主类</th>
@@ -534,6 +537,10 @@
         <div class="field span2">
           <label class="req">中文名</label>
           <input id="edit-name" placeholder="请输入中文名" />
+        </div>
+        <div class="field span2">
+          <label>风控回复</label>
+          <textarea id="edit-reply" rows="2" placeholder="填写风控审核回复说明，如：挂店风险说明、处置建议等"></textarea>
         </div>
         <div class="field span2">
           <label>类目</label>
@@ -652,14 +659,14 @@
 
   // 统一高危品数据：字段通用，仅标识类型名称不同（sku / order）
   const productData = [
-    { id: 1, idType: "sku", code: "13430831", cat: "武器", name: "登山手杖伸缩三节碎砖甩棍橡胶手柄", cate: "家居、厨具、家装>>家具>>客厅家具", link: "https://1688.com/offer/s1", checked: false, hasImg: true },
-    { id: 2, idType: "sku", code: "14334713", cat: "吸毒", name: "鱼缸玻璃进出水管", cate: "家居、厨具、家装>>厨房与餐厅>>炊具", link: "https://1688.com/offer/s2", checked: false, hasImg: true },
-    { id: 3, idType: "sku", code: "12921582", cat: "色情", name: "调教束缚反手捆绑手颈套", cate: "美容和个人护理>>彩妆>>口红", link: "https://1688.com/offer/s3", checked: false, hasImg: true },
-    { id: 4, idType: "sku", code: "66018821", cat: "监听", name: "迷你摄像头隐蔽录音笔二合一", cate: "办公用品>>办公电子>>打印机", link: "https://1688.com/offer/s4", checked: false, hasImg: true },
-    { id: 5, idType: "order", code: "XB20261027001", cat: "武器", name: "合金弹弓高强度户外弹弓", cate: "玩具和游戏>>积木>>积木套装", link: "https://1688.com/offer/i1", checked: false, hasImg: true },
-    { id: 6, idType: "order", code: "XB20261025088", cat: "监听", name: "超薄GPS定位器磁吸款", cate: "办公用品>>办公电子>>计算器", link: "https://1688.com/offer/i2", checked: false, hasImg: true },
-    { id: 7, idType: "order", code: "XB20261022015", cat: "吸毒", name: "研磨器金属粉碎器", cate: "家居、厨具、家装>>床上用品>>枕头", link: "https://1688.com/offer/i3", checked: false, hasImg: true },
-    { id: 8, idType: "sku", code: "44887766", cat: "冒犯", name: "敏感政治图案印花T恤", cate: "手工制品>>首饰>>项链", link: "https://1688.com/offer/s5", checked: false, hasImg: true },
+    { id: 1, idType: "sku", code: "13430831", cat: "武器", name: "登山手杖伸缩三节碎砖甩棍橡胶手柄", reply: "易被认定为管制器械，禁止刊登美站", cate: "家居、厨具、家装>>家具>>客厅家具", link: "https://1688.com/offer/s1", checked: false, hasImg: true },
+    { id: 2, idType: "sku", code: "14334713", cat: "吸毒", name: "鱼缸玻璃进出水管", reply: "名称/用途易触发吸毒类政策", cate: "家居、厨具、家装>>厨房与餐厅>>炊具", link: "https://1688.com/offer/s2", checked: false, hasImg: true },
+    { id: 3, idType: "sku", code: "12921582", cat: "色情", name: "调教束缚反手捆绑手颈套", reply: "成人向束缚类，全站点禁售", cate: "美容和个人护理>>彩妆>>口红", link: "https://1688.com/offer/s3", checked: false, hasImg: true },
+    { id: 4, idType: "sku", code: "66018821", cat: "监听", name: "迷你摄像头隐蔽录音笔二合一", reply: "隐蔽摄像录音，高风险", cate: "办公用品>>办公电子>>打印机", link: "https://1688.com/offer/s4", checked: false, hasImg: true },
+    { id: 5, idType: "order", code: "XB20261027001", cat: "武器", name: "合金弹弓高强度户外弹弓", reply: "提报打回：弹射类武器风险", cate: "玩具和游戏>>积木>>积木套装", link: "https://1688.com/offer/i1", checked: false, hasImg: true },
+    { id: 6, idType: "order", code: "XB20261025088", cat: "监听", name: "超薄GPS定位器磁吸款", reply: "跟踪定位器，按监听类管控", cate: "办公用品>>办公电子>>计算器", link: "https://1688.com/offer/i2", checked: false, hasImg: true },
+    { id: 7, idType: "order", code: "XB20261022015", cat: "吸毒", name: "研磨器金属粉碎器", reply: "打回：疑似吸毒工具", cate: "家居、厨具、家装>>床上用品>>枕头", link: "https://1688.com/offer/i3", checked: false, hasImg: true },
+    { id: 8, idType: "sku", code: "44887766", cat: "冒犯", name: "敏感政治图案印花T恤", reply: "敏感图案，建议下架", cate: "手工制品>>首饰>>项链", link: "https://1688.com/offer/s5", checked: false, hasImg: true },
   ];
   function idTypeLabel(t) { return t === "order" ? "提报单" : "SKU"; }
 
@@ -772,11 +779,12 @@
         <td><code>${r.code}</code></td>
         <td>${catTag(r.cat)}</td>
         <td>${r.name}</td>
+        <td class="reply-cell" title="${(r.reply || "").replace(/"/g, "&quot;")}">${r.reply || "—"}</td>
         <td>${r.cate}</td>
         <td>${thumb(r.cat)}</td>
         <td class="link-cell"><a href="${r.link}" target="_blank" rel="noopener">${r.link}</a></td>
         <td class="ops"><a data-edit-data="${r.id}">编辑</a><a data-log-data="${r.id}">日志</a></td>
-      </tr>`).join("") || `<tr><td colspan="9"><div class="empty">暂无数据，请点击「新增」</div></td></tr>`;
+      </tr>`).join("") || `<tr><td colspan="10"><div class="empty">暂无数据，请点击「新增」</div></td></tr>`;
   }
 
   function filteredRescanGroups() {
@@ -1037,7 +1045,7 @@
     const label = idTypeLabel(document.getElementById("batch-idtype").value);
     document.getElementById("batch-count").textContent = `共 ${batchRows.length} 条待新增`;
     if (!batchRows.length) {
-      tb.innerHTML = `<tr><td colspan="7"><div class="empty">粘贴${label}后点击「解析并带出」</div></td></tr>`;
+      tb.innerHTML = `<tr><td colspan="8"><div class="empty">粘贴${label}后点击「解析并带出」</div></td></tr>`;
       return;
     }
     tb.innerHTML = batchRows.map((r, idx) => `
@@ -1050,6 +1058,7 @@
           </div>
         </td>
         <td><input data-batch-field="name" data-batch-idx="${idx}" value="${r.name.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
+        <td><input data-batch-field="reply" data-batch-idx="${idx}" value="${(r.reply || "").replace(/"/g, "&quot;")}" placeholder="风控回复" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
         <td><input data-batch-field="cate" data-batch-idx="${idx}" value="${r.cate.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
         <td><input data-batch-field="link" data-batch-idx="${idx}" value="${r.link.replace(/"/g, "&quot;")}" style="width:100%;height:28px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;font:inherit;" /></td>
         <td>
@@ -1086,6 +1095,7 @@
         img: info ? info.img : "",
         hasImg: !!info,
         cat: defaultCat,
+        reply: "",
       };
     });
     status.style.display = "block";
@@ -1127,6 +1137,7 @@
     document.getElementById("edit-cat").value = row.cat;
     document.getElementById("edit-key").value = row.code;
     document.getElementById("edit-name").value = row.name;
+    document.getElementById("edit-reply").value = row.reply || "";
     document.getElementById("edit-cate").value = row.cate;
     editCateNodes = amzFindNodesFromCateStr(row.cate);
     renderCateTags("edit-cate-tags", editCateNodes);
@@ -1169,7 +1180,7 @@
       batchRows.slice().reverse().forEach((r, i) => {
         const id = base + i;
         const row = {
-          id, idType, code: r.code, cat: r.cat, name: r.name.trim(), cate: r.cate.trim(),
+          id, idType, code: r.code, cat: r.cat, name: r.name.trim(), reply: (r.reply || "").trim(), cate: r.cate.trim(),
           link: r.link.trim(), checked: false, hasImg: true,
         };
         productData.unshift(row);
@@ -1187,6 +1198,7 @@
     const cat = document.getElementById("edit-cat").value;
     const key = document.getElementById("edit-key").value.trim();
     const name = document.getElementById("edit-name").value.trim();
+    const reply = document.getElementById("edit-reply").value.trim();
     const cate = document.getElementById("edit-cate").value.trim();
     const link = document.getElementById("edit-link").value.trim();
     const hasImg = document.getElementById("edit-thumb").dataset.has === "1";
@@ -1195,7 +1207,7 @@
 
     if (editMode.id) {
       Object.assign(productData.find((x) => x.id === editMode.id), {
-        idType, code: key, cat, name, cate, link, hasImg: true,
+        idType, code: key, cat, name, reply, cate, link, hasImg: true,
       });
       renderData();
       closeEdit();
@@ -1204,7 +1216,7 @@
     }
 
     const id = Date.now();
-    const row = { id, idType, code: key, cat, name, cate, link, checked: false, hasImg: true };
+    const row = { id, idType, code: key, cat, name, reply, cate, link, checked: false, hasImg: true };
     productData.unshift(row);
     addRescanForItem(idType, row, id);
     renderData();
