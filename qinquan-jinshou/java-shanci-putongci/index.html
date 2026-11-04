@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>普通禁用词按销量分流</title>
+<link rel="stylesheet" href="../../import/prototype-annotate.css" />
+<style>
+  :root{
+    --primary:#2f6bff; --primary-hover:#1c54e0;
+    --border:#e8ebf0; --bg:#f3f5f8; --text:#1f2733; --text-2:#5b6577;
+    --text-3:#97a0b0; --warn:#fa8c16; --success:#16b364; --danger:#f5455c;
+    --manual:#722ed1; --tech:#1677ff; --radius:6px;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
+  .app{ background:#fff; min-height:100vh; }
+  .topbar{ padding:16px 20px 12px; border-bottom:1px solid var(--border); }
+  .topbar h1{ margin:0 0 6px; font-size:18px; font-weight:650; }
+  .topbar p{ margin:0; color:var(--text-2); line-height:1.6; }
+  .topbar a{ color:var(--primary); }
+  .tabs{ display:flex; gap:24px; padding:0 20px; border-bottom:1px solid var(--border); }
+  .tab{ padding:12px 2px; color:var(--text-2); cursor:pointer; position:relative; background:none; border:none; font:inherit; }
+  .tab.active{ color:var(--primary); font-weight:600; }
+  .tab.active::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--primary); }
+  .pane{ display:none; padding:16px 20px 40px; }
+  .pane.show{ display:block; }
+  .banner{ background:#fff7e6; border:1px solid #ffd591; color:#ad6800; border-radius:8px; padding:10px 12px; margin-bottom:14px; line-height:1.6; }
+  .flow{ display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; }
+  .node{ background:#fff; border:1px solid var(--border); border-radius:8px; padding:10px 12px; min-width:140px; }
+  .node b{ display:block; margin-bottom:4px; }
+  .node.old{ background:#fafafa; color:var(--text-2); }
+  .node.change{ border-color:#ffd591; background:#fff7e6; }
+  .node.manual{ border-color:#d3adf7; background:#f9f0ff; }
+  .node.tech{ border-color:#91caff; background:#e6f4ff; }
+  .arrow{ align-self:center; color:var(--text-3); }
+  .grid{ display:grid; grid-template-columns:320px 1fr; gap:16px; }
+  .card{ border:1px solid var(--border); border-radius:10px; padding:16px; background:#fff; }
+  .card h3{ margin:0 0 12px; font-size:14px; }
+  label{ display:block; margin:10px 0 6px; color:var(--text-2); }
+  .ctrl{ width:100%; height:32px; border:1px solid var(--border); border-radius:var(--radius); padding:0 10px; font-size:13px; }
+  .btn{ height:32px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; }
+  .btn:hover{ background:var(--primary-hover); }
+  .result{ margin-top:14px; border-radius:8px; padding:12px; line-height:1.7; display:none; }
+  .result.show{ display:block; }
+  .result.manual{ background:#f9f0ff; border:1px solid #d3adf7; }
+  .result.tech{ background:#e6f4ff; border:1px solid #91caff; }
+  .result.keep{ background:#fafafa; border:1px solid var(--border); }
+  .filters{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .chip{ border:1px solid var(--border); background:#fff; border-radius:16px; padding:4px 12px; cursor:pointer; }
+  .chip.active{ border-color:var(--primary); color:var(--primary); background:#f0f5ff; }
+  table{ width:100%; border-collapse:collapse; background:#fff; }
+  th,td{ border-bottom:1px solid var(--border); text-align:left; padding:10px 8px; vertical-align:top; }
+  th{ color:var(--text-2); font-weight:600; background:#fafafa; }
+  tr{ cursor:pointer; }
+  tr:hover{ background:#f7f9fc; }
+  .tag{ display:inline-block; padding:0 8px; border-radius:4px; line-height:22px; font-size:12px; }
+  .tag-manual{ background:#f9f0ff; color:#722ed1; }
+  .tag-tech{ background:#e6f4ff; color:#1677ff; }
+  .tag-keep{ background:#f5f5f5; color:#595959; }
+  .tag-normal{ background:#fffbe6; color:#d48806; }
+  .tag-high{ background:#fff1f0; color:#cf1322; }
+  .tag-tm{ background:#f6ffed; color:#389e0d; }
+  .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; z-index:100; }
+  .overlay.show{ display:flex; }
+  .modal{ background:#fff; border-radius:10px; width:480px; max-width:92vw; padding:20px; position:relative; }
+  .modal h3{ margin:0 0 10px; }
+  .modal p{ margin:6px 0; line-height:1.6; }
+  .toast{ position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1f2733; color:#fff; padding:10px 18px; border-radius:8px; z-index:200; opacity:0; transition:.25s; pointer-events:none; }
+  .toast.show{ opacity:1; top:34px; }
+  @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>Java 删词后续优化 · 普通禁用词按销量分流</h1>
+    <p>只调整原流程「普通禁用词」分支：近 365 天销量 <b>大于 0</b> 进入人工处理，<b>小于等于 0</b> 进入技术处理（提交删词队列）。高危禁用词、商标词、SKU 禁售仍走原流程。基线文档不修改：
+      <a href="https://alidocs.dingtalk.com/i/nodes/Gl6Pm2Db8D3kB579t9yBwbnzJxLq0Ee4" target="_blank" rel="noopener">QQJS-35837</a>
+    </p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" type="button" data-pane="rule">规则说明</button>
+    <button class="tab" type="button" data-pane="try">分流试算</button>
+    <button class="tab" type="button" data-pane="list">结果列表</button>
+  </div>
+
+  <div class="pane show" id="rule">
+    <div class="banner">变化点只有一处：普通禁用词且近 365 天销量等于 0 时，原流程进入人工列表，现改为提交删词队列。销量大于 0 仍人工处理。</div>
+    <div class="flow">
+      <div class="node old"><b>原流程前置</b>是否禁售 = 否，且不是高危禁用词、不是商标词</div>
+      <div class="arrow">→</div>
+      <div class="node change"><b>本次调整</b>读近 365 天销量<br>大于 0 / 小于等于 0</div>
+      <div class="arrow">→</div>
+      <div class="node manual"><b>大于 0 · 人工处理</b>进入删词待处理列表<br>回写人工（5）</div>
+      <div class="node tech"><b>小于等于 0 · 技术处理</b>提交删词队列，不进人工列表<br>成功回写已删（1）</div>
+    </div>
+  </div>
+
+  <div class="pane" id="try">
+    <div class="grid">
+      <div class="card">
+        <h3>试算</h3>
+        <label>命中情况</label>
+        <select class="ctrl" id="kind">
+          <option value="normal">仅普通禁用词</option>
+          <option value="high">含高危禁用词或商标词</option>
+          <option value="ban">SKU 在该平台站点禁售</option>
+        </select>
+        <label>近 365 天销量</label>
+        <input class="ctrl" id="sales" type="number" value="0" />
+        <div style="margin-top:14px"><button class="btn" id="btnCalc" type="button">判断去向</button></div>
+        <div class="result" id="calcResult"></div>
+      </div>
+      <div class="card">
+        <h3>对照</h3>
+        <p>原流程图：销量大于等于 0 → 人工处理；销量小于 0 → 提交删词队列。</p>
+        <p>本需求：销量大于 0 → 人工处理；销量小于等于 0 → 技术处理。</p>
+        <p>销量为空时不在原型里当成 0。生产规则待补充，不能自动删词。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" id="list">
+    <div class="filters" id="filters">
+      <button class="chip active" type="button" data-f="all">全部</button>
+      <button class="chip" type="button" data-f="manual">人工处理</button>
+      <button class="chip" type="button" data-f="tech">技术处理</button>
+      <button class="chip" type="button" data-f="keep">仍走原流程</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Listing</th><th>敏感词</th><th>近 365 天销量</th><th>分流</th><th>去向</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <h3 id="detailTitle">明细</h3>
+    <p id="detailBody"></p>
+    <button class="btn" type="button" id="btnClose">关闭</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ROWS = [
+  { id:"B0AAA0001", title:"Storage Bin", kw:"普通禁用词", kwClass:"tag-normal", sales:12, route:"manual", where:"删词待处理列表", note:"销量大于 0，销售人工处理。可确认删词、删 listing、保留。" },
+  { id:"B0AAA0002", title:"Desk Organizer", kw:"普通禁用词", kwClass:"tag-normal", sales:1, route:"manual", where:"删词待处理列表", note:"销量等于 1，仍走人工，不进删词队列。" },
+  { id:"B0AAA0003", title:"Cable Clip", kw:"普通禁用词", kwClass:"tag-normal", sales:0, route:"tech", where:"提交删词队列", note:"销量等于 0。原流程会进人工列表，本次改为技术处理，不进入删词待处理列表。" },
+  { id:"B0AAA0004", title:"Empty Pack", kw:"普通禁用词", kwClass:"tag-normal", sales:0, route:"tech", where:"提交删词队列", note:"另一条销量为 0 的普通禁用词，同样提交删词队列。" },
+  { id:"B0AAA0005", title:"High Risk Lamp", kw:"高危禁用词", kwClass:"tag-high", sales:0, route:"keep", where:"原高危分支", note:"销量虽然为 0，但是高危禁用词，不按本规则改道。" },
+  { id:"B0AAA0006", title:"Brand Bottle", kw:"商标词", kwClass:"tag-tm", sales:20, route:"keep", where:"原商标词分支", note:"商标词保持 QQJS-35837 原分支。" },
+  { id:"B0AAA0007", title:"Banned SKU", kw:"普通禁用词 · SKU禁售", kwClass:"tag-high", sales:0, route:"keep", where:"原禁售删 listing 分支", note:"SKU 禁售仍走提交 listing 删除队列，不受本次销量规则影响。" }
+];
+const LABEL = { manual:"人工处理", tech:"技术处理", keep:"仍走原流程" };
+const TAG = { manual:"tag-manual", tech:"tag-tech", keep:"tag-keep" };
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function decide(kind, sales){
+  if(kind === "ban") return { cls:"keep", title:"仍走原流程", text:"SKU 在对应平台站点禁售，走原「提交 listing 删除队列」分支，不按销量改道。" };
+  if(kind === "high") return { cls:"keep", title:"仍走原流程", text:"同时或单独命中高危禁用词 / 商标词时，走原高危、商标词分支。" };
+  if(sales === "" || sales === null || Number.isNaN(Number(sales))) return { cls:"keep", title:"不能按 0 处理", text:"销量为空。待补充正式规则前，不提交删词队列，也不当成销量等于 0。" };
+  const n = Number(sales);
+  if(n > 0) return { cls:"manual", title:"人工处理", text:"近 365 天销量大于 0，进入删词待处理列表。流程结束在人工节点时回写状态 5。" };
+  return { cls:"tech", title:"技术处理", text:"近 365 天销量小于等于 0，提交删词队列，不进入删词待处理列表。成功回写已删（1），失败沿用原失败码。" };
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".pane").forEach(p => p.classList.remove("show"));
+    tab.classList.add("active");
+    document.getElementById(tab.dataset.pane).classList.add("show");
+  };
+});
+
+document.getElementById("btnCalc").onclick = () => {
+  const kind = document.getElementById("kind").value;
+  const raw = document.getElementById("sales").value;
+  const box = document.getElementById("calcResult");
+  const r = decide(kind, raw);
+  box.className = "result show " + r.cls;
+  box.innerHTML = "<b>" + r.title + "</b><br>" + r.text;
+};
+
+let filter = "all";
+function render(){
+  const body = document.getElementById("tbody");
+  body.innerHTML = ROWS.filter(r => filter === "all" || r.route === filter).map(r => `
+    <tr data-id="${r.id}">
+      <td><b>${r.id}</b><br><span style="color:#5b6577">${r.title}</span></td>
+      <td><span class="tag ${r.kwClass}">${r.kw}</span></td>
+      <td>${r.sales}</td>
+      <td><span class="tag ${TAG[r.route]}">${LABEL[r.route]}</span></td>
+      <td>${r.where}</td>
+    </tr>`).join("");
+  body.querySelectorAll("tr").forEach(tr => {
+    tr.onclick = () => {
+      const row = ROWS.find(x => x.id === tr.dataset.id);
+      document.getElementById("detailTitle").textContent = row.id + " · " + LABEL[row.route];
+      document.getElementById("detailBody").textContent = row.note;
+      document.getElementById("detailOverlay").classList.add("show");
+    };
+  });
+}
+document.getElementById("filters").onclick = (e) => {
+  const btn = e.target.closest(".chip");
+  if(!btn) return;
+  filter = btn.dataset.f;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === btn));
+  render();
+};
+document.getElementById("btnClose").onclick = () => document.getElementById("detailOverlay").classList.remove("show");
+render();
+</script>
+<script src="../../import/prototype-annotate.js"></script>
+<script>
+PrototypeAnnotate.init({
+  storageKey: "java-shanci-putongci-annotations",
+  exportTitle: "普通禁用词按销量分流",
+  exportFilename: "普通禁用词按销量分流-原型标注.md",
+  scopeLabels: { page: "页面", detailOverlay: "分流明细" },
+  builtins: [
+    { id: 1, scope: "page", x: 28, y: 118, text: "本次只改普通禁用词：近365天销量大于0人工处理，小于等于0技术处理（提交删词队列）。销量等于0是变化点。" }
+  ],
+  toast
+});
+</script>
+</body>
+</html>
