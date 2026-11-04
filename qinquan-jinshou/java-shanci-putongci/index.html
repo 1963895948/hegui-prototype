@@ -3,239 +3,1090 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>普通禁用词按销量分流</title>
-<link rel="stylesheet" href="../../import/prototype-annotate.css" />
+<title>删词处理列表</title>
 <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   :root{
     --primary:#2f6bff; --primary-hover:#1c54e0;
     --border:#e8ebf0; --bg:#f3f5f8; --text:#1f2733; --text-2:#5b6577;
-    --text-3:#97a0b0; --warn:#fa8c16; --success:#16b364; --danger:#f5455c;
-    --manual:#722ed1; --tech:#1677ff; --radius:6px;
+    --text-3:#97a0b0; --link:#2f6bff; --warn:#fa8c16; --success:#16b364; --danger:#f5455c;
+    --radius:6px;
   }
-  *{ box-sizing:border-box; }
-  body{ margin:0; font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
+  body{ font-family:"Microsoft YaHei","PingFang SC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg); color:var(--text); font-size:13px; line-height:1.5; }
   .app{ background:#fff; min-height:100vh; }
-  .topbar{ padding:16px 20px 12px; border-bottom:1px solid var(--border); }
-  .topbar h1{ margin:0 0 6px; font-size:18px; font-weight:650; }
-  .topbar p{ margin:0; color:var(--text-2); line-height:1.6; }
-  .topbar a{ color:var(--primary); }
-  .tabs{ display:flex; gap:24px; padding:0 20px; border-bottom:1px solid var(--border); }
-  .tab{ padding:12px 2px; color:var(--text-2); cursor:pointer; position:relative; background:none; border:none; font:inherit; }
+
+  .tabs{ display:flex; gap:24px; padding:0 20px; border-bottom:1px solid var(--border); background:#fff; }
+  .tab{ padding:14px 2px; font-size:14px; color:var(--text-2); cursor:pointer; position:relative; }
   .tab.active{ color:var(--primary); font-weight:600; }
   .tab.active::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--primary); }
-  .pane{ display:none; padding:16px 20px 40px; }
-  .pane.show{ display:block; }
-  .banner{ background:#fff7e6; border:1px solid #ffd591; color:#ad6800; border-radius:8px; padding:10px 12px; margin-bottom:14px; line-height:1.6; }
-  .flow{ display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; }
-  .node{ background:#fff; border:1px solid var(--border); border-radius:8px; padding:10px 12px; min-width:140px; }
-  .node b{ display:block; margin-bottom:4px; }
-  .node.old{ background:#fafafa; color:var(--text-2); }
-  .node.change{ border-color:#ffd591; background:#fff7e6; }
-  .node.manual{ border-color:#d3adf7; background:#f9f0ff; }
-  .node.tech{ border-color:#91caff; background:#e6f4ff; }
-  .arrow{ align-self:center; color:var(--text-3); }
-  .grid{ display:grid; grid-template-columns:320px 1fr; gap:16px; }
-  .card{ border:1px solid var(--border); border-radius:10px; padding:16px; background:#fff; }
-  .card h3{ margin:0 0 12px; font-size:14px; }
-  label{ display:block; margin:10px 0 6px; color:var(--text-2); }
-  .ctrl{ width:100%; height:32px; border:1px solid var(--border); border-radius:var(--radius); padding:0 10px; font-size:13px; }
-  .btn{ height:32px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; }
-  .btn:hover{ background:var(--primary-hover); }
-  .result{ margin-top:14px; border-radius:8px; padding:12px; line-height:1.7; display:none; }
-  .result.show{ display:block; }
-  .result.manual{ background:#f9f0ff; border:1px solid #d3adf7; }
-  .result.tech{ background:#e6f4ff; border:1px solid #91caff; }
-  .result.keep{ background:#fafafa; border:1px solid var(--border); }
-  .filters{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
-  .chip{ border:1px solid var(--border); background:#fff; border-radius:16px; padding:4px 12px; cursor:pointer; }
-  .chip.active{ border-color:var(--primary); color:var(--primary); background:#f0f5ff; }
-  table{ width:100%; border-collapse:collapse; background:#fff; }
-  th,td{ border-bottom:1px solid var(--border); text-align:left; padding:10px 8px; vertical-align:top; }
-  th{ color:var(--text-2); font-weight:600; background:#fafafa; }
-  tr{ cursor:pointer; }
-  tr:hover{ background:#f7f9fc; }
-  .tag{ display:inline-block; padding:0 8px; border-radius:4px; line-height:22px; font-size:12px; }
-  .tag-manual{ background:#f9f0ff; color:#722ed1; }
-  .tag-tech{ background:#e6f4ff; color:#1677ff; }
-  .tag-keep{ background:#f5f5f5; color:#595959; }
-  .tag-normal{ background:#fffbe6; color:#d48806; }
-  .tag-high{ background:#fff1f0; color:#cf1322; }
-  .tag-tm{ background:#f6ffed; color:#389e0d; }
+
+  .filters{ padding:16px 20px 6px; background:#fff; }
+  .filter-row{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; align-items:center; }
+  .field{ display:flex; align-items:stretch; height:32px; }
+  .field .lbl{ background:#f6f8fb; border:1px solid var(--border); border-right:none;
+    border-radius:var(--radius) 0 0 var(--radius); padding:0 10px; display:flex; align-items:center;
+    color:var(--text-2); white-space:nowrap; font-size:12px; }
+  .ctrl{ height:32px; border:1px solid var(--border); border-radius:var(--radius); background:#fff;
+    padding:0 10px; color:var(--text); font-size:13px; outline:none; min-width:120px; }
+  .ctrl:focus{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(47,107,255,.12); }
+  .ctrl::placeholder{ color:var(--text-3); opacity:.55; }
+  .field .ctrl{ border-radius:0 var(--radius) var(--radius) 0; }
+  select.ctrl{ appearance:none; background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%2397a0b0' fill='none' stroke-width='1.4'/></svg>") no-repeat right 9px center; padding-right:26px; cursor:pointer; }
+  .multi{ position:relative; }
+  .multi::after{ content:"多选"; position:absolute; right:24px; top:9px; font-size:10px; color:var(--text-3); pointer-events:none; }
+  .status-multi{ display:inline-block; min-width:140px; }
+  .status-multi-trigger{ width:100%; min-width:140px; text-align:left; cursor:pointer; font-family:inherit; }
+  .status-multi-panel{ display:none; position:absolute; top:100%; left:0; margin-top:4px; min-width:176px;
+    background:#fff; border:1px solid var(--border); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.14);
+    padding:6px 0; z-index:60; max-height:280px; overflow:auto; }
+  .status-multi-panel.show{ display:block; }
+  .status-multi-opt{ display:flex; align-items:center; gap:8px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .status-multi-opt:hover{ background:#f3f6fb; }
+  .status-multi-opt input{ cursor:pointer; margin:0; }
+  .num-range{ display:flex; align-items:center; gap:4px; }
+  .num-range .lbl2{ font-size:11px; color:var(--text-2); white-space:nowrap; margin-right:2px; }
+  .num-range .ctrl{ width:62px; min-width:62px; text-align:center; padding:0 4px; }
+  .num-range .sep{ color:var(--text-3); }
+  .date-range{ display:flex; align-items:center; gap:6px; }
+  .date-range .ctrl{ min-width:120px; }
+
+  .btn{ height:32px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--border);
+    background:#fff; color:var(--text); cursor:pointer; font-size:13px; display:inline-flex;
+    align-items:center; gap:5px; transition:.15s; white-space:nowrap; }
+  .btn:hover{ border-color:var(--primary); color:var(--primary); }
+  .btn-primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); color:#fff; }
+  .btn-danger{ background:var(--danger); border-color:var(--danger); color:#fff; }
+  .btn-danger:hover{ filter:brightness(.94); color:#fff; }
+  .btn-success{ background:var(--success); border-color:var(--success); color:#fff; }
+  .btn-success:hover{ filter:brightness(.94); color:#fff; }
+  .btn-sm{ height:28px; padding:0 12px; font-size:12px; }
+  .btn[disabled]{ cursor:not-allowed; opacity:.5; }
+
+  .toolbar{ display:flex; align-items:center; gap:10px; padding:6px 20px 10px; flex-wrap:wrap; }
+  .toolbar-dropdown{ position:relative; display:inline-block; }
+  .btn-batch-op{ background:#e6f4ff; border-color:#91caff; color:var(--primary); }
+  .btn-batch-op:hover{ background:#bae0ff; border-color:#69b1ff; color:var(--primary); }
+  .toolbar-menu{ display:none; position:absolute; top:100%; left:0; margin-top:4px; min-width:128px;
+    background:#fff; border:1px solid var(--border); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.14);
+    padding:4px 0; z-index:50; }
+  .toolbar-menu.show{ display:block; }
+  .toolbar-mi{ padding:8px 16px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .toolbar-mi:hover{ background:#f3f6fb; color:var(--primary); }
+  .btn-import-audit{ font-size:12px; padding:0 12px; }
+  .group-bar{ padding:8px 20px; background:#fafafa; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    font-size:12px; color:var(--text-2); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .toolbar .spacer{ flex:1; }
+  .muted{ color:var(--text-3); font-size:12px; }
+  .link{ color:var(--link); cursor:pointer; font-size:12px; }
+  .link:hover{ text-decoration:underline; }
+
+  .table-wrap{ padding:0 20px 20px; overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:1320px; }
+  thead th{ background:#f6f8fb; color:var(--text-2); font-weight:600; font-size:12px;
+    text-align:left; padding:10px 10px; border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; z-index:1; }
+  tbody td{ padding:12px 10px; border-bottom:1px solid var(--border); vertical-align:top; font-size:12px; }
+  tbody tr:hover{ background:#fafbfd; }
+  .sort{ color:var(--text-3); font-size:10px; margin-left:2px; }
+
+  .listing{ display:flex; gap:10px; max-width:320px; }
+  .thumb{ width:54px; height:54px; border:1px solid var(--border); border-radius:4px; flex:none;
+    background:linear-gradient(135deg,#eef1f6,#dfe4ec); display:flex; align-items:center; justify-content:center;
+    color:#aeb6c4; font-size:18px; }
+  .listing .info{ min-width:0; }
+  .listing .title{ color:var(--text); font-size:12px; line-height:1.45; margin-bottom:4px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .kv{ color:var(--text-2); font-size:11px; line-height:1.7; }
+  .kv b{ color:var(--text); font-weight:500; }
+  .code{ color:var(--link); }
+  .copy{ cursor:pointer; opacity:.45; margin-left:3px; }
+  .copy:hover{ opacity:.9; }
+
+  .store .row, .sales .row, .stock .row{ font-size:11px; color:var(--text-2); line-height:1.8; white-space:nowrap; }
+  .store .name{ color:var(--text); font-weight:500; }
+  .store .abn{ color:var(--danger); }
+
+  .flag{ font-size:14px; margin-right:3px; }
+  .tag{ display:inline-block; padding:1px 7px; border-radius:3px; font-size:11px; line-height:18px; }
+  .tag-ship-self{ background:#fff3e0; color:#fa8c16; border:1px solid #ffd591; }
+  .tag-fba{ background:#e6f4ff; color:#2f6bff; border:1px solid #91caff; }
+  .tag-amz{ background:#232f3e; color:#ff9900; padding:0 6px; border-radius:3px; font-weight:600; font-size:10px; }
+  .ship-cell{ display:flex; flex-direction:column; gap:5px; align-items:flex-start; }
+  .bind{ font-size:10px; color:var(--text-3); }
+
+  /* 敏感词类型 */
+  .kw-item{ margin-bottom:4px; line-height:1.5; }
+  .kw-word{ font-weight:600; }
+  .kw-type{ display:inline-block; margin:0 4px; padding:0 5px; border-radius:3px; font-size:10px; line-height:16px; vertical-align:1px; }
+  .type-tm{ background:#fff1f0; color:#f5455c; border:1px solid #ffccc7; }       /* 商标词 */
+  .type-high{ background:#fff2e8; color:#fa541c; border:1px solid #ffbb96; }     /* 高危禁用词 */
+  .type-normal{ background:#fffbe6; color:#d48806; border:1px solid #ffe58f; }   /* 普通禁用词 */
+  .kw-pos{ color:var(--text-3); font-size:11px; }
+  .kw-word.tm{ color:#f5455c; }
+  .kw-word.high{ color:#fa541c; }
+  .kw-word.normal{ color:#d48806; }
+
+  .festival{ display:inline-block; margin-top:4px; padding:1px 7px; border-radius:3px;
+    background:#fff1f0; color:#f5455c; border:1px solid #ffccc7; font-size:11px; }
+  .dash{ color:var(--text-3); }
+
+  /* 处理状态 */
+  .pill{ display:inline-block; padding:0 8px; height:22px; line-height:22px; border-radius:11px; font-size:11px; white-space:nowrap; }
+  .st-wait{ background:#fff7e6; color:#fa8c16; }
+  .st-todel{ background:#e6f4ff; color:#2f6bff; }
+  .st-deling{ background:#fff0f6; color:#c41d7f; }
+  .st-delfail{ background:#fff1f0; color:#f5455c; }
+  .st-toword{ background:#f0f5ff; color:#597ef7; }
+  .st-wordsucc{ background:#f0f9f3; color:#16b364; }
+  .st-wordfail{ background:#fff1f0; color:#f5455c; }
+  .st-keep{ background:#f0f9f3; color:#16b364; }
+
+  .ck-op{ display:flex; flex-direction:column; gap:12px; align-items:flex-start; }
+  .op-trigger{ color:var(--link); cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:3px; font-size:12px; white-space:nowrap; }
+  .op-trigger:hover{ text-decoration:underline; }
+  .op-trigger .caret{ font-size:9px; }
+  .op-menu{ position:fixed; display:none; background:#fff; border:1px solid var(--border); border-radius:6px;
+    box-shadow:0 6px 20px rgba(0,0,0,.14); min-width:124px; z-index:120; padding:4px 0; }
+  .op-menu.show{ display:block; }
+  .op-mi{ padding:8px 16px; font-size:12px; color:var(--text); cursor:pointer; white-space:nowrap; }
+  .op-mi:hover{ background:#f3f6fb; color:var(--primary); }
+  .op-mi.disabled{ color:var(--text-3); cursor:not-allowed; background:none; }
+
+  .time{ color:var(--text-2); font-size:11px; line-height:1.8; white-space:nowrap; }
+  .time .row-log{ display:inline-block; margin-top:4px; font-size:12px; }
+
+  .pager{ display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:14px 20px;
+    border-top:1px solid var(--border); flex-wrap:wrap; }
+  .pager .total{ color:var(--text-2); margin-right:auto; }
+  .page-btn{ min-width:30px; height:30px; padding:0 8px; border:1px solid var(--border); border-radius:var(--radius);
+    background:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; color:var(--text-2); }
+  .page-btn:hover{ border-color:var(--primary); color:var(--primary); }
+  .page-btn.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .jump{ display:flex; align-items:center; gap:6px; color:var(--text-2); }
+  .jump .ctrl{ width:48px; min-width:48px; height:30px; text-align:center; padding:0; }
+
+  input[type=checkbox]{ width:15px; height:15px; cursor:pointer; accent-color:var(--primary); }
+
+  /* ===== 弹窗 ===== */
   .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; z-index:100; }
   .overlay.show{ display:flex; }
-  .modal{ background:#fff; border-radius:10px; width:480px; max-width:92vw; padding:20px; position:relative; }
-  .modal h3{ margin:0 0 10px; }
-  .modal p{ margin:6px 0; line-height:1.6; }
-  .toast{ position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1f2733; color:#fff; padding:10px 18px; border-radius:8px; z-index:200; opacity:0; transition:.25s; pointer-events:none; }
+  .modal{ background:#fff; border-radius:10px; width:440px; max-width:92vw; box-shadow:0 12px 40px rgba(0,0,0,.18); overflow:hidden; position:relative; }
+  .modal.lg{ width:720px; }
+  .modal-head{ padding:16px 20px; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
+  .modal-head .x{ margin-left:auto; cursor:pointer; color:var(--text-3); font-size:18px; }
+  .modal-body{ padding:18px 20px; font-size:13px; color:var(--text-2); max-height:62vh; overflow:auto; }
+  .modal-foot{ padding:12px 20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border); }
+  .warn-ico{ color:var(--warn); }
+  .danger-ico{ color:var(--danger); }
+
+  /* listing文案编辑 */
+  .modal.edit-copy{ width:720px; max-width:96vw; border-radius:4px; }
+  .modal.edit-copy .modal-head{ padding:14px 16px; font-size:14px; font-weight:600; border-bottom:1px solid #e8e8e8; }
+  .modal.edit-copy .modal-body{ padding:16px 20px; max-height:70vh; overflow-y:auto; }
+  .modal.edit-copy .modal-foot{ padding:10px 16px 14px; }
+  .edit-meta{ font-size:12px; color:var(--text-3); margin-bottom:14px; }
+  .edit-field{ margin-bottom:16px; }
+  .edit-field-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .edit-field-head label{ font-size:13px; color:var(--text); font-weight:500; }
+  .edit-field-actions{ display:flex; gap:12px; }
+  .edit-area-wrap{ position:relative; border:1px solid #d9d9d9; border-radius:2px; background:#fff; }
+  .edit-area-wrap:focus-within{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(47,107,255,.12); }
+  .edit-area{ width:100%; border:none; outline:none; padding:8px 10px 24px; font-size:13px; line-height:1.65;
+    resize:vertical; min-height:72px; font-family:inherit; display:block; color:var(--text); background:transparent; }
+  .edit-area.title-area{ min-height:96px; }
+  .edit-count{ position:absolute; right:10px; bottom:6px; font-size:12px; color:var(--text-3); pointer-events:none; }
+  .edit-count.over{ color:var(--danger); }
+  .bullet-list{ display:flex; flex-direction:column; gap:10px; }
+  .edit-remark{ width:100%; min-height:48px; padding:8px 10px; resize:vertical; line-height:1.5; border:1px solid #d9d9d9; border-radius:2px; font-size:13px; outline:none; font-family:inherit; }
+  .edit-remark:focus{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(47,107,255,.12); }
+  .detect-tip{ font-size:12px; margin-top:6px; padding:8px 10px; border-radius:4px; display:none; }
+  .detect-tip.err{ display:block; background:#fff1f0; color:#f5455c; border:1px solid #ffccc7; }
+  .detect-tip.ok{ display:block; background:#f0f9f3; color:#16b364; border:1px solid #b7eb8f; }
+  .legend{ font-size:11px; color:var(--text-3); margin-bottom:12px; }
+  .readonly{ background:#f6f8fb; color:var(--text-2); padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-size:12px; }
+  .tpl-table{ width:100%; border-collapse:collapse; margin:10px 0; font-size:12px; }
+  .tpl-table th,.tpl-table td{ border:1px solid var(--border); padding:8px 10px; text-align:left; }
+  .tpl-table th{ background:#f6f8fb; color:var(--text-2); font-weight:600; }
+  .upload-box{ border:1px dashed var(--border); border-radius:8px; padding:18px; text-align:center; color:var(--text-3); font-size:12px; margin:12px 0; cursor:pointer; }
+  .upload-box:hover{ border-color:var(--primary); color:var(--primary); }
+  .upload-box.has-file{ border-style:solid; border-color:var(--primary); color:var(--text); background:#f6f9ff; }
+  .import-rules{ font-size:12px; color:var(--text-2); line-height:1.7; margin-bottom:10px; }
+  .import-rules ol{ margin:6px 0 0 18px; }
+  .import-rules li{ margin-bottom:4px; }
+  .import-result-summary{ font-size:13px; line-height:1.7; margin-bottom:12px; }
+  .import-result-summary.err{ color:var(--danger); }
+  .import-result-summary.ok{ color:var(--success); }
+  .err-table td.reason{ color:var(--danger); }
+  .import-foot-note{ font-size:11px; color:var(--text-3); margin-right:auto; align-self:center; }
+  .import-examples{ font-size:12px; color:var(--text-2); margin-top:8px; }
+  .import-examples .eg-active{ color:var(--primary); font-weight:600; }
+  .log-table{ width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed; }
+  .log-table th,.log-table td{ border-bottom:1px solid var(--border); padding:5px 8px; text-align:left; line-height:1.45; word-break:break-all; }
+  .log-table th{ background:#f6f8fb; color:var(--text-2); font-weight:600; }
+  .log-table th:nth-child(1){ width:132px; }
+  .log-table th:nth-child(2){ width:64px; }
+  .log-table th:nth-child(3){ width:96px; }
+  .modal.log-modal{ width:520px; }
+  .modal.log-modal .modal-head{ padding:12px 16px; font-size:14px; }
+  .modal.log-modal .modal-body{ max-height:none; overflow:visible; padding:0 12px 4px; }
+  .modal.log-modal .modal-foot{ padding:8px 16px 12px; }
+  .cf-remark-wrap{ margin-top:14px; }
+  .cf-remark-wrap label{ display:block; font-size:12px; font-weight:600; color:var(--text); margin-bottom:5px; }
+  .cf-remark{ width:100%; min-height:56px; height:auto; padding:8px 10px; resize:vertical; line-height:1.5; }
+
+  /* toast */
+  .toast{ position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1f2733; color:#fff;
+    padding:10px 18px; border-radius:8px; font-size:13px; z-index:200; opacity:0; transition:.25s; pointer-events:none; }
   .toast.show{ opacity:1; top:34px; }
-  @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
 </style>
+<link rel="stylesheet" href="../../import/prototype-annotate.css" />
 </head>
 <body>
 <div class="app">
-  <div class="topbar">
-    <h1>Java 删词后续优化 · 普通禁用词按销量分流</h1>
-    <p>只调整原流程「普通禁用词」分支：近 365 天销量 <b>大于 0</b> 进入人工处理，<b>小于等于 0</b> 进入技术处理（提交删词队列）。高危禁用词、商标词、SKU 禁售仍走原流程。基线文档不修改：
-      <a href="https://alidocs.dingtalk.com/i/nodes/Gl6Pm2Db8D3kB579t9yBwbnzJxLq0Ee4" target="_blank" rel="noopener">QQJS-35837</a>
-    </p>
-  </div>
+
   <div class="tabs">
-    <button class="tab active" type="button" data-pane="rule">规则说明</button>
-    <button class="tab" type="button" data-pane="try">分流试算</button>
-    <button class="tab" type="button" data-pane="list">结果列表</button>
+    <div class="tab active">删词处理列表</div>
+    <div class="tab">保留禁用词列表</div>
   </div>
 
-  <div class="pane show" id="rule">
-    <div class="banner">变化点：普通禁用词且近 365 天销量等于 0 时，原流程进人工列表，现改为提交删词队列；销量大于 0 仍人工。线上删词处理列表约 63.7 万「待处理」历史数据也要按新规则重新触发删词流程。</div>
-    <div class="flow">
-      <div class="node old"><b>原流程前置</b>是否禁售 = 否，且不是高危禁用词、不是商标词</div>
-      <div class="arrow">→</div>
-      <div class="node change"><b>本次调整</b>读近 365 天销量<br>大于 0 / 小于等于 0</div>
-      <div class="arrow">→</div>
-      <div class="node manual"><b>大于 0 · 人工处理</b>进入删词待处理列表<br>回写人工（5）</div>
-      <div class="node tech"><b>小于等于 0 · 技术处理</b>提交删词队列，不进人工列表<br>成功回写已删（1）</div>
-    </div>
-  </div>
-
-  <div class="pane" id="try">
-    <div class="grid">
-      <div class="card">
-        <h3>试算</h3>
-        <label>命中情况</label>
-        <select class="ctrl" id="kind">
-          <option value="normal">仅普通禁用词</option>
-          <option value="high">含高危禁用词或商标词</option>
-          <option value="ban">SKU 在该平台站点禁售</option>
+  <!-- 筛选区（按 PRD 1.1.1，紧凑两行布局） -->
+  <div class="filters">
+    <div class="filter-row">
+      <div class="field">
+        <select class="ctrl" style="border-radius:6px 0 0 6px;min-width:110px">
+          <option>ASIN</option><option>系统SKU</option><option>MSKU</option>
         </select>
-        <label>近 365 天销量</label>
-        <input class="ctrl" id="sales" type="number" value="0" />
-        <div style="margin-top:14px"><button class="btn" id="btnCalc" type="button">判断去向</button></div>
-        <div class="result" id="calcResult"></div>
+        <input class="ctrl" placeholder="精准查询，支持批量（空格/换行分隔）" style="min-width:220px" />
       </div>
-      <div class="card">
-        <h3>对照</h3>
-        <p>原流程图：销量大于等于 0 → 人工处理；销量小于 0 → 提交删词队列。</p>
-        <p>本需求：销量大于 0 → 人工处理；销量小于等于 0 → 技术处理。</p>
-        <p>存量：删词处理列表「待处理」约 63.7 万条需按新规则重新触发删词流程，不是只改增量。</p>
+      <select class="ctrl multi"><option>全部店铺</option></select>
+      <select class="ctrl"><option>全部店铺状态</option><option>正常</option><option>异常</option></select>
+      <select class="ctrl"><option>全部配送类型</option><option>FBA</option><option>FBM</option></select>
+      <select class="ctrl"><option>是否纯FBM链接</option><option>是</option><option>否</option></select>
+      <select class="ctrl"><option>是否备货</option><option>是</option><option>否</option></select>
+      <select class="ctrl multi"><option>敏感词类型</option><option>商标词</option><option>普通禁用词</option><option>高危禁用词</option></select>
+      <select class="ctrl" title="选择数值指标后，在下一行填写范围">
+        <option>近30天销量</option><option>近30天订单</option><option>近365天销量</option><option>近365天订单</option>
+        <option>FBA库存</option><option>FBA在途</option><option>建单待发</option><option>全链路库存</option>
+      </select>
+    </div>
+
+    <div class="filter-row">
+      <input class="ctrl" placeholder="请输入" style="min-width:120px" />
+      <span class="sep" style="color:var(--text-3)">~</span>
+      <input class="ctrl" placeholder="请输入" style="min-width:120px" />
+      <div class="date-range">
+        <select class="ctrl" style="min-width:100px"><option>创建日期</option><option>更新日期</option></select>
+        <input class="ctrl" type="date" /><span class="muted">-</span><input class="ctrl" type="date" />
       </div>
+      <div class="status-multi multi" id="filterStatusWrap">
+        <button type="button" class="ctrl status-multi-trigger" id="filterStatusTrigger">
+          <span id="filterStatusLabel">处理状态</span>
+        </button>
+        <div class="status-multi-panel" id="filterStatusPanel">
+          <label class="status-multi-opt"><input type="checkbox" value="wait" />待处理</label>
+          <label class="status-multi-opt"><input type="checkbox" value="todel" />待删除listing</label>
+          <label class="status-multi-opt"><input type="checkbox" value="deling" />删除listing中</label>
+          <label class="status-multi-opt"><input type="checkbox" value="delfail" />删除listing失败</label>
+          <label class="status-multi-opt"><input type="checkbox" value="wordsucc" />删词成功</label>
+          <label class="status-multi-opt"><input type="checkbox" value="wordfail" />删词失败</label>
+          <label class="status-multi-opt"><input type="checkbox" value="keep" />保留</label>
+        </div>
+      </div>
+      <select class="ctrl multi"><option>全部销售人员</option><option>（组织架构）</option></select>
+      <select class="ctrl multi"><option>全部 FBA/FBM 业务员</option><option>（组织架构）</option></select>
+      <button class="btn btn-primary" id="btnSearch" type="button">搜索</button>
+      <button class="btn" id="btnResetFilter" type="button">重置</button>
+      <button class="btn">保存快捷键</button>
     </div>
   </div>
 
-  <div class="pane" id="list">
-    <div class="filters" id="filters">
-      <button class="chip active" type="button" data-f="all">全部</button>
-      <button class="chip" type="button" data-f="manual">人工处理</button>
-      <button class="chip" type="button" data-f="tech">技术处理</button>
-      <button class="chip" type="button" data-f="keep">仍走原流程</button>
+  <!-- 操作栏（批量提取 + 批量操作下拉 + 导出 + 主管确认删除） -->
+  <div class="toolbar">
+    <button class="btn btn-primary" id="btnBatchExtract">批量提取</button>
+    <div class="toolbar-dropdown" id="batchOpDropdown">
+      <button class="btn btn-batch-op" id="btnBatchOpToggle" type="button">批量操作 <span style="font-size:10px">▾</span></button>
+      <div class="toolbar-menu" id="batchOpMenu">
+        <div class="toolbar-mi" data-batch="del">删除listing</div>
+        <div class="toolbar-mi" data-batch="confirmWord">确认删词</div>
+        <div class="toolbar-mi" data-batch="keep">保留</div>
+      </div>
     </div>
+    <div class="toolbar-dropdown" id="exportDropdown">
+      <button class="btn btn-primary" id="btnExportToggle" type="button">导出 <span style="font-size:10px">▾</span></button>
+      <div class="toolbar-menu" id="exportMenu">
+        <div class="toolbar-mi" data-export="selected">选中数据导出</div>
+        <div class="toolbar-mi" data-export="filtered">当前条件导出</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-import-audit" id="btnConfirmDel" title="高级主管权限：对待删除 listing 执行确认删除">确认删除listing</button>
+  </div>
+
+  <div class="group-bar">
+    <span>未分配：无数据</span>
+    <span class="link">隐藏快捷键分组</span>
+    <span class="link">设置快捷键分组</span>
+  </div>
+
+  <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Listing</th><th>敏感词</th><th>近 365 天销量</th><th>分流</th><th>去向</th>
+          <th style="width:56px"><input type="checkbox" id="checkAll" /></th>
+          <th>listing 信息</th>
+          <th>店铺信息</th>
+          <th>销量信息 <span class="sort">↕</span></th>
+          <th>配送类型</th>
+          <th>库存信息 <span class="sort">↕</span></th>
+          <th>产品标签/节日标签</th>
+          <th>敏感词及类型</th>
+          <th>处理状态</th>
+          <th>添加时间/更新时间 <span class="sort">↕</span></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
-</div>
 
-<div class="overlay" id="detailOverlay">
-  <div class="modal">
-    <h3 id="detailTitle">明细</h3>
-    <p id="detailBody"></p>
-    <button class="btn" type="button" id="btnClose">关闭</button>
+  <div class="pager">
+    <span class="total">共 <span id="totalCount">666</span> 条</span>
+    <select class="ctrl" style="height:30px;min-width:90px"><option>200条/页</option><option>50条/页</option><option>100条/页</option></select>
+    <button class="page-btn">‹</button>
+    <button class="page-btn active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <button class="page-btn">4</button>
+    <span class="muted">…</span>
+    <button class="page-btn">›</button>
+    <span class="jump">跳至 <input class="ctrl" value="1" /> 页</span>
   </div>
 </div>
+
+<!-- 通用确认弹窗 -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <div class="modal-head"><span id="cfTitle">提示</span><span class="x" data-close>×</span></div>
+    <div class="modal-body" id="cfBody"></div>
+    <div class="modal-foot">
+      <button class="btn" data-close>取消</button>
+      <button class="btn btn-danger" id="cfOk">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作下拉浮层（共用） -->
+<div class="op-menu" id="opMenu"></div>
+
+<!-- 操作日志 -->
+<div class="overlay" id="logOverlay">
+  <div class="modal log-modal">
+    <div class="modal-head"><span id="logModalTitle">操作日志</span><span class="x" data-close-log>×</span></div>
+    <div class="modal-body">
+      <table class="log-table">
+        <thead><tr><th>操作时间</th><th>操作人</th><th>操作内容</th><th>备注</th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" data-close-log>关闭</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const ROWS = [
-  { id:"B0AAA0001", title:"Storage Bin", kw:"普通禁用词", kwClass:"tag-normal", sales:12, route:"manual", where:"删词待处理列表", note:"销量大于 0，销售人工处理。可确认删词、删 listing、保留。" },
-  { id:"B0AAA0002", title:"Desk Organizer", kw:"普通禁用词", kwClass:"tag-normal", sales:1, route:"manual", where:"删词待处理列表", note:"销量等于 1，仍走人工，不进删词队列。" },
-  { id:"B0AAA0003", title:"Cable Clip", kw:"普通禁用词", kwClass:"tag-normal", sales:0, route:"tech", where:"提交删词队列", note:"销量等于 0。原流程会进人工列表，本次改为技术处理，不进入删词待处理列表。" },
-  { id:"B0AAA0004", title:"Empty Pack", kw:"普通禁用词", kwClass:"tag-normal", sales:0, route:"tech", where:"提交删词队列", note:"另一条销量为 0 的普通禁用词，同样提交删词队列。" },
-  { id:"B0AAA0005", title:"High Risk Lamp", kw:"高危禁用词", kwClass:"tag-high", sales:0, route:"keep", where:"原高危分支", note:"销量虽然为 0，但是高危禁用词，不按本规则改道。" },
-  { id:"B0AAA0006", title:"Brand Bottle", kw:"商标词", kwClass:"tag-tm", sales:20, route:"keep", where:"原商标词分支", note:"商标词保持 QQJS-35837 原分支。" },
-  { id:"B0AAA0007", title:"Banned SKU", kw:"普通禁用词 · SKU禁售", kwClass:"tag-high", sales:0, route:"keep", where:"原禁售删 listing 分支", note:"SKU 禁售仍走提交 listing 删除队列，不受本次销量规则影响。" }
+/* 敏感词类型：tm=商标词, high=高危禁用词, normal=普通禁用词 */
+const CODE_CHARS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const STORE_SITES = ['FR', 'BE', 'DE'];
+function mkRng(seed){
+  let s = seed >>> 0;
+  return ()=>{ s = (s * 1664525 + 1013904223) >>> 0; return s / 0xffffffff; };
+}
+function pickCode(rng, len, charset = CODE_CHARS){
+  let out = '';
+  for(let i = 0; i < len; i++) out += charset[Math.floor(rng() * charset.length)];
+  return out;
+}
+function genAsin(i){ return 'B0' + pickCode(mkRng(9100 + i), 8); }
+function genSku(i){ return pickCode(mkRng(8100 + i), 8, '0123456789'); }
+function genMsku(i){ return pickCode(mkRng(7100 + i), 12) + '…'; }
+function genStore(i){
+  const rng = mkRng(6100 + i);
+  return `Amazon-Z0${pickCode(rng, 5, '0123456789')}-${STORE_SITES[i % STORE_SITES.length]}`;
+}
+function attachCodes(scenarios){
+  return scenarios.map((row, i) => ({
+    ...row,
+    asin: genAsin(i),
+    sku: genSku(i),
+    msku: genMsku(i),
+    store: genStore(i)
+  }));
+}
+
+const rowScenarios = [
+  {
+    img:"🚗", title:"SOLLISTRE fournitures de stationnerie de voiture numér…",
+    normalStore:true, gold:"需餐宴", fbm:"-",
+    s30:"0 (0)", s365:"0 (1)", sale90:0,
+    ship:"self", bind:true, fba:"0", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"SFS", type:"tm", pos:["描述","亮点"]}],
+    status:"wait",
+    copy:{ title:"SOLLISTRE fournitures de voiture", bullet:"SFS qualité premium pour voiture", keywords:"voiture; plaque; SFS", desc:"Accessoire SFS pour stationnement" },
+    add:"2025-10-27 22:21:55", upd:"2025-10-28 10:11:48",
+    logs:[{ time:"2025-08-09 22:02:57", user:"xxx", action:"人工删词", note:"不强制要求" }]
+  },
+  {
+    img:"🖼️", title:"Alipis Lot de 6 cadres photo（异常店铺·不可确认删词）",
+    normalStore:false, gold:"陈桌然", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"fba", bind:false, fba:"12", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"FINIS", type:"tm", pos:["亮点"]}],
+    status:"wait",
+    copy:{ title:"Alipis Lot de 6 cadres photo", bullets:["Lot de 6 cadres photo en bois à bricoler - Cadre photo en bois avec support et verre, cadre photo à bricoler pour bricolage, décoration, cadeau"], keywords:"cadre; photo; bois", desc:"Cadre photo à bricoler" },
+    add:"2025-10-27 22:21:44", upd:"2025-10-28 10:11:27"
+  },
+  {
+    img:"🧤", title:"Mobestech Lot de 8 housses de poignée de porte de réfrig",
+    normalStore:true, gold:"王晓萌", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"self", bind:false, fba:"0", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:"圣诞节",
+    kw:[{w:"GANTS", type:"normal", pos:["标题"]}],
+    status:"wait",
+    copy:{ title:"Mobestech GANTS housses de poignée", bullet:"protection poignée réfrigérateur", keywords:"housse; poignée; cuisine", desc:"Lot de 8 housses décoratives" },
+    add:"2025-10-27 22:21:33", upd:"2025-10-28 10:10:59"
+  },
+  {
+    img:"🧤", title:"Mobestech Lot de 8 housses de poignée de porte (有销量)",
+    normalStore:true, gold:"陈桌然", fbm:"-",
+    s30:"1 (1)", s365:"3 (4)", sale90:8,
+    ship:"fba", bind:true, fba:"36", transit:"10", whWait:"0", whAll:"5",
+    tag:"—", festival:null,
+    kw:[{w:"GANTS", type:"normal", pos:["标题"]}],
+    status:"wait",
+    copy:{ title:"Mobestech GANTS housses poignée premium", bullet:"décoration cuisine", keywords:"housse; poignée", desc:"Lot de 8 housses" },
+    add:"2025-10-27 22:21:21", upd:"2025-10-28 10:10:31"
+  },
+  {
+    img:"🎨", title:"Wsmyp Kit de peinture diamant 5D - Bricolage（高危禁用词）",
+    normalStore:true, gold:"王晓萌", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"fba", bind:false, fba:"58", transit:"0", whWait:"0", whAll:"0",
+    tag:"新品", festival:"圣诞节",
+    kw:[{w:"DISNEY", type:"tm", pos:["标题","描述"]},{w:"mercury", type:"high", pos:["描述"]}],
+    status:"wordfail",
+    copy:{ title:"Wsmyp DISNEY peinture diamant 5D", bullet:"kit complet bricolage", keywords:"diamant; peinture; DISNEY", desc:"Contient mercury free, DISNEY design" },
+    add:"2025-10-27 22:20:58", upd:"2025-10-28 10:09:47"
+  },
+  {
+    img:"🔧", title:"Outils de réparation tournevis 24 en 1（删词成功·待剔除）",
+    normalStore:true, gold:"需餐宴", fbm:"绑定BMlist",
+    s30:"0 (0)", s365:"5 (6)", sale90:0,
+    ship:"self", bind:true, fba:"0", transit:"0", whWait:"8", whAll:"8",
+    tag:"—", festival:null,
+    kw:[{w:"BOSCH", type:"tm", pos:["标题"]}],
+    status:"wordsucc",
+    copy:{ title:"Outils tournevis 24 en 1", bullet:"kit réparation", keywords:"tournevis; outils", desc:"24 en 1 outils" },
+    add:"2025-10-27 22:20:33", upd:"2025-10-28 10:09:12",
+    logs:[
+      { time:"2025-08-09 22:02:57", user:"演示用户", action:"确认删词", note:"已在平台完成人工删词" },
+      { time:"2025-08-10 08:00:00", user:"系统", action:"回扫通过", note:"文案无敏感词，待剔除列表" }
+    ]
+  },
+  {
+    img:"📦", title:"Lot de rangement plastique（保留状态·普通禁用词）",
+    normalStore:true, gold:"陈桌然", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"fba", bind:false, fba:"20", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"best seller", type:"normal", pos:["亮点"]}],
+    status:"keep",
+    copy:{ title:"Lot de rangement plastique", bullet:"best seller rangement maison", keywords:"rangement; boite", desc:"Boîtes empilables" },
+    add:"2025-10-27 22:20:10", upd:"2025-10-28 10:08:40",
+    logs:[{ time:"2025-08-09 22:03:11", user:"xxx", action:"保留", note:"" }]
+  },
+  {
+    img:"💡", title:"Guirlande lumineuse LED（删除失败）",
+    normalStore:true, gold:"王晓萌", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"self", bind:false, fba:"0", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:"圣诞节",
+    kw:[{w:"PHILIPS", type:"tm", pos:["标题"]}],
+    status:"delfail",
+    copy:{ title:"PHILIPS guirlande LED", bullet:"décoration Noël", keywords:"LED; guirlande", desc:"50m guirlande lumineuse" },
+    add:"2025-10-27 22:19:55", upd:"2025-10-28 10:08:11",
+    logs:[
+      { time:"2025-08-10 02:15:00", user:"高级主管", action:"高级主管确认删除listing", note:"业务审核通过" },
+      { time:"2025-08-10 02:20:00", user:"系统", action:"已加入删除listing队列", note:"定时任务入队" },
+      { time:"2025-08-11 09:00:00", user:"系统", action:"队列执行完成", note:"删除失败：平台限制不可删" }
+    ]
+  },
+  {
+    img:"📋", title:"Coffret rangement bureau（待删除listing·待主管确认）",
+    normalStore:true, gold:"陈桌然", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"fba", bind:false, fba:"5", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"IKEA", type:"tm", pos:["标题"]}],
+    status:"todel",
+    copy:{ title:"Coffret rangement bureau", bullet:"organisation", keywords:"boite; bureau", desc:"Set de rangement" },
+    add:"2025-10-27 22:19:40", upd:"2025-10-28 09:55:00",
+    logs:[{ time:"2025-08-09 22:03:11", user:"演示用户", action:"删除listing", note:"" }]
+  },
+  {
+    img:"📋", title:"Boîte de rangement bureau XL（待删除listing·可批量确认）",
+    normalStore:true, gold:"王晓萌", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"fba", bind:false, fba:"3", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"3M", type:"tm", pos:["标题"]}],
+    status:"todel",
+    copy:{ title:"Boîte de rangement bureau XL", bullet:"organisation bureau", keywords:"boite; bureau", desc:"Rangement XL" },
+    add:"2025-10-27 22:19:35", upd:"2025-10-28 09:50:00",
+    logs:[{ time:"2025-08-09 22:03:11", user:"演示用户", action:"删除listing", note:"批量提交" }]
+  },
+  {
+    img:"⏳", title:"Support téléphone voiture（删除listing中·等待队列回写）",
+    normalStore:true, gold:"王晓萌", fbm:"-",
+    s30:"0 (0)", s365:"0 (0)", sale90:0,
+    ship:"self", bind:false, fba:"0", transit:"0", whWait:"0", whAll:"0",
+    tag:"—", festival:null,
+    kw:[{w:"APPLE", type:"tm", pos:["描述"]}],
+    status:"deling",
+    queued:true,
+    copy:{ title:"Support téléphone voiture", bullet:"fixation stable", keywords:"support; voiture", desc:"Compatible APPLE design" },
+    add:"2025-10-27 22:19:20", upd:"2025-10-28 09:30:00",
+    logs:[
+      { time:"2025-08-09 22:03:11", user:"高级主管", action:"高级主管确认删除listing", note:"业务审核通过" },
+      { time:"2025-08-10 02:00:00", user:"系统", action:"已加入删除listing队列", note:"定时任务入队" }
+    ]
+  }
 ];
-const LABEL = { manual:"人工处理", tech:"技术处理", keep:"仍走原流程" };
-const TAG = { manual:"tag-manual", tech:"tag-tech", keep:"tag-keep" };
+const rows = attachCodes(rowScenarios);
 
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 1800);
+function nowStr(){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+function addRowLog(rowIndex, action, note="", user="演示用户"){
+  const r = rows[rowIndex];
+  if(!r.logs) r.logs = [];
+  r.logs.unshift({ time:nowStr(), user, action, note });
+}
+function renderLogs(entries){
+  const list = entries && entries.length ? entries : [{ time:"—", user:"—", action:"暂无操作记录", note:"" }];
+  document.getElementById("logBody").innerHTML = list.map(l=>{
+    const note = (l.note === undefined || l.note === null || l.note === "") ? "—" : l.note;
+    return `<tr><td>${l.time}</td><td>${l.user}</td><td>${l.action}</td><td>${note}</td></tr>`;
+  }).join("");
+}
+function openRowLog(rowIndex){
+  const r = rows[rowIndex];
+  document.getElementById("logModalTitle").textContent = `操作日志 · ASIN ${r.asin}`;
+  renderLogs(r.logs);
+  logOverlay.classList.add("show");
 }
 
-function decide(kind, sales){
-  if(kind === "ban") return { cls:"keep", title:"仍走原流程", text:"SKU 在对应平台站点禁售，走原「提交 listing 删除队列」分支，不按销量改道。" };
-  if(kind === "high") return { cls:"keep", title:"仍走原流程", text:"同时或单独命中高危禁用词 / 商标词时，走原高危、商标词分支。" };
-  if(sales === "" || sales === null || Number.isNaN(Number(sales))) return { cls:"keep", title:"不能按 0 处理", text:"销量为空。待补充正式规则前，不提交删词队列，也不当成销量等于 0。" };
-  const n = Number(sales);
-  if(n > 0) return { cls:"manual", title:"人工处理", text:"近 365 天销量大于 0，进入删词待处理列表。流程结束在人工节点时回写状态 5。" };
-  return { cls:"tech", title:"技术处理", text:"近 365 天销量小于等于 0，提交删词队列，不进入删词待处理列表。成功回写已删（1），失败沿用原失败码。" };
-}
-
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".pane").forEach(p => p.classList.remove("show"));
-    tab.classList.add("active");
-    document.getElementById(tab.dataset.pane).classList.add("show");
-  };
-});
-
-document.getElementById("btnCalc").onclick = () => {
-  const kind = document.getElementById("kind").value;
-  const raw = document.getElementById("sales").value;
-  const box = document.getElementById("calcResult");
-  const r = decide(kind, raw);
-  box.className = "result show " + r.cls;
-  box.innerHTML = "<b>" + r.title + "</b><br>" + r.text;
+const TYPE_LABEL = { tm:"商标词", high:"高危禁用词", normal:"普通禁用词" };
+const TYPE_CLASS = { tm:"type-tm", high:"type-high", normal:"type-normal" };
+const STATUS = {
+  wait:{ t:"待处理", c:"st-wait" },
+  todel:{ t:"待删除listing", c:"st-todel", tip:"已提交删 listing，待导出供业务确认；高级主管确认后进入删除 listing 中" },
+  deling:{ t:"删除listing中", c:"st-deling", tip:"已提交删除任务，等待队列执行；最终结果以后台处理为准" },
+  delfail:{ t:"删除listing失败", c:"st-delfail", tip:"队列执行或对账失败，详见操作日志" },
+  toword:{ t:"待删词", c:"st-toword", tip:"已确认人工删词，系统回扫中（本列表不展示）" },
+  wordsucc:{ t:"删词成功", c:"st-wordsucc", tip:"回扫确认文案无敏感词，将从列表剔除" },
+  wordfail:{ t:"删词失败", c:"st-wordfail", tip:"回扫仍含敏感词或队列失败，详见操作日志" },
+  keep:{ t:"保留", c:"st-keep" }
 };
+/* 文档：待删词、删词中、删除listing成功 — 列表不展示 */
+const HIDDEN_LIST_STATUSES = new Set(["toword"]);
+const LOCKED_STATUSES = new Set(["todel","deling","delfail","toword","wordsucc","wordfail"]);
+let statusFilters = new Set();
 
-let filter = "all";
+function readStatusFilterChecks(){
+  return new Set(
+    [...document.querySelectorAll('#filterStatusPanel input[type=checkbox]:checked')].map(el => el.value)
+  );
+}
+function syncStatusFilterChecks(){
+  document.querySelectorAll('#filterStatusPanel input[type=checkbox]').forEach(el => {
+    el.checked = statusFilters.has(el.value);
+  });
+}
+function updateStatusFilterLabel(){
+  const el = document.getElementById('filterStatusLabel');
+  if(!statusFilters.size){
+    el.textContent = '处理状态';
+    return;
+  }
+  const names = [...statusFilters].map(k => STATUS[k].t);
+  el.textContent = names.length <= 2 ? names.join('、') : `处理状态（${names.length}）`;
+}
+function hideStatusFilterPanel(){
+  document.getElementById('filterStatusPanel')?.classList.remove('show');
+}
+
+function getVisibleRows(){
+  const all = rows.map((r, i) => ({ r, i }));
+  if(!statusFilters.size) return all.filter(x => !HIDDEN_LIST_STATUSES.has(x.r.status));
+  return all.filter(x => statusFilters.has(x.r.status));
+}
+
+function statusPill(r){
+  const s = STATUS[r.status];
+  const tip = s.tip ? ` title="${s.tip}"` : "";
+  return `<span class="pill ${s.c}"${tip}>${s.t}</span>`;
+}
+function shipCell(r){
+  const badge = r.ship==="fba" ? '<span class="tag tag-fba">FBA</span>' : '<span class="tag tag-ship-self">自发</span>';
+  const bind = r.bind ? '<span class="bind">绑定 BMlist</span>' : '';
+  return `<div class="ship-cell"><span class="tag-amz">amazon</span>${badge}${bind}</div>`;
+}
+function kwCell(r){
+  return r.kw.map(k=>`<div class="kw-item">
+      <span class="kw-word ${k.type}">${k.w}</span>
+      <span class="kw-type ${TYPE_CLASS[k.type]}">${TYPE_LABEL[k.type]}</span>
+      <span class="kw-pos">【${k.pos.join('、')}】</span>
+    </div>`).join('');
+}
+function tagCell(r){
+  let html = r.tag==="—" ? '<span class="dash">—</span>' : r.tag;
+  if(r.festival) html += `<br><span class="festival">${r.festival}</span>`;
+  return html;
+}
+
+/* 操作可用性规则（PRD 1.1.2.1） */
+function canDelete(r){ return r.sale90===0 && (r.status==="wait"||r.status==="keep"); }          // 删listing：90天销量=0 且 待处理/保留
+function canConfirmDelete(r){ return r.status==="todel"; }                                       // 确认删除listing：仅待删除listing（高级主管）
+function canConfirmWord(r){ return (r.status==="wait"||r.status==="keep") && r.normalStore; }   // 确认删词：待处理/保留 且 正常店铺
+function canKeep(r){ return r.kw.some(k=>k.type==="normal") && r.status==="wait"; }             // 保留：含普通禁用词 且 待处理
+
+function delReason(r){
+  if(r.sale90!==0) return "近90天销量≠0，不可删listing";
+  if(r.status==="todel") return "已在待删除 listing，请导出供业务确认后由高级主管确认删除";
+  if(r.status==="deling") return "删除 listing 中，不可操作";
+  if(r.status==="delfail") return "删除 listing 失败，不可操作";
+  if(!(r.status==="wait"||r.status==="keep")) return "仅待处理/保留状态可删listing";
+  return "";
+}
+function confirmWordReason(r){
+  if(r.status==="todel") return "待删除 listing，不可确认删词";
+  if(LOCKED_STATUSES.has(r.status) && r.status!=="todel") return `${STATUS[r.status].t}，不可确认删词`;
+  if(!(r.status==="wait"||r.status==="keep")) return "仅待处理/保留状态可确认删词";
+  if(!r.normalStore) return "异常店铺不可确认删词";
+  return "";
+}
+function keepReason(r){
+  if(r.status==="todel") return "待删除 listing，不可保留";
+  if(LOCKED_STATUSES.has(r.status) && r.status!=="wait") return `${STATUS[r.status].t}，不可保留`;
+  if(!r.kw.some(k=>k.type==="normal")) return "仅普通禁用词可保留";
+  if(r.status!=="wait") return "仅待处理状态可保留";
+  return "";
+}
+function confirmDelReason(r){
+  if(r.status!=="todel") return "仅待删除 listing 状态可由高级主管确认删除";
+  return "";
+}
+
+function buildOpMenu(r){
+  const item=(label,enabled,reason,act)=> enabled
+    ? `<div class="op-mi" data-act="${act}">${label}</div>`
+    : `<div class="op-mi disabled" title="${reason}">${label}</div>`;
+  return item("删除listing",canDelete(r),delReason(r),"del")
+       + item("确认删除listing",canConfirmDelete(r),confirmDelReason(r),"confirmDel")
+       + item("确认删词",canConfirmWord(r),confirmWordReason(r),"confirmWord")
+       + item("保留",canKeep(r),keepReason(r),"keep");
+}
+
 function render(){
-  const body = document.getElementById("tbody");
-  body.innerHTML = ROWS.filter(r => filter === "all" || r.route === filter).map(r => `
-    <tr data-id="${r.id}">
-      <td><b>${r.id}</b><br><span style="color:#5b6577">${r.title}</span></td>
-      <td><span class="tag ${r.kwClass}">${r.kw}</span></td>
-      <td>${r.sales}</td>
-      <td><span class="tag ${TAG[r.route]}">${LABEL[r.route]}</span></td>
-      <td>${r.where}</td>
-    </tr>`).join("");
-  body.querySelectorAll("tr").forEach(tr => {
-    tr.onclick = () => {
-      const row = ROWS.find(x => x.id === tr.dataset.id);
-      document.getElementById("detailTitle").textContent = row.id + " · " + LABEL[row.route];
-      document.getElementById("detailBody").textContent = row.note;
-      document.getElementById("detailOverlay").classList.add("show");
+  const visible = getVisibleRows();
+  document.getElementById('tbody').innerHTML = visible.map(({ r, i })=>`
+    <tr data-i="${i}">
+      <td><div class="ck-op">
+        <input type="checkbox" class="rowck" ${ (r.status==="wait"||r.status==="keep"||r.status==="todel") ? "" : "disabled title='待处理/保留可批量删listing；待删除listing可批量确认'" } />
+        <span class="op-trigger" data-trigger="${i}">操作 <span class="caret">▾</span></span>
+      </div></td>
+      <td>
+        <div class="listing">
+          <div class="thumb">${r.img}</div>
+          <div class="info">
+            <div class="title">${r.title}</div>
+            <div class="kv">ASIN：<span class="code">${r.asin}</span><span class="copy">⧉</span></div>
+            <div class="kv">系统SKU：<b>${r.sku}</b></div>
+            <div class="kv">MSKU：<b>${r.msku}</b><span class="copy">⧉</span></div>
+          </div>
+        </div>
+      </td>
+      <td><div class="store">
+        <div class="row"><span class="flag">🇧🇪</span><span class="name">${r.store}</span></div>
+        <div class="row">黄金业务员：${r.gold}</div>
+        <div class="row">FBM业务员：${r.fbm}</div>
+        <div class="row">店铺状态：${ r.normalStore ? "正常" : '<span class="abn">异常</span>' }</div>
+      </div></td>
+      <td><div class="sales">
+        <div class="row">近30天销量(订单)：${r.s30}</div>
+        <div class="row">近365天销量(订单)：${r.s365}</div>
+        <div class="row">近90天销量：<b>${r.sale90}</b></div>
+      </div></td>
+      <td>${shipCell(r)}</td>
+      <td><div class="stock">
+        <div class="row">FBA库存：${r.fba}</div>
+        <div class="row">FBA在途：${r.transit}</div>
+        <div class="row">建单待发：${r.whWait}</div>
+        <div class="row">全链路库存：${r.whAll}</div>
+      </div></td>
+      <td>${tagCell(r)}</td>
+      <td>${kwCell(r)}</td>
+      <td>${statusPill(r)}</td>
+      <td><div class="time">${r.add}<br>${r.upd}<br><span class="link row-log" data-log="${i}">操作日志</span></div></td>
+    </tr>
+  `).join('');
+  bindRowActions();
+  bindRowLogActions();
+  updateSel();
+  document.getElementById('totalCount').textContent = visible.length;
+}
+const overlay = document.getElementById('confirmOverlay');
+const cfTitle = document.getElementById('cfTitle');
+const cfBody = document.getElementById('cfBody');
+const cfOk = document.getElementById('cfOk');
+let okHandler = null;
+function confirmRemarkHtml(){
+  return `<div class="cf-remark-wrap">
+    <label for="cfRemark">备注</label>
+    <textarea class="ctrl cf-remark" id="cfRemark" placeholder="选填，将写入该行操作日志"></textarea>
+  </div>`;
+}
+function getConfirmRemark(){
+  const el = document.getElementById('cfRemark');
+  return el ? el.value.trim() : '';
+}
+function confirmBox(title, html, onOk, options={}){
+  const showRemark = options.showRemark !== false;
+  cfTitle.innerHTML = title;
+  cfBody.innerHTML = html + (showRemark ? confirmRemarkHtml() : '');
+  okHandler = onOk;
+  cfOk.textContent = options.okText || '确认';
+  cfOk.className = options.okClass || 'btn btn-danger';
+  cfOk.onclick = ()=>{
+    const remark = showRemark ? getConfirmRemark() : '';
+    if(okHandler) okHandler(remark);
+    overlay.classList.remove('show');
+  };
+  overlay.classList.add('show');
+}
+overlay.querySelectorAll('[data-close]').forEach(b=> b.onclick=()=> overlay.classList.remove('show'));
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+/* 操作下拉浮层 */
+const opMenu = document.getElementById('opMenu');
+let opMenuRow = -1;
+function hideOpMenu(){ opMenu.classList.remove('show'); opMenuRow = -1; }
+function doAct(i, act){
+  const r = rows[i];
+  if(act==="del"){
+    confirmBox('⚠️ 删除 listing 确认',
+      `确认提交删除该 listing？<br><br>ASIN：<b>${r.asin}</b><br>近90天销量：<b>${r.sale90}</b><br><br>状态将变更为「<b>待删除listing</b>」。请导出待删除数据供业务确认，<b>高级主管确认后</b>将进入「删除listing中」并加入删 listing 队列。`,
+      (remark)=>{
+        r.status="todel"; r.upd=nowStr();
+        addRowLog(i, "删除listing", remark);
+        render(); toast('已提交，状态更新为「待删除listing」，已写入操作日志');
+      });
+  } else if(act==="confirmDel"){
+    confirmBox('⚠️ 高级主管确认删除 listing',
+      `确认对该 listing 执行删除？<br><br>ASIN：<b>${r.asin}</b><br>MSKU：<b>${r.msku}</b><br>店铺：<b>${r.store}</b><br><br>确认后状态将变更为「<b>删除listing中</b>」，系统将定时加入删 listing 队列。`,
+      (remark)=>{
+        r.status="deling"; r.upd=nowStr();
+        addRowLog(i, "高级主管确认删除listing", remark, "高级主管");
+        render(); toast('已确认删除，状态更新为「删除listing中」，已写入操作日志');
+      }, { okText: '确认删除', okClass: 'btn btn-danger' });
+  } else if(act==="confirmWord"){
+    const kwList = r.kw.map(k=>k.w).join('、') || '—';
+    confirmBox('确认删词',
+      `本页<b>不支持在线改文案</b>，请先在平台完成人工删词后再确认。<br><br>ASIN：<b>${r.asin}</b><br>敏感词：<b>${kwList}</b>`,
+      (remark)=>{
+        r.status="toword"; r.upd=nowStr();
+        addRowLog(i, "确认删词", remark);
+        render(); toast('已确认删词，系统回扫中；本列表不展示「待删词」状态');
+      });
+  } else if(act==="keep"){
+    confirmBox('保留确认',
+      `确认将该 listing 标记为「保留」？<br><br>仅普通禁用词可保留：<b>${r.kw.filter(k=>k.type==='normal').map(k=>k.w).join('、') || '—'}</b>`,
+      (remark)=>{
+        r.status="keep"; r.upd=nowStr();
+        addRowLog(i, "保留", remark);
+        render(); toast('已保留，状态更新为「保留」，已写入操作日志');
+      });
+  }
+}
+function bindRowActions(){
+  document.querySelectorAll('#tbody [data-trigger]').forEach(t=>{
+    t.onclick = (e)=>{
+      e.stopPropagation();
+      const i = +t.dataset.trigger;
+      if(opMenu.classList.contains('show') && opMenuRow===i){ hideOpMenu(); return; }
+      opMenuRow = i;
+      opMenu.innerHTML = buildOpMenu(rows[i]);
+      opMenu.classList.add('show');
+      const rect = t.getBoundingClientRect();
+      let top = rect.bottom + 4, left = rect.left;
+      if(top + opMenu.offsetHeight > window.innerHeight) top = rect.top - opMenu.offsetHeight - 4;
+      if(left + opMenu.offsetWidth > window.innerWidth) left = window.innerWidth - opMenu.offsetWidth - 8;
+      opMenu.style.top = top + 'px'; opMenu.style.left = left + 'px';
+      opMenu.querySelectorAll('.op-mi[data-act]').forEach(a=>{
+        a.onclick = (ev)=>{
+          ev.stopPropagation();
+          const act = a.dataset.act;
+          const rowIndex = i;
+          hideOpMenu();
+          doAct(rowIndex, act);
+        };
+      });
     };
   });
 }
-document.getElementById("filters").onclick = (e) => {
-  const btn = e.target.closest(".chip");
-  if(!btn) return;
-  filter = btn.dataset.f;
-  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === btn));
-  render();
+function bindRowLogActions(){
+  document.querySelectorAll('.row-log').forEach(el=>{
+    el.onclick = (e)=>{
+      e.stopPropagation();
+      openRowLog(+el.dataset.log);
+    };
+  });
+}
+
+/* 全选 / 批量 */
+const checkAll = document.getElementById('checkAll');
+checkAll.addEventListener('change', e=>{
+  document.querySelectorAll('.rowck:not([disabled])').forEach(c=> c.checked = e.target.checked);
+  updateSel();
+});
+function updateSel(){
+  document.querySelectorAll('.rowck').forEach(c=> c.onchange = updateSelCount);
+}
+function updateSelCount(){ /* 原版无已选计数 */ }
+
+function getCheckedRows(){
+  return [...document.querySelectorAll('.rowck:checked')];
+}
+function resolveBatchScope(){
+  const checked = getCheckedRows();
+  if(checked.length) return { scope:'selected', indices: checked.map(c => +c.closest('tr').dataset.i) };
+  const filtered = getVisibleRows().map(x => x.i);
+  return { scope:'filter', indices: filtered };
+}
+function batchScopeLabel(scope){
+  return scope === 'filter' ? '当前条件下' : '已勾选';
+}
+function batchDeleteListing(){
+  const { scope, indices } = resolveBatchScope();
+  if(!indices.length){
+    toast('当前筛选条件下无数据');
+    return;
+  }
+  const eligible = indices.filter(i => canDelete(rows[i]));
+  if(!eligible.length){
+    toast('无符合条件数据：仅「待处理/保留」且近90天销量=0 可删 listing');
+    return;
+  }
+  confirmBox('⚠️ 删除 listing 确认',
+    `确认对<b>${batchScopeLabel(scope)}</b>的 <b>${eligible.length}</b> 条 listing 提交删除？<br><span style="color:#97a0b0;font-size:12px">状态将变更为「待删除listing」，仅待处理 / 保留状态可操作。</span>`,
+    (remark)=>{
+      eligible.forEach(i=>{
+        rows[i].status="todel"; rows[i].upd=nowStr();
+        addRowLog(i, "删除listing", remark);
+      });
+      checkAll.checked=false; render();
+      toast(`已删除 listing ${eligible.length} 条，状态更新为「待删除listing」`);
+    });
+}
+function batchConfirmWord(){
+  const { scope, indices } = resolveBatchScope();
+  if(!indices.length){
+    toast('当前筛选条件下无数据');
+    return;
+  }
+  const eligible = indices.filter(i => canConfirmWord(rows[i]));
+  if(!eligible.length){
+    toast('无符合条件数据：仅「待处理/保留」且正常店铺可确认删词');
+    return;
+  }
+  confirmBox('确认删词',
+    `确认对<b>${batchScopeLabel(scope)}</b>的 <b>${eligible.length}</b> 条 listing 执行确认删词？<br><span style="color:#97a0b0;font-size:12px">请确保已在平台完成人工删词；本页不支持在线改文案。</span>`,
+    (remark)=>{
+      eligible.forEach(i=>{
+        rows[i].status="toword"; rows[i].upd=nowStr();
+        addRowLog(i, "确认删词", remark);
+      });
+      checkAll.checked=false; render();
+      toast(`已确认删词 ${eligible.length} 条，系统回扫中`);
+    });
+}
+function batchKeepListing(){
+  const { scope, indices } = resolveBatchScope();
+  if(!indices.length){
+    toast('当前筛选条件下无数据');
+    return;
+  }
+  const eligible = indices.filter(i => canKeep(rows[i]));
+  if(!eligible.length){
+    toast('无符合条件数据：仅「待处理」且含「普通禁用词」可保留');
+    return;
+  }
+  confirmBox('保留确认',
+    `确认对<b>${batchScopeLabel(scope)}</b>的 <b>${eligible.length}</b> 条 listing 标记为「保留」？`,
+    (remark)=>{
+      eligible.forEach(i=>{
+        rows[i].status="keep"; rows[i].upd=nowStr();
+        addRowLog(i, "保留", remark);
+      });
+      checkAll.checked=false; render(); toast(`已保留 ${eligible.length} 条`);
+    });
+}
+function batchConfirmDeleteListing(){
+  const { scope, indices } = resolveBatchScope();
+  if(!indices.length){
+    toast('当前筛选条件下无数据');
+    return;
+  }
+  const eligible = indices.filter(i => canConfirmDelete(rows[i]));
+  if(!eligible.length){
+    toast('无符合条件数据：仅「待删除listing」状态可由高级主管确认删除');
+    return;
+  }
+  confirmBox('⚠️ 确认删除 listing',
+    `确认对<b>${batchScopeLabel(scope)}</b>的 <b>${eligible.length}</b> 条待删除 listing 执行删除？<br><span style="color:#97a0b0;font-size:12px">确认后状态将变更为「删除listing中」，系统将定时加入删 listing 队列。</span>`,
+    (remark)=>{
+      eligible.forEach(i=>{
+        rows[i].status="deling"; rows[i].upd=nowStr();
+        addRowLog(i, "高级主管确认删除listing", remark, "高级主管");
+      });
+      checkAll.checked=false; render(); toast(`已确认删除 ${eligible.length} 条，状态更新为「删除listing中」`);
+    }, { okText: '确认删除', okClass: 'btn btn-danger' });
+}
+
+const batchOpMenu = document.getElementById('batchOpMenu');
+const batchOpDropdown = document.getElementById('batchOpDropdown');
+function hideBatchOpMenu(){ batchOpMenu.classList.remove('show'); }
+document.getElementById('btnBatchOpToggle').onclick = (e)=>{
+  e.stopPropagation();
+  batchOpMenu.classList.toggle('show');
 };
-document.getElementById("btnClose").onclick = () => document.getElementById("detailOverlay").classList.remove("show");
+batchOpMenu.querySelectorAll('[data-batch]').forEach(mi=>{
+  mi.onclick = (e)=>{
+    e.stopPropagation();
+    hideBatchOpMenu();
+    if(mi.dataset.batch==="del") batchDeleteListing();
+    else if(mi.dataset.batch==="confirmWord") batchConfirmWord();
+    else batchKeepListing();
+  };
+});
+document.addEventListener('click', ()=>{ hideBatchOpMenu(); hideExportMenu(); hideOpMenu(); hideStatusFilterPanel(); });
+window.addEventListener('scroll', ()=>{ hideBatchOpMenu(); hideExportMenu(); hideOpMenu(); hideStatusFilterPanel(); }, true);
+
+const filterStatusTrigger = document.getElementById('filterStatusTrigger');
+const filterStatusPanel = document.getElementById('filterStatusPanel');
+filterStatusTrigger.onclick = (e)=>{
+  e.stopPropagation();
+  hideBatchOpMenu();
+  hideExportMenu();
+  hideOpMenu();
+  syncStatusFilterChecks();
+  filterStatusPanel.classList.toggle('show');
+};
+filterStatusPanel.onclick = (e)=> e.stopPropagation();
+
+const exportMenu = document.getElementById('exportMenu');
+function hideExportMenu(){ exportMenu.classList.remove('show'); }
+document.getElementById('btnExportToggle').onclick = (e)=>{
+  e.stopPropagation();
+  hideBatchOpMenu();
+  exportMenu.classList.toggle('show');
+};
+exportMenu.querySelectorAll('[data-export]').forEach(mi=>{
+  mi.onclick = (e)=>{
+    e.stopPropagation();
+    hideExportMenu();
+    if(mi.dataset.export === 'selected'){
+      const checked = getCheckedRows();
+      if(!checked.length){ toast('请先勾选需要导出的数据'); return; }
+      checked.forEach(c=>{
+        const i = +c.closest('tr').dataset.i;
+        if(rows[i].status === 'todel') addRowLog(i, '导出待删除listing', '');
+      });
+      toast(`已导出选中 ${checked.length} 条数据`);
+      return;
+    }
+    rows.forEach((r,i)=>{ if(r.status === 'todel') addRowLog(i, '导出待删除listing', ''); });
+    const n = getVisibleRows().length;
+    toast(`已按当前条件导出 ${n} 条数据`);
+  };
+});
+
+document.getElementById('btnSearch').onclick = ()=>{
+  statusFilters = readStatusFilterChecks();
+  updateStatusFilterLabel();
+  hideStatusFilterPanel();
+  render();
+  if(statusFilters.size){
+    const names = [...statusFilters].map(k => STATUS[k].t).join('、');
+    toast(`已筛选：${names}，共 ${getVisibleRows().length} 条`);
+  } else {
+    toast('已显示全部处理状态');
+  }
+};
+document.getElementById('btnResetFilter').onclick = ()=>{
+  statusFilters = new Set();
+  document.querySelectorAll('#filterStatusPanel input[type=checkbox]').forEach(el => { el.checked = false; });
+  updateStatusFilterLabel();
+  hideStatusFilterPanel();
+  render();
+  toast('已重置筛选');
+};
+
+document.getElementById('btnBatchExtract').onclick = ()=>{
+  const n = getCheckedRows().length;
+  if(!n){ toast('请先勾选需要提取的 listing'); return; }
+  toast(`已批量提取 ${n} 条（原型演示）`);
+};
+
+document.getElementById('btnConfirmDel').onclick = batchConfirmDeleteListing;
+
+const logOverlay = document.getElementById('logOverlay');
+logOverlay.querySelectorAll('[data-close-log]').forEach(b=> b.onclick=()=> logOverlay.classList.remove('show'));
+
+document.querySelectorAll('.page-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    if(b.textContent==='‹'||b.textContent==='›') return;
+    document.querySelectorAll('.page-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+
 render();
 </script>
 <script src="../../import/prototype-annotate.js"></script>
 <script>
 PrototypeAnnotate.init({
-  storageKey: "java-shanci-putongci-annotations",
-  exportTitle: "普通禁用词按销量分流",
-  exportFilename: "普通禁用词按销量分流-原型标注.md",
-  scopeLabels: { page: "页面", detailOverlay: "分流明细" },
+  storageKey: 'java-shanci-putongci-annotations',
+  exportTitle: '删词处理列表（普通禁用词按销量分流）',
+  exportFilename: '删词处理列表-普通禁用词按销量分流-原型标注.md',
+  scopeLabels: {
+    page: '页面',
+    confirmOverlay: '确认弹窗',
+    logOverlay: '操作日志'
+  },
   builtins: [
-    { id: 1, scope: "page", x: 28, y: 118, text: "本次只改普通禁用词：近365天销量大于0人工处理，小于等于0技术处理（提交删词队列）。销量等于0是变化点。" }
+    { scope: 'page', pin: { top: '72px', left: 'calc(100% - 260px)' }, text: '批量操作：有勾选则作用于勾选行，无勾选则作用于当前筛选结果。' }
   ],
-  toast
+  toast,
+  nowStr
 });
 </script>
 </body>
