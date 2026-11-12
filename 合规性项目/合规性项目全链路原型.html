@@ -1649,7 +1649,7 @@
                 </div>
 
                 <div class="form-field scope-time-only">
-                  <label><span class="req">*</span>回扫产品类目</label>
+                  <label>回扫产品类目</label>
                   <div class="ctl">
                     <span class="link" id="openRescanCategoryModal" style="cursor:pointer">＋ 选择类目</span>
                     <div class="picked" id="rescanCategoryPicked"></div>
@@ -3367,7 +3367,9 @@
       rescanCategories = new Set(draftRescanCategories);
       renderRescanCategoryPicked();
       closeRescanCategoryModal();
-      if (!rescanCategories.size) showToast('未选择产品类目');
+      showToast(rescanCategories.size
+        ? `已选择 ${rescanCategories.size} 个产品类目`
+        : '未选类目，提交时不限产品类目');
     });
     document.getElementById('amzCatAccumulateBtn')?.addEventListener('click', accumulateCurrentAmzCat);
     document.querySelectorAll('[data-amz-cat-tab]').forEach(btn => {
