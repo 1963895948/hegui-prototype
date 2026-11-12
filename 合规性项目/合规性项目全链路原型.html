@@ -721,6 +721,15 @@
     .site-icon.ok{background:#e8f8ee;color:var(--ok)}
     .site-icon.risk{background:#fff1f0;color:var(--danger)}
     .cell-sites{font-size:11px;color:var(--sub);line-height:1.5;max-width:200px}
+    #rescan-detail .rescan-detail-table-wrap{
+      width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:#fff;
+      -webkit-overflow-scrolling:touch;
+    }
+    #rescan-detail .rescan-detail-table-wrap table{
+      min-width:1480px;width:max-content;margin:0;border:none;
+    }
+    #rescan-detail .rescan-detail-table-wrap th{white-space:nowrap}
+    #rescan-detail .cell-sync-status{white-space:nowrap;font-size:12px}
     .thumb{width:48px;height:48px;background:#eef1f6;border-radius:4px;flex:none}
 
     /* 合规性提交检测 */
@@ -1978,12 +1987,13 @@
             <button class="btn pri">按筛选条件导出</button>
           </div>
 
+          <div class="rescan-detail-table-wrap">
           <table>
             <thead>
               <tr>
                 <th><input type="checkbox" /></th>
                 <th>编号</th><th>产品图</th><th>SKU</th><th>产品名称 / 类目</th>
-                <th>sku已标记合规站点</th><th>回扫站点</th><th>系统检测结果 / 说明</th><th>审核结果</th><th>业务配置合规站点</th><th>业务配置合规认证</th><th>审核说明</th><th>操作人</th><th>操作时间</th><th>操作</th>
+                <th>sku已标记合规站点</th><th>回扫站点</th><th>系统检测结果 / 说明</th><th>审核结果</th><th>业务配置合规站点</th><th>业务配置合规认证</th><th>审核说明</th><th>同步状态</th><th>操作人</th><th>操作时间</th><th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -2000,6 +2010,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
+                <td class="cell-sync-status" data-sync-status="">—</td>
                 <td class="cell-meta">
                   <div>分配人：林佳丽</div>
                   <div>审核人：—</div>
@@ -2025,6 +2036,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
+                <td class="cell-sync-status" data-sync-status="">—</td>
                 <td class="cell-meta">
                   <div>分配人：林佳丽</div>
                   <div>审核人：—</div>
@@ -2050,6 +2062,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
+                <td class="cell-sync-status" data-sync-status="">—</td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
                   <div>审核人：—</div>
@@ -2075,6 +2088,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
+                <td class="cell-sync-status" data-sync-status="无需同步">无需同步</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
                   <div>审核人：—</div>
@@ -2100,6 +2114,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
+                <td class="cell-sync-status" data-sync-status="无需同步">无需同步</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
                   <div>审核人：—</div>
@@ -2125,6 +2140,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="美国、加拿大">美国、加拿大</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="FCC、ISED" title="FCC(美国)、ISED(加拿大)">FCC(美国)、ISED(加拿大)</td>
                 <td class="cell-ellipsis" title="人工确认合规品，待同步打标">人工确认合规品，待同步打标</td>
+                <td class="cell-sync-status" data-sync-status="待同步"><span class="tag t-w">待同步</span></td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
                   <div>审核人：马婷婷</div>
@@ -2150,6 +2166,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需审核打标">系统判定非合规品，无需审核打标</td>
+                <td class="cell-sync-status" data-sync-status="无需同步">无需同步</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
                   <div>审核人：—</div>
@@ -2175,6 +2192,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="美国、加拿大">美国、加拿大</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="FDA、LFGB" title="FDA(美国)、LFGB(加拿大)">FDA(美国)、LFGB(加拿大)</td>
                 <td class="cell-ellipsis" title="已同步产品库打标">已同步产品库打标</td>
+                <td class="cell-sync-status" data-sync-status="已同步"><span class="tag t-y">已同步</span></td>
                 <td class="cell-meta">
                   <div>分配人：王五</div>
                   <div>审核人：王五</div>
@@ -2200,6 +2218,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
+                <td class="cell-sync-status" data-sync-status="无需同步">无需同步</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
                   <div>审核人：—</div>
@@ -2225,6 +2244,7 @@
                 <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
                 <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
+                <td class="cell-sync-status" data-sync-status="">—</td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
                   <div>审核人：—</div>
@@ -2239,6 +2259,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
           <div class="pager">共 10 条 · 20 条/页 · 1</div>
         </section>
 
@@ -5732,7 +5753,7 @@
       if (!row) return;
       const tds = [...row.children];
       const text = (i) => (tds[i]?.innerText || '').replace(/\s+/g, ' ').trim() || '—';
-      // 0勾选 1编号 2图 3SKU 4名称 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12操作人 13操作时间 14操作
+      // 0勾选 1编号 2图 3SKU 4名称 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12同步状态 13操作人 14操作时间 15操作
       const markedRaw = text(5);
       const sysResult = text(7);
       openDetectDetailModal({
@@ -5745,7 +5766,7 @@
         audit: text(8),
         bizSites: text(9),
         bizCerts: text(10),
-        syncStatus: row.dataset.syncStatus || '—',
+        syncStatus: (text(12) && text(12) !== '—') ? text(12) : (row.dataset.syncStatus || '—'),
         auditRemark: text(11)
       });
     }
@@ -5765,7 +5786,7 @@
     const detectLogPager = document.getElementById('detectLogPager');
     function buildRescanLogs(row){
       const tds = row.querySelectorAll('td');
-      // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12操作人 13操作时间
+      // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12同步状态 13操作人 14操作时间
       const audit = (tds[8]?.innerText || '').replace(/\s+/g, ' ').trim();
       const remark = (tds[11]?.innerText || '').replace(/\s+/g, ' ').trim();
       const marked = (tds[5]?.innerText || '').replace(/\s+/g, ' ').trim();
@@ -6155,6 +6176,11 @@
       syncConfirmRows.forEach(r => {
         r.dataset.synced = '1';
         r.dataset.syncStatus = '已同步';
+        const cell = r.querySelector('.cell-sync-status');
+        if (cell) {
+          cell.dataset.syncStatus = '已同步';
+          cell.innerHTML = '<span class="tag t-y">已同步</span>';
+        }
       });
       const tip = syncConfirmCount > 1
         ? `已同步 ${syncConfirmCount} 条至产品库`
