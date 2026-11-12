@@ -1925,7 +1925,14 @@
             <input class="input" placeholder="请输入 SKU" style="min-width:140px" />
             <input class="input" placeholder="审核开始时间" />
             <input class="input" placeholder="审核结束时间" />
-            <select class="sel"><option>是否同步</option><option>是</option><option>否</option></select>
+            <select class="sel" id="rescanSyncStatusFilter">
+              <option value="">同步状态</option>
+              <option>待同步</option>
+              <option>同步中</option>
+              <option>已同步</option>
+              <option>同步失败</option>
+              <option>无需同步</option>
+            </select>
             <button class="btn pri" id="rescanDetailSearchBtn">搜索</button>
             <button class="btn" id="rescanDetailResetBtn">重置</button>
           </div>
@@ -1937,6 +1944,7 @@
             <div class="stat-tab">合规品<em>(2)</em></div>
             <div class="stat-tab">已同步产品库<em>(1)</em></div>
             <div class="stat-tab">待同步产品库<em>(1)</em></div>
+            <div class="stat-tab">无需同步<em>(4)</em></div>
           </div>
 
           <div class="toolbar row">
@@ -1961,7 +1969,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="rescan-data-row" data-sku="23110438" data-title-cn="不锈钢灭烛罩带手柄，适用于生日蜡烛安全熄灭" data-sys-result="合规品" data-sys-desc="不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标" data-audit="待审核">
+              <tr class="rescan-data-row" data-sku="23110438" data-title-cn="不锈钢灭烛罩带手柄，适用于生日蜡烛安全熄灭" data-sys-result="合规品" data-sys-desc="不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标" data-audit="待审核" data-sync-status="">
                 <td><input type="checkbox" /></td>
                 <td>200008-01</td>
                 <td><div class="thumb"></div></td>
@@ -1984,7 +1992,7 @@
                 </td>
                 <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-D3301" data-title-cn="儿童毛绒玩具套装 带音乐功能" data-sys-result="合规品" data-sys-desc="类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标" data-audit="待审核">
+              <tr class="rescan-data-row" data-sku="SKU-D3301" data-title-cn="儿童毛绒玩具套装 带音乐功能" data-sys-result="合规品" data-sys-desc="类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标" data-audit="待审核" data-sync-status="">
                 <td><input type="checkbox" /></td>
                 <td>200008-02</td>
                 <td><div class="thumb"></div></td>
@@ -2007,7 +2015,7 @@
                 </td>
                 <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-D3302" data-title-cn="不锈钢厨房收纳架 三层" data-sys-result="合规品" data-sys-desc="不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标" data-audit="待审核">
+              <tr class="rescan-data-row" data-sku="SKU-D3302" data-title-cn="不锈钢厨房收纳架 三层" data-sys-result="合规品" data-sys-desc="不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标" data-audit="待审核" data-sync-status="">
                 <td><input type="checkbox" /></td>
                 <td>200008-03</td>
                 <td><div class="thumb"></div></td>
@@ -2030,7 +2038,7 @@
                 </td>
                 <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-C8821" data-title-cn="儿童学习桌 可调节高度" data-sys-result="非合规品" data-audit="非合规品">
+              <tr class="rescan-data-row" data-sku="SKU-C8821" data-title-cn="儿童学习桌 可调节高度" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-04</td>
                 <td><div class="thumb"></div></td>
@@ -2053,7 +2061,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-B2205" data-title-cn="锂电池移动电源 10000mAh" data-sys-result="非合规品" data-audit="非合规品">
+              <tr class="rescan-data-row" data-sku="SKU-B2205" data-title-cn="锂电池移动电源 10000mAh" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-05</td>
                 <td><div class="thumb"></div></td>
@@ -2076,7 +2084,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-E3310" data-title-cn="蓝牙音箱 便携防水" data-sys-result="合规品" data-sys-desc="含蓝牙射频模块，命中 FCC Part 15 / ISED 射频认证义务，建议人工确认后打标" data-audit="合规品">
+              <tr class="rescan-data-row" data-sku="SKU-E3310" data-title-cn="蓝牙音箱 便携防水" data-sys-result="合规品" data-sys-desc="含蓝牙射频模块，命中 FCC Part 15 / ISED 射频认证义务，建议人工确认后打标" data-audit="合规品" data-sync-status="待同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-06</td>
                 <td><div class="thumb"></div></td>
@@ -2099,7 +2107,7 @@
                 </td>
                 <td><span class="link rescan-sync-btn">同步</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-F5501" data-title-cn="儿童睡衣套装 纯棉" data-sys-result="非合规品" data-audit="非合规品">
+              <tr class="rescan-data-row" data-sku="SKU-F5501" data-title-cn="儿童睡衣套装 纯棉" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-07</td>
                 <td><div class="thumb"></div></td>
@@ -2122,7 +2130,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-G6602" data-title-cn="硅胶烘焙模具套装" data-sys-result="合规品" data-sys-desc="食品接触硅胶烘焙器具，命中 FDA、LFGB 食品级认证义务，人工已确认" data-audit="合规品" data-synced="1">
+              <tr class="rescan-data-row" data-sku="SKU-G6602" data-title-cn="硅胶烘焙模具套装" data-sys-result="合规品" data-sys-desc="食品接触硅胶烘焙器具，命中 FDA、LFGB 食品级认证义务，人工已确认" data-audit="合规品" data-synced="1" data-sync-status="已同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-08</td>
                 <td><div class="thumb"></div></td>
@@ -2145,7 +2153,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-H7703" data-title-cn="婴儿安抚巾 带牙胶" data-sys-result="非合规品" data-audit="非合规品">
+              <tr class="rescan-data-row" data-sku="SKU-H7703" data-title-cn="婴儿安抚巾 带牙胶" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
                 <td>200008-09</td>
                 <td><div class="thumb"></div></td>
@@ -2168,7 +2176,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-J8804" data-title-cn="无线充电器 三合一" data-sys-result="合规品" data-sys-desc="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标" data-audit="待审核">
+              <tr class="rescan-data-row" data-sku="SKU-J8804" data-title-cn="无线充电器 三合一" data-sys-result="合规品" data-sys-desc="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标" data-audit="待审核" data-sync-status="">
                 <td><input type="checkbox" /></td>
                 <td>200008-10</td>
                 <td><div class="thumb"></div></td>
@@ -2887,6 +2895,7 @@
             <div class="detail-kv"><span class="k">系统检测结果：</span><span class="v" id="detailSysResult">—</span></div>
             <div class="detail-kv"><span class="k">系统检测说明：</span><span class="v muted" id="detailSysDesc">—</span></div>
             <div class="detail-kv"><span class="k">审核结果：</span><span class="v" id="detailAudit">—</span></div>
+            <div class="detail-kv"><span class="k">同步状态：</span><span class="v" id="detailSyncStatus">—</span></div>
             <div class="detail-kv"><span class="k">审核备注：</span><span class="v muted" id="detailAuditRemark">—</span></div>
             <div class="detail-kv"><span class="k">报关中文名：</span><span class="v" id="detailCustomsName">—</span></div>
           </div>
@@ -5356,7 +5365,11 @@
     }
     function canSyncRow(row){
       if (!row) return false;
-      return getRowAuditResult(row) === '合规品' && row.dataset.synced !== '1';
+      if (getRowAuditResult(row) !== '合规品') return false;
+      const st = row.dataset.syncStatus || '';
+      // 可同步：待同步、同步失败；已同步/同步中/无需同步不可再同步
+      if (st) return st === '待同步' || st === '同步失败';
+      return row.dataset.synced !== '1';
     }
     function getBatchAuditResult(){
       return batchAuditResultBox?.querySelector('input[name="batchAuditResult"]:checked')?.value || '';
@@ -5550,6 +5563,7 @@
       }
       fillDetailField('detailSysDesc', data.sysDesc);
       fillDetailField('detailAudit', data.audit);
+      fillDetailField('detailSyncStatus', data.syncStatus || '—');
       fillDetailField('detailAuditRemark', data.auditRemark);
       fillDetailField('detailCustomsName', data.customsName || attrs.customsName);
       fillDetailField('detailUse', data.use || attrs.use);
@@ -5573,6 +5587,7 @@
         sysResult: row.dataset.sysResult,
         sysDesc: row.dataset.sysDesc,
         audit: row.dataset.audit,
+        syncStatus: row.dataset.syncStatus || '—',
         auditRemark: row.dataset.auditRemark
       });
     }
@@ -5591,6 +5606,7 @@
         sysResult,
         sysDesc: row.dataset.sysDesc || (row.querySelector('.sys-desc')?.getAttribute('title') || row.querySelector('.sys-desc')?.textContent?.trim()) || (sysResult === '非合规品' ? '系统判定为非合规品，无需处理' : '—'),
         audit: text(8),
+        syncStatus: row.dataset.syncStatus || '—',
         auditRemark: text(9)
       });
     }
@@ -5961,6 +5977,7 @@
     });
     let syncConfirmSku = '';
     let syncConfirmCount = 0;
+    let syncConfirmRows = [];
     function openSyncConfirmModal(rowOrRows){
       const rows = Array.isArray(rowOrRows) ? rowOrRows : (rowOrRows ? [rowOrRows] : []);
       if (!rows.length) {
@@ -5968,9 +5985,10 @@
         return;
       }
       if (rows.some(r => !canSyncRow(r))) {
-        showWarnToast('仅人工审核为合规品的记录可同步产品库打标');
+        showWarnToast('仅「待同步 / 同步失败」且审核为合规品的记录可同步');
         return;
       }
+      syncConfirmRows = rows;
       syncConfirmCount = rows.length;
       syncConfirmSku = rows.length === 1 ? (rows[0].dataset.sku || '—') : '';
       const textEl = document.getElementById('syncConfirmText');
@@ -5987,6 +6005,7 @@
       document.getElementById('syncConfirmModal')?.classList.remove('show');
       syncConfirmSku = '';
       syncConfirmCount = 0;
+      syncConfirmRows = [];
     }
     document.getElementById('closeSyncConfirmModal')?.addEventListener('click', closeSyncConfirmModal);
     document.getElementById('cancelSyncConfirmModal')?.addEventListener('click', closeSyncConfirmModal);
@@ -5994,6 +6013,10 @@
       if (e.target.id === 'syncConfirmModal') closeSyncConfirmModal();
     });
     document.getElementById('confirmSyncConfirmModal')?.addEventListener('click', () => {
+      syncConfirmRows.forEach(r => {
+        r.dataset.synced = '1';
+        r.dataset.syncStatus = '已同步';
+      });
       const tip = syncConfirmCount > 1
         ? `已同步 ${syncConfirmCount} 条至产品库`
         : `已同步 ${syncConfirmSku || '—'} 至产品库`;
