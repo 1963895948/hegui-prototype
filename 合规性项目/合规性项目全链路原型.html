@@ -1969,7 +1969,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="rescan-data-row" data-sku="23110438" data-title-cn="不锈钢灭烛罩带手柄，适用于生日蜡烛安全熄灭" data-sys-result="合规品" data-sys-desc="不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标" data-audit="待审核" data-sync-status="">
+              <tr class="rescan-data-row" data-sku="23110438" data-title-cn="不锈钢灭烛罩带手柄，适用于生日蜡烛安全熄灭" data-sys-result="合规品" data-sys-desc="不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标" data-audit="待审核" data-sync-status="" data-policy-category="无线射频设备">
                 <td><input type="checkbox" /></td>
                 <td>200008-01</td>
                 <td><div class="thumb"></div></td>
@@ -1992,7 +1992,7 @@
                 </td>
                 <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-D3301" data-title-cn="儿童毛绒玩具套装 带音乐功能" data-sys-result="合规品" data-sys-desc="类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标" data-audit="待审核" data-sync-status="">
+              <tr class="rescan-data-row" data-sku="SKU-D3301" data-title-cn="儿童毛绒玩具套装 带音乐功能" data-sys-result="合规品" data-sys-desc="类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标" data-audit="待审核" data-sync-status="" data-policy-category="儿童玩具">
                 <td><input type="checkbox" /></td>
                 <td>200008-02</td>
                 <td><div class="thumb"></div></td>
@@ -2015,7 +2015,7 @@
                 </td>
                 <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-D3302" data-title-cn="不锈钢厨房收纳架 三层" data-sys-result="合规品" data-sys-desc="不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标" data-audit="待审核" data-sync-status="">
+              <tr class="rescan-data-row" data-sku="SKU-D3302" data-title-cn="不锈钢厨房收纳架 三层" data-sys-result="合规品" data-sys-desc="不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标" data-audit="待审核" data-sync-status="" data-policy-category="儿童玩具">
                 <td><input type="checkbox" /></td>
                 <td>200008-03</td>
                 <td><div class="thumb"></div></td>
@@ -2176,7 +2176,7 @@
                 </td>
                 <td><span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
-              <tr class="rescan-data-row" data-sku="SKU-J8804" data-title-cn="无线充电器 三合一" data-sys-result="合规品" data-sys-desc="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标" data-audit="待审核" data-sync-status="">
+              <tr class="rescan-data-row" data-sku="SKU-J8804" data-title-cn="无线充电器 三合一" data-sys-result="合规品" data-sys-desc="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标" data-audit="待审核" data-sync-status="" data-policy-category="无线射频设备">
                 <td><input type="checkbox" /></td>
                 <td>200008-10</td>
                 <td><div class="thumb"></div></td>
@@ -2490,6 +2490,7 @@
         <div class="form-field audit-cert-field" id="auditRiskSitesField" hidden>
           <label>所需相关认证</label>
           <div class="ctl">
+            <div class="hint" style="margin:0 0 8px" id="auditCertAutoHint">根据已选合规站点，从合规政策库自动带出对应认证（可增删改）。</div>
             <table class="audit-cert-table" id="auditCertTable">
               <thead>
                 <tr>
@@ -3443,7 +3444,7 @@
       'BQB','TEST REPORT','CPC','EN71','DOT','CE','FDA','FCC','HDMI','EMC',
       'ROHS','WEEE','UL','UN38.3','MSDS','IEC62133','CCC','说明书',
       'TIC-CPC','TIC-DV','CPSIA','Prop 65','EPA','NLEA','REACH','ErP',
-      'LFGB','CPNP','UKCA','ETL','CB','FSC','CQC','SRRC','CSA','IC(ISED)',
+      'LFGB','CPNP','UKCA','ETL','CB','FSC','CQC','SRRC','CSA','IC(ISED)','ISED','ISO 17025',
       'TELEC','PSC','JBRC','PSE菱形','PSE圆形','VCCI','RCM','SAA',
       'KC','KCC','SASO','TISI','SIRIM','INMETRO','ANATEL','IRAM','Halal'
     ];
@@ -4000,6 +4001,7 @@
     let detectSites = new Set(['亚马逊|美国']);
     let auditSites = new Set();
     let auditCertRows = [];
+    let auditContextCategory = ''; // 审核时对齐的政策分类，用于带出认证
     let draftSites = new Set();
     let modalTarget = 'rescan';
     let policySiteNames = new Set(['美国']);
@@ -4386,6 +4388,63 @@
       if (e.target.id === 'platformModal') closePlatformModal();
     });
 
+    function normalizeAuditCountry(site){
+      const map = { '沙特': '沙特阿拉伯' };
+      return map[site] || site;
+    }
+    function inferPolicyCategoryFromRow(row){
+      if (!row) return '';
+      if (row.dataset.policyCategory) return row.dataset.policyCategory;
+      const desc = row.dataset.sysDesc || row.querySelector('.sys-desc')?.textContent || '';
+      const hit = POLICY_STORE.find(p => p.content && desc && desc.includes(String(p.content).slice(0, 18)));
+      if (hit) return hit.category;
+      if (/玩具|毛绒|CPC 路径|儿童学习/.test(desc)) return '儿童玩具';
+      if (/射频|FCC|蓝牙|无线充|ISED/.test(desc)) return '无线射频设备';
+      if (/睡衣|易燃|16 CFR/.test(desc)) return '儿童睡衣';
+      if (/食品接触|硅胶|烘焙|FDA|LFGB/.test(desc)) return '儿童玩具';
+      return '';
+    }
+    function buildAuditCertRowsFromPolicy(){
+      const byCert = new Map();
+      [...auditSites].forEach(k => {
+        const { platform, site } = parseKey(k);
+        const country = normalizeAuditCountry(site);
+        let candidates = POLICY_STORE.filter(p =>
+          p.status === '启用'
+          && p.site === site
+          && (p.platform || '亚马逊') === (platform || '亚马逊')
+          && (p.certs || []).length
+        );
+        if (auditContextCategory) {
+          const scoped = candidates.filter(p => p.category === auditContextCategory);
+          if (scoped.length) candidates = scoped;
+        }
+        candidates.forEach(p => {
+          (p.certs || []).forEach(cert => {
+            if (!byCert.has(cert)) byCert.set(cert, new Set());
+            byCert.get(cert).add(country);
+          });
+        });
+      });
+      const rows = [...byCert.entries()].map(([cert, countries]) => ({
+        cert,
+        countries: [...countries]
+      }));
+      return rows.length ? rows : [{ cert: '', countries: [] }];
+    }
+    function autoFillAuditCertsFromPolicy(){
+      if (getBatchAuditResult() !== '合规品') return;
+      auditCertRows = buildAuditCertRowsFromPolicy();
+      const hint = document.getElementById('auditCertAutoHint');
+      if (hint) {
+        const n = auditCertRows.filter(r => r.cert).length;
+        const cat = auditContextCategory ? `「${auditContextCategory}」` : '政策库';
+        hint.textContent = n
+          ? `已按${cat}与已选站点自动带出 ${n} 项认证，可增删改。`
+          : `已选站点在${cat}中暂无认证配置，可手动新增。`;
+      }
+      renderAuditCertRows();
+    }
     function renderAuditSitePicked(){
       const box = document.getElementById('auditSitePicked');
       if (!box) return;
@@ -4402,6 +4461,7 @@
           renderAuditSitePicked();
         });
       });
+      if (getBatchAuditResult() === '合规品') autoFillAuditCertsFromPolicy();
     }
 
     const AUDIT_COUNTRY_OPTIONS = [
@@ -4410,7 +4470,7 @@
       '泰国','土耳其','西班牙','新加坡','意大利','印度','英国','中国'
     ];
     function sitesForAuditCert(cert){
-      // 审核选国家：统一国家清单（与认证类型无关）
+      // 审核选国家：统一国家清单 + 当前行已带出的国家（兼容政策站点名）
       return AUDIT_COUNTRY_OPTIONS.slice();
     }
     function collectAuditCertRows(){
@@ -4496,7 +4556,8 @@
         const certOpts = CERT_OPTIONS.map(c =>
           `<option value="${c}" ${r.cert === c ? 'selected' : ''}>${c}</option>`
         ).join('');
-        const sites = sitesForAuditCert(r.cert);
+        const baseSites = sitesForAuditCert(r.cert);
+        const sites = [...new Set([...baseSites, ...countries])];
         const selected = countries.filter(c => sites.includes(c));
         const siteChecks = sites.map(s =>
           `<label><input type="checkbox" class="audit-country-cb" value="${s}" ${selected.includes(s) ? 'checked' : ''} /> ${s}</label>`
@@ -5403,14 +5464,12 @@
         // 合规站点在切到非合规品时清空；初始未选结果时保留预填
         if (getBatchAuditResult() === '非合规品') {
           auditSites = new Set();
-          renderAuditSitePicked();
+          // 避免非合规品时再触发认证自动带出
+          const box = document.getElementById('auditSitePicked');
+          if (box) box.innerHTML = '';
         }
       } else {
-        if (!auditCertRows.length) {
-          auditCertRows = [{ cert: '', countries: [] }];
-          renderAuditCertRows();
-        }
-        renderAuditSitePicked();
+        renderAuditSitePicked(); // 内含按政策自动带出认证
       }
     }
     function resetBatchAuditForm(prefillsSites){
@@ -5419,7 +5478,22 @@
       auditCertRows = [];
       auditSites = prefillsSites instanceof Set ? new Set(prefillsSites) : new Set();
       renderAuditCertRows();
-      renderAuditSitePicked();
+      const box = document.getElementById('auditSitePicked');
+      if (box) {
+        box.innerHTML = '';
+        [...auditSites].sort().forEach(k => {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.innerHTML = `${formatLabel(k)} <span class="x-chip" data-rm="${k}">×</span>`;
+          box.appendChild(chip);
+        });
+        box.querySelectorAll('.x-chip').forEach(el => {
+          el.addEventListener('click', () => {
+            auditSites.delete(el.dataset.rm);
+            renderAuditSitePicked();
+          });
+        });
+      }
       syncAuditRiskSitesField();
     }
     batchAuditResultBox?.addEventListener('change', syncAuditRiskSitesField);
@@ -5455,6 +5529,13 @@
       auditSingleSku = row?.dataset.sku || '';
       const titleEl = document.getElementById('batchAuditModalTitle');
       if (titleEl) titleEl.textContent = mode === 'single' ? '审核' : '批量审核';
+      // 对齐政策分类，供「所需相关认证」按政策自动带出
+      if (mode === 'single' && row) {
+        auditContextCategory = inferPolicyCategoryFromRow(row);
+      } else {
+        const rows = source === 'rescan' ? getCheckedRescanRows() : getCheckedDetectRows();
+        auditContextCategory = inferPolicyCategoryFromRow(rows[0]) || '';
+      }
       // 单条审核时默认带出回扫站点 / 检测站点，便于确认后打标
       const prefills = mode === 'single' ? prefillsAuditSitesFromRow(row) : new Set();
       resetBatchAuditForm(prefills);
