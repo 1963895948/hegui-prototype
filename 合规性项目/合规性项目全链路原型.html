@@ -3948,6 +3948,7 @@
       });
       return list;
     }
+    let rescanUiReady = false;
     function refreshRescanPolicySelect(){
       if (!rescanPolicySelect) return;
       const list = getPolicyListFromTable().filter(p => p.status === '启用');
@@ -3958,10 +3959,8 @@
       if (cur && +cur < list.length) {
         rescanPolicySelect.value = cur;
       }
-      // PLATFORM_SITES 初始化前不可刷预览，否则会中断整页脚本导致政策列表空白
-      if (typeof PLATFORM_SITES !== 'undefined' && typeof renderRescanPolicyPreview === 'function') {
-        renderRescanPolicyPreview();
-      }
+      // 须等 PLATFORM_SITES / 预览函数就绪后再刷，否则会中断整页脚本导致政策列表空白
+      if (rescanUiReady) renderRescanPolicyPreview();
     }
     refreshRescanPolicySelect();
     /* renderPolicyTable 延后到站点筛选初始化后 */
@@ -4509,6 +4508,7 @@
     });
     renderPlatformPicked();
     renderDetectPlatformPicked();
+    rescanUiReady = true;
     renderRescanSiteChecks();
 
     rescanPolicySelect?.addEventListener('change', () => {
