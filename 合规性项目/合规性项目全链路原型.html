@@ -1909,6 +1909,24 @@
               <option selected>合规品</option>
             </select>
             <select class="sel"><option>审核结果</option><option>待审核</option><option>非合规品</option><option>合规品</option></select>
+            <select class="sel" id="rescanBizSiteFilter">
+              <option value="">业务配置合规站点</option>
+              <option>美国</option>
+              <option>加拿大</option>
+              <option>英国</option>
+              <option>德国</option>
+              <option>墨西哥</option>
+            </select>
+            <select class="sel" id="rescanBizCertFilter">
+              <option value="">业务配置合规认证</option>
+              <option>FCC</option>
+              <option>ISED</option>
+              <option>CPC</option>
+              <option>CE</option>
+              <option>FDA</option>
+              <option>LFGB</option>
+              <option>UKCA</option>
+            </select>
             <select class="sel"><option>审核人</option><option>林佳丽</option><option>马婷婷</option><option>王五</option></select>
             <select class="sel" id="rescanAssigneeFilter">
               <option value="">分配人</option>
@@ -1965,7 +1983,7 @@
               <tr>
                 <th><input type="checkbox" /></th>
                 <th>编号</th><th>产品图</th><th>SKU</th><th>产品名称 / 类目</th>
-                <th>sku已标记合规站点</th><th>回扫站点</th><th>系统检测结果 / 说明</th><th>审核结果</th><th>审核说明</th><th>操作人</th><th>操作时间</th><th>操作</th>
+                <th>sku已标记合规站点</th><th>回扫站点</th><th>系统检测结果 / 说明</th><th>审核结果</th><th>业务配置合规站点</th><th>业务配置合规认证</th><th>审核说明</th><th>操作人</th><th>操作时间</th><th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -1979,6 +1997,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标">不锈钢+蜡烛熄灭工具，命中加州 Prop 65 重金属披露义务，建议人工确认后打标</div></td>
                 <td><span class="tag t-w">待审核</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
                 <td class="cell-meta">
                   <div>分配人：林佳丽</div>
@@ -2002,6 +2022,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标">类目Toys+标题含儿童/毛绒，命中12岁以下玩具 CPC 路径（需 CPC 及第三方检测），建议人工确认后打标</div></td>
                 <td><span class="tag t-w">待审核</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
                 <td class="cell-meta">
                   <div>分配人：林佳丽</div>
@@ -2025,6 +2047,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标">不锈钢厨房收纳，命中食品接触材料路径（FDA / LFGB），建议人工确认后打标</div></td>
                 <td><span class="tag t-w">待审核</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
@@ -2048,6 +2072,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-y">非合规品</span><div class="sys-desc" title="系统判定为非合规品，无需处理">系统判定为非合规品，无需处理</div></td>
                 <td><span class="tag t-y">非合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
@@ -2071,6 +2097,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-y">非合规品</span><div class="sys-desc" title="系统判定为非合规品，无需处理">系统判定为非合规品，无需处理</div></td>
                 <td><span class="tag t-y">非合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
@@ -2094,6 +2122,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="含蓝牙射频模块，命中 FCC Part 15 / ISED 射频认证义务，建议人工确认后打标">含蓝牙射频模块，命中 FCC Part 15 / ISED 射频认证义务，建议人工确认后打标</div></td>
                 <td><span class="tag t-d">合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="美国、加拿大">美国、加拿大</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="FCC、ISED" title="FCC(美国)、ISED(加拿大)">FCC(美国)、ISED(加拿大)</td>
                 <td class="cell-ellipsis" title="人工确认合规品，待同步打标">人工确认合规品，待同步打标</td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
@@ -2117,6 +2147,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-y">非合规品</span><div class="sys-desc" title="系统判定为非合规品，无需处理">系统判定为非合规品，无需处理</div></td>
                 <td><span class="tag t-y">非合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需审核打标">系统判定非合规品，无需审核打标</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
@@ -2140,6 +2172,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="食品接触硅胶烘焙器具，命中 FDA、LFGB 食品级认证义务，人工已确认">食品接触硅胶烘焙器具，命中 FDA、LFGB 食品级认证义务，人工已确认</div></td>
                 <td><span class="tag t-d">合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="美国、加拿大">美国、加拿大</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="FDA、LFGB" title="FDA(美国)、LFGB(加拿大)">FDA(美国)、LFGB(加拿大)</td>
                 <td class="cell-ellipsis" title="已同步产品库打标">已同步产品库打标</td>
                 <td class="cell-meta">
                   <div>分配人：王五</div>
@@ -2163,6 +2197,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-y">非合规品</span><div class="sys-desc" title="系统判定为非合规品，无需处理">系统判定为非合规品，无需处理</div></td>
                 <td><span class="tag t-y">非合规品</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="系统判定非合规品，无需同步打标">系统判定非合规品，无需同步打标</td>
                 <td class="cell-meta">
                   <div>分配人：—</div>
@@ -2186,6 +2222,8 @@
                 <td class="cell-sites">美国、加拿大</td>
                 <td class="cell-sys-result"><span class="tag t-d">合规品</span><div class="sys-desc" title="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标">无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标</div></td>
                 <td><span class="tag t-w">待审核</span></td>
+                <td class="cell-sites cell-biz-sites" data-biz-sites="">—</td>
+                <td class="cell-ellipsis cell-biz-certs" data-biz-certs="" title="—">—</td>
                 <td class="cell-ellipsis" title="—">—</td>
                 <td class="cell-meta">
                   <div>分配人：马婷婷</div>
@@ -2896,6 +2934,8 @@
             <div class="detail-kv"><span class="k">系统检测结果：</span><span class="v" id="detailSysResult">—</span></div>
             <div class="detail-kv"><span class="k">系统检测说明：</span><span class="v muted" id="detailSysDesc">—</span></div>
             <div class="detail-kv"><span class="k">审核结果：</span><span class="v" id="detailAudit">—</span></div>
+            <div class="detail-kv"><span class="k">业务配置合规站点：</span><span class="v" id="detailBizSites">—</span></div>
+            <div class="detail-kv"><span class="k">业务配置合规认证：</span><span class="v" id="detailBizCerts">—</span></div>
             <div class="detail-kv"><span class="k">同步状态：</span><span class="v" id="detailSyncStatus">—</span></div>
             <div class="detail-kv"><span class="k">审核备注：</span><span class="v muted" id="detailAuditRemark">—</span></div>
             <div class="detail-kv"><span class="k">报关中文名：</span><span class="v" id="detailCustomsName">—</span></div>
@@ -5658,6 +5698,8 @@
       }
       fillDetailField('detailSysDesc', data.sysDesc);
       fillDetailField('detailAudit', data.audit);
+      fillDetailField('detailBizSites', data.bizSites || '—');
+      fillDetailField('detailBizCerts', data.bizCerts || '—');
       fillDetailField('detailSyncStatus', data.syncStatus || '—');
       fillDetailField('detailAuditRemark', data.auditRemark);
       fillDetailField('detailCustomsName', data.customsName || attrs.customsName);
@@ -5690,7 +5732,7 @@
       if (!row) return;
       const tds = [...row.children];
       const text = (i) => (tds[i]?.innerText || '').replace(/\s+/g, ' ').trim() || '—';
-      // 0勾选 1编号 2图 3SKU 4名称 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9审核说明 10操作人 11操作时间 12操作
+      // 0勾选 1编号 2图 3SKU 4名称 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12操作人 13操作时间 14操作
       const markedRaw = text(5);
       const sysResult = text(7);
       openDetectDetailModal({
@@ -5701,8 +5743,10 @@
         sysResult,
         sysDesc: row.dataset.sysDesc || (row.querySelector('.sys-desc')?.getAttribute('title') || row.querySelector('.sys-desc')?.textContent?.trim()) || (sysResult === '非合规品' ? '系统判定为非合规品，无需处理' : '—'),
         audit: text(8),
+        bizSites: text(9),
+        bizCerts: text(10),
         syncStatus: row.dataset.syncStatus || '—',
-        auditRemark: text(9)
+        auditRemark: text(11)
       });
     }
     function closeDetectDetailModal(){
@@ -5721,9 +5765,9 @@
     const detectLogPager = document.getElementById('detectLogPager');
     function buildRescanLogs(row){
       const tds = row.querySelectorAll('td');
-      // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9审核说明 10操作人 11操作时间
+      // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12操作人 13操作时间
       const audit = (tds[8]?.innerText || '').replace(/\s+/g, ' ').trim();
-      const remark = (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim();
+      const remark = (tds[11]?.innerText || '').replace(/\s+/g, ' ').trim();
       const marked = (tds[5]?.innerText || '').replace(/\s+/g, ' ').trim();
       const base = [
         { who: '系统', time: '2026-06-05 02:10:18', what: '【回扫任务】：进入回扫队列并完成检测' }
