@@ -5446,6 +5446,113 @@
     let auditMode = 'batch';
     let auditSource = 'detect';
     let auditSingleSku = '';
+    let auditSingleRow = null;
+    const rescanAuditLogs = Object.create(null); // sku -> log entries[]
+
+    function nowAuditTime(){
+      const d = new Date();
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    }
+    function formatAuditBizSites(sites){
+      return [...(sites || [])].sort().map(k => parseKey(k).site).filter(Boolean).join('、') || '—';
+    }
+    function formatAuditBizCerts(certRows){
+      const parts = (certRows || []).filter(r => r.cert).map(r => {
+        const c = (r.countries || []).join('、');
+        return c ? `${r.cert}(${c})` : r.cert;
+      });
+      return parts.length ? parts.join('、') : '—';
+    }
+    function pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark }){
+      const sku = row?.dataset.sku || '';
+      if (!sku) return;
+      if (!rescanAuditLogs[sku]) rescanAuditLogs[sku] = [];
+      rescanAuditLogs[sku].push({ who, time, what: `【审核】结果=${result}` });
+      if (result === '合规品') {
+        rescanAuditLogs[sku].push({
+          who, time,
+          what: `【审核】审核合规站点=${bizSites || '—'}；所需认证=${bizCerts || '—'}`
+        });
+      }
+      rescanAuditLogs[sku].push({ who, time, what: `【审核】明细=${remark || '—'}` });
+    }
+    function applyAuditToRescanRow(row, { result, sites, certs, remark, who = '林佳丽' }){
+      if (!row || !row.classList.contains('rescan-data-row')) return;
+      const tds = [...row.children];
+      if (tds.length < 16) return;
+      const time = nowAuditTime();
+      const bizSites = result === '合规品' ? formatAuditBizSites(sites) : '—';
+      const bizCerts = result === '合规品' ? formatAuditBizCerts(certs) : '—';
+      let remarkText = (remark || '').trim();
+      if (!remarkText) {
+        remarkText = result === '合规品'
+          ? '人工确认合规品，待同步打标'
+          : '人工确认为非合规品，无需同步打标';
+      }
+      const syncStatus = result === '合规品' ? '待同步' : (result === '非合规品' ? '无需同步' : '');
+      row.dataset.audit = result;
+      row.dataset.syncStatus = syncStatus;
+      delete row.dataset.synced;
+
+      const auditCls = result === '合规品' ? 't-d' : (result === '非合规品' ? 't-y' : 't-w');
+      tds[8].innerHTML = `<span class="tag ${auditCls}">${result}</span>`;
+
+      tds[9].className = 'cell-sites cell-biz-sites';
+      tds[9].dataset.bizSites = bizSites === '—' ? '' : bizSites;
+      tds[9].textContent = bizSites;
+
+      tds[10].className = 'cell-ellipsis cell-biz-certs';
+      tds[10].dataset.bizCerts = bizCerts === '—' ? '' : bizCerts;
+      tds[10].title = bizCerts;
+      tds[10].textContent = bizCerts;
+
+      tds[11].className = 'cell-ellipsis';
+      tds[11].title = remarkText;
+      tds[11].textContent = remarkText;
+
+      tds[12].className = 'cell-sync-status';
+      tds[12].dataset.syncStatus = syncStatus;
+      tds[12].innerHTML = syncStatus === '待同步'
+        ? '<span class="tag t-w">待同步</span>'
+        : (syncStatus || '—');
+
+      const assigner = (tds[13].innerText.match(/分配人：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+      const assignTime = (tds[14].innerText.match(/分配时间：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+      tds[13].innerHTML = `<div>分配人：${assigner}</div><div>审核人：${who}</div><div>同步人：—</div>`;
+      tds[14].innerHTML = `<div>分配时间：${assignTime}</div><div>审核时间：${time}</div><div>同步时间：—</div>`;
+
+      tds[15].innerHTML = result === '合规品'
+        ? '<span class="link rescan-sync-btn">同步</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span>'
+        : '<span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span>';
+
+      pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark: remarkText });
+    }
+    function applyAuditToDetectRow(row, { result, remark, who = '林佳丽' }){
+      if (!row || !row.classList.contains('detect-data-row')) return;
+      row.dataset.audit = result;
+      row.dataset.auditRemark = (remark || '').trim() || (result === '合规品' ? '人工确认合规品，可同步打标' : '人工确认为非合规品');
+      const tds = [...row.children];
+      // 0勾选 1图 2SKU 3相似 4标题 5状态 6站点 7系统结果 8说明 9审核结果 10备注 11人 12时间 13操作
+      if (tds[9]) {
+        const cls = result === '合规品' ? 't-d' : 't-y';
+        tds[9].innerHTML = `<span class="tag ${cls}">${result}</span>`;
+      }
+      if (tds[10]) {
+        tds[10].title = row.dataset.auditRemark;
+        tds[10].textContent = row.dataset.auditRemark;
+      }
+      if (tds[11]) {
+        const submitter = (tds[11].innerText.match(/提交\s*([^\n]+)/) || [])[1]?.trim() || '—';
+        tds[11].innerHTML = `<div><b>提交</b> ${submitter}</div><div><b>审核</b> ${who}</div>`;
+      }
+      if (tds[12]) {
+        const time = nowAuditTime();
+        const submitT = (tds[12].innerText.match(/提交\s*([^\n]+)/) || [])[1]?.trim() || '—';
+        const doneT = (tds[12].innerText.match(/检测完成\s*([^\n]+)/) || [])[1]?.trim() || '—';
+        tds[12].innerHTML = `<div><b>提交</b> ${submitT}</div><div><b>检测完成</b> ${doneT}</div><div><b>审核</b> ${time}</div>`;
+      }
+    }
 
     function parseSitesTextToKeys(text){
       const keys = new Set();
@@ -5588,6 +5695,7 @@
       auditMode = mode;
       auditSource = source;
       auditSingleSku = row?.dataset.sku || '';
+      auditSingleRow = mode === 'single' ? row : null;
       const titleEl = document.getElementById('batchAuditModalTitle');
       if (titleEl) titleEl.textContent = mode === 'single' ? '审核' : '批量审核';
       // 对齐政策分类，供「所需相关认证」按政策自动带出
@@ -5607,6 +5715,7 @@
       auditMode = 'batch';
       auditSource = 'detect';
       auditSingleSku = '';
+      auditSingleRow = null;
     }
     document.getElementById('closeBatchAuditModal')?.addEventListener('click', closeBatchAuditModal);
     document.getElementById('cancelBatchAuditModal')?.addEventListener('click', closeBatchAuditModal);
@@ -5634,18 +5743,38 @@
           return;
         }
       }
-      let n = 1;
-      if (auditMode === 'batch') {
-        n = auditSource === 'rescan'
-          ? getCheckedRescanRows().length
-          : getDetectRowCbs().filter(cb => cb.checked).length;
+      const remark = (batchAuditDetail?.value || '').trim();
+      const sitesSnap = new Set(auditSites);
+      const certsSnap = result === '合规品'
+        ? collectAuditCertRows().filter(r => r.cert || (r.countries && r.countries.length))
+        : [];
+      let targetRows = [];
+      if (auditMode === 'single' && auditSingleRow) {
+        targetRows = [auditSingleRow];
+      } else if (auditSource === 'rescan') {
+        targetRows = getCheckedRescanRows();
+      } else {
+        targetRows = getCheckedDetectRows();
       }
+      targetRows.forEach(row => {
+        if (row.classList.contains('rescan-data-row')) {
+          applyAuditToRescanRow(row, {
+            result,
+            sites: sitesSnap,
+            certs: certsSnap,
+            remark
+          });
+        } else {
+          applyAuditToDetectRow(row, { result, remark });
+        }
+      });
+      const n = targetRows.length || 1;
       const label = auditMode === 'single' ? (auditSingleSku || '当前记录') : `${n} 条`;
-      const certTip = auditCertRows.length
-        ? `；认证：${auditCertRows.map(r => `${r.cert}（${r.countries.join('、')}）`).join('；')}`
+      const certTip = certsSnap.length
+        ? `；认证：${certsSnap.map(r => `${r.cert}（${(r.countries || []).join('、')}）`).join('；')}`
         : '';
       const siteTip = result === '合规品'
-        ? `，合规站点：${[...auditSites].sort().map(formatLabel).join('、')}${certTip}`
+        ? `，合规站点：${[...sitesSnap].sort().map(formatLabel).join('、')}${certTip}`
         : '';
       closeBatchAuditModal();
       showToast(`已对 ${label} 审核为「${result}」${siteTip}`);
@@ -5789,26 +5918,36 @@
       // 5已标记合规站点 6回扫站点 7系统结果 8审核结果 9业务配置站点 10业务配置认证 11审核说明 12同步状态 13操作人 14操作时间
       const audit = (tds[8]?.innerText || '').replace(/\s+/g, ' ').trim();
       const remark = (tds[11]?.innerText || '').replace(/\s+/g, ' ').trim();
-      const marked = (tds[5]?.innerText || '').replace(/\s+/g, ' ').trim();
+      const bizSites = (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim();
+      const bizCerts = (tds[10]?.innerText || '').replace(/\s+/g, ' ').trim();
       const base = [
         { who: '系统', time: '2026-06-05 02:10:18', what: '【回扫任务】：进入回扫队列并完成检测' }
       ];
+      const sku = row.dataset.sku || '';
+      const live = rescanAuditLogs[sku] || [];
+      if (live.length) {
+        const logs = [...base, ...live];
+        if (row.dataset.synced === '1') {
+          logs.push({ who: '林佳丽', time: nowAuditTime(), what: '【同步产品库】：已同步打标' });
+        }
+        return logs;
+      }
       if (audit === '待审核' || !audit) {
         return base;
       }
       if (audit.includes('非合规品')) {
         return [
           ...base,
-          { who: '林佳丽', time: '2026-06-05 09:42:41', what: '【审核结果】：修改成 非合规品' },
-          { who: '林佳丽', time: '2026-06-05 09:43:05', what: `【审核明细】：修改成 ${remark && remark !== '—' ? remark : '系统判定非合规品，无需打标'}` }
+          { who: '林佳丽', time: '2026-06-05 09:42:41', what: '【审核】结果=非合规品' },
+          { who: '林佳丽', time: '2026-06-05 09:43:05', what: `【审核】明细=${remark && remark !== '—' ? remark : '系统判定非合规品，无需打标'}` }
         ];
       }
       if ((audit.includes('合规品') && !audit.includes('非合规品')) || audit === '合规品') {
         const logs = [
           ...base,
-          { who: '林佳丽', time: '2026-06-05 11:20:33', what: '【审核结果】：修改成 合规品' },
-          { who: '林佳丽', time: '2026-06-05 11:20:35', what: `【合规站点】：修改成 ${marked && marked !== '—' ? marked : '—'}` },
-          { who: '林佳丽', time: '2026-06-05 11:20:40', what: `【审核明细】：修改成 ${remark && remark !== '—' ? remark : '人工确认合规品'}` }
+          { who: '林佳丽', time: '2026-06-05 11:20:33', what: '【审核】结果=合规品' },
+          { who: '林佳丽', time: '2026-06-05 11:20:35', what: `【审核】审核合规站点=${bizSites && bizSites !== '—' ? bizSites : '—'}；所需认证=${bizCerts && bizCerts !== '—' ? bizCerts : '—'}` },
+          { who: '林佳丽', time: '2026-06-05 11:20:40', what: `【审核】明细=${remark && remark !== '—' ? remark : '人工确认合规品'}` }
         ];
         if (row.dataset.synced === '1') {
           logs.push({ who: '林佳丽', time: '2026-06-05 11:30:12', what: '【同步产品库】：已同步打标' });
@@ -6180,6 +6319,24 @@
         if (cell) {
           cell.dataset.syncStatus = '已同步';
           cell.innerHTML = '<span class="tag t-y">已同步</span>';
+        }
+        const tds = [...r.children];
+        if (tds[13] && tds[14]) {
+          const time = nowAuditTime();
+          const assigner = (tds[13].innerText.match(/分配人：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+          const auditor = (tds[13].innerText.match(/审核人：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+          const assignTime = (tds[14].innerText.match(/分配时间：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+          const auditTime = (tds[14].innerText.match(/审核时间：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
+          tds[13].innerHTML = `<div>分配人：${assigner}</div><div>审核人：${auditor}</div><div>同步人：林佳丽</div>`;
+          tds[14].innerHTML = `<div>分配时间：${assignTime}</div><div>审核时间：${auditTime}</div><div>同步时间：${time}</div>`;
+        }
+        if (tds[15]) {
+          tds[15].innerHTML = '<span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span>';
+        }
+        const sku = r.dataset.sku || '';
+        if (sku) {
+          if (!rescanAuditLogs[sku]) rescanAuditLogs[sku] = [];
+          rescanAuditLogs[sku].push({ who: '林佳丽', time: nowAuditTime(), what: '【同步产品库】成功' });
         }
       });
       const tip = syncConfirmCount > 1
