@@ -3958,7 +3958,10 @@
       if (cur && +cur < list.length) {
         rescanPolicySelect.value = cur;
       }
-      renderRescanPolicyPreview();
+      // PLATFORM_SITES 初始化前不可刷预览，否则会中断整页脚本导致政策列表空白
+      if (typeof PLATFORM_SITES !== 'undefined' && typeof renderRescanPolicyPreview === 'function') {
+        renderRescanPolicyPreview();
+      }
     }
     refreshRescanPolicySelect();
     /* renderPolicyTable 延后到站点筛选初始化后 */
@@ -4008,6 +4011,7 @@
       return keys;
     }
     function amazonKeys(filterFn){
+      if (typeof PLATFORM_SITES === 'undefined' || !PLATFORM_SITES) return [];
       const am = PLATFORM_SITES.find(p => p.id === 'amazon');
       return (am?.sites || []).filter(filterFn || (() => true)).map(s => siteKey(am.name, s));
     }
