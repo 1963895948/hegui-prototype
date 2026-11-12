@@ -1677,7 +1677,7 @@
 
               <div class="form-panel">
                 <h3 class="panel-title">2. 回扫站点与政策</h3>
-                <p class="form-section-tip">先选合规政策（单选可切换），再多选回扫站点；下方只读预览所选政策在已选站点上的内容。</p>
+                <p class="form-section-tip">先选合规分类（政策），选完后下方展示该分类下可用站点供勾选；政策内容只读预览。</p>
 
                 <div class="form-field">
                   <label><span class="req">*</span>合规政策</label>
@@ -1685,7 +1685,7 @@
                     <select class="sel block" id="rescanPolicySelect">
                       <option value="">请选择一项合规政策（可切换）</option>
                     </select>
-                    <div class="hint" style="margin-top:6px">同时只能选一个政策；切换后预览区会更新，已选站点保留。</div>
+                    <div class="hint" style="margin-top:6px">同时只能选一个分类；切换后站点列表按该分类可用站更新。</div>
                   </div>
                 </div>
 
@@ -3969,7 +3969,7 @@
         rescanPolicySelect.value = cur;
       }
       // 须等 PLATFORM_SITES / 预览函数就绪后再刷，否则会中断整页脚本导致政策列表空白
-      if (rescanUiReady) renderRescanPolicyPreview();
+      if (rescanUiReady) syncRescanSitesToPolicy();
     }
     refreshRescanPolicySelect();
     /* renderPolicyTable 延后到站点筛选初始化后 */
@@ -4003,7 +4003,7 @@
     let draftSites = new Set();
     let modalTarget = 'rescan';
     let policySiteNames = new Set(['美国']);
-    // 创建回扫：政策单选 → 站点多选 → 政策内容只读预览
+    // 创建回扫：先选合规分类 → 仅展示该分类可用站勾选 → 政策内容只读预览
     let rescanAllowedSiteKeys = null;
 
     function siteKey(p, s){ return `${p}|${s}` }
@@ -4024,7 +4024,12 @@
       return (am?.sites || []).filter(filterFn || (() => true)).map(s => siteKey(am.name, s));
     }
     function getRescanSitePoolKeys(){
-      return amazonKeys();
+      // 未选分类时不展示站点；选中后仅展示该分类下已启用且有内容的站点
+      const p = getSelectedRescanPolicy();
+      if (!p) return [];
+      if (Array.isArray(p.siteKeys) && p.siteKeys.length) return [...p.siteKeys];
+      const plat = p.platform || '亚马逊';
+      return (p.siteNames || []).map(s => siteKey(plat, s));
     }
     function getSelectedRescanPolicy(){
       if (!rescanPolicySelect || rescanPolicySelect.value === '') return null;
@@ -4032,8 +4037,8 @@
       return list[+rescanPolicySelect.value] || null;
     }
     function syncRescanSitesToPolicy(){
-      // 兼容旧调用：站点与政策解耦后，仅刷新站点池与预览
-      rescanAllowedSiteKeys = new Set(getRescanSitePoolKeys());
+      const pool = getRescanSitePoolKeys();
+      rescanAllowedSiteKeys = new Set(pool);
       confirmedSites = new Set([...confirmedSites].filter(k => rescanAllowedSiteKeys.has(k)));
       renderRescanSiteChecks();
       renderRescanPolicyPreview();
@@ -4070,12 +4075,21 @@
       const box = document.getElementById('rescanSiteChecks');
       const tools = document.getElementById('rescanSiteTools');
       if (!box) return;
+      const policy = getSelectedRescanPolicy();
       const pool = getRescanSitePoolKeys();
       rescanAllowedSiteKeys = new Set(pool);
+      if (!policy) {
+        if (tools) tools.hidden = true;
+        box.innerHTML = `<div class="rescan-site-empty"><div>请先选择合规政策</div><div class="hint" style="margin-top:6px">选中后将展示该分类下可用站点供勾选</div></div>`;
+        syncRescanSiteCheckAllState();
+        renderRescanPolicyPreview();
+        return;
+      }
       if (tools) tools.hidden = false;
       if (!pool.length) {
-        box.innerHTML = `<div class="rescan-site-empty"><div>暂无可选站点</div></div>`;
+        box.innerHTML = `<div class="rescan-site-empty"><div>「${policy.category.replace(/</g, '&lt;')}」暂无可用站点</div></div>`;
         syncRescanSiteCheckAllState();
+        renderRescanPolicyPreview();
         return;
       }
       box.innerHTML = pool.map(k => {
@@ -4521,10 +4535,10 @@
     renderRescanSiteChecks();
 
     rescanPolicySelect?.addEventListener('change', () => {
-      // 切换政策：保留已选站点，只读预览随政策更新
+      // 切换分类：站点池改为该分类可用站，并刷新勾选与预览
       const p = getSelectedRescanPolicy();
-      renderRescanPolicyPreview();
-      if (p) showToast(`已切换政策「${p.category}」`);
+      syncRescanSitesToPolicy();
+      if (p) showToast(`已切换「${p.category}」，可选站 ${p.siteNames?.length || 0} 个`);
     });
 
     /* 合规性提交检测 · Tab 切换 */
