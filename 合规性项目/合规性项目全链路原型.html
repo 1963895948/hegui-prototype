@@ -236,7 +236,11 @@
     .policy-time{font-size:12px;color:rgba(0,0,0,.65);line-height:1.7;white-space:nowrap}
     .policy-time .t-lab{color:rgba(0,0,0,.45);margin-right:4px;display:inline-block;min-width:36px}
     .pd-table-wrap .op-cell{vertical-align:middle}
-    .pd-table-wrap .op-menu{z-index:40;min-width:112px}
+    .pd-table-wrap .op-menu{min-width:112px}
+    .op-menu.op-menu-fixed{
+      position:fixed;right:auto;top:auto;z-index:200;
+      margin:0;
+    }
     .pd-batch-dd{position:relative;display:inline-block}
     .pd-batch-menu{
       position:absolute;right:0;top:calc(100% + 4px);z-index:20;min-width:148px;
@@ -5386,7 +5390,31 @@
 
     /* 合规品检测结果 · 行内操作菜单 */
     function closeAllOpMenus(){
-      document.querySelectorAll('.op-menu.show').forEach(m => m.classList.remove('show'));
+      document.querySelectorAll('.op-menu.show').forEach(m => {
+        m.classList.remove('show', 'op-menu-fixed');
+        m.style.left = '';
+        m.style.top = '';
+        m.style.right = '';
+        m.style.bottom = '';
+      });
+    }
+    function openOpMenuNear(trigger, menu){
+      if (!trigger || !menu) return;
+      closeAllOpMenus();
+      menu.classList.add('show', 'op-menu-fixed');
+      const rect = trigger.getBoundingClientRect();
+      const mw = Math.max(menu.offsetWidth || 112, 112);
+      const mh = menu.offsetHeight || 160;
+      let left = rect.right - mw;
+      let top = rect.bottom + 4;
+      if (left < 8) left = 8;
+      if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+      if (top + mh > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - mh - 4);
+      }
+      menu.style.left = `${Math.round(left)}px`;
+      menu.style.top = `${Math.round(top)}px`;
+      menu.style.right = 'auto';
     }
     function fillDetailField(id, value, asHtml){
       const el = document.getElementById(id);
@@ -6419,7 +6447,7 @@
           const menu = more.nextElementSibling;
           const wasOpen = menu?.classList.contains('show');
           closeAllOpMenus();
-          if (!wasOpen) menu?.classList.add('show');
+          if (!wasOpen) openOpMenuNear(more, menu);
           return;
         }
         const actBtn = e.target.closest('.pd-op-cell .op-menu button[data-act]');
