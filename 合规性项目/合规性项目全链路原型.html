@@ -2241,6 +2241,49 @@
     </main>
   </div>
 
+  <!-- 转移站点到其他合规分类 -->
+  <div class="modal-mask above" id="policyTransferModal" aria-hidden="true">
+    <div class="modal-box md" role="dialog" aria-labelledby="policyTransferTitle">
+      <div class="modal-hd">
+        <span id="policyTransferTitle">转移站点</span>
+        <button type="button" class="modal-x" id="closePolicyTransferModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <p class="hint" style="margin:0 0 12px" id="policyTransferLead">将所选站点明细转移到目标合规分类；若目标分类已有同站点，将替换其配置。</p>
+        <div style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#fafcff;font-size:13px;line-height:1.7">
+          <div>原分类：<b id="policyTransferFrom">—</b></div>
+          <div>站点：<b id="policyTransferSites">—</b></div>
+        </div>
+        <div class="form-field" style="display:flex;flex-direction:column;gap:6px;align-items:stretch">
+          <label style="font-size:13px"><span class="req">*</span>目标合规分类</label>
+          <input class="input" id="policyTransferCatInput" list="policyTransferCatList" placeholder="请选择或搜索目标合规分类" style="width:100%" autocomplete="off" />
+          <datalist id="policyTransferCatList"></datalist>
+          <div class="hint" id="policyTransferHint" style="margin:0">不可选当前分类；目标已有同站点时确认后替换。</div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn" id="cancelPolicyTransferBtn">取 消</button>
+        <button type="button" class="btn pri" id="nextPolicyTransferBtn">下一步</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask above" id="policyTransferConfirmModal" aria-hidden="true">
+    <div class="modal-box sm" role="dialog" aria-labelledby="policyTransferConfirmTitle">
+      <div class="modal-hd">
+        <span id="policyTransferConfirmTitle">确认转移</span>
+        <button type="button" class="modal-x" id="closePolicyTransferConfirmModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <p style="margin:0;font-size:13px;line-height:1.7" id="policyTransferConfirmDesc">—</p>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn" id="cancelPolicyTransferConfirmBtn">取 消</button>
+        <button type="button" class="btn pri" id="confirmPolicyTransferBtn">确认转移</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 重命名合规分类 -->
   <div class="modal-mask above" id="policyRenameModal" aria-hidden="true">
     <div class="modal-box sm" role="dialog" aria-labelledby="policyRenameTitle">
@@ -2249,7 +2292,7 @@
         <button type="button" class="modal-x" id="closePolicyRenameModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd">
-        <p class="hint" style="margin:0 0 12px">仅修改分类名称，各站点明细内容不变；回扫/检测中引用该分类名的选项将一并按新名展示（原型示意）。低频纠错用；不做站点跨分类移动。</p>
+        <p class="hint" style="margin:0 0 12px">仅修改分类名称，各站点明细内容不变；回扫/检测中引用该分类名的选项将一并按新名展示。站点换分类请用操作列「转移」。</p>
         <div class="form-field" style="display:flex;flex-direction:column;gap:6px;align-items:stretch">
           <label style="font-size:12px;color:var(--sub)">原名称</label>
           <div id="policyRenameOld" style="font-size:13px;font-weight:600">—</div>
@@ -2509,7 +2552,6 @@
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <div style="font-size:16px;font-weight:600" id="pdCategory">—</div>
             <button type="button" class="btn" id="pdRenameBtn" style="height:28px;padding:0 10px;font-size:12px">重命名</button>
-            <button type="button" class="btn" id="pdCopyBtn" style="height:28px;padding:0 10px;font-size:12px">复制为新政策</button>
           </div>
           <div class="hint" style="margin-top:4px" id="pdSubLine">—</div>
         </div>
@@ -2520,6 +2562,7 @@
               <button type="button" class="btn" id="pdBatchBtn" style="height:30px;padding:0 12px;font-size:12px">批量操作 ▾</button>
               <div class="pd-batch-menu" id="pdBatchMenu" hidden>
                 <button type="button" class="pd-batch-item" data-action="edit">编辑所选站点</button>
+                <button type="button" class="pd-batch-item" data-action="transfer">转移所选站点</button>
                 <button type="button" class="pd-batch-item" data-action="enable">启用所选站点</button>
                 <button type="button" class="pd-batch-item" data-action="disable">停用所选站点</button>
               </div>
@@ -3737,7 +3780,6 @@
       const cat = g.category.replace(/"/g, '&quot;');
       return `<div class="policy-ops">
         <span class="link-btn policy-view-btn" data-category="${cat}">详情</span>
-        <span class="link-btn policy-copy-btn" data-category="${cat}">复制</span>
       </div>`;
     }
     function getCategoryGroups(){
@@ -5980,34 +6022,16 @@
       const menu = document.getElementById('policyAddSiteMenu');
       if (menu) menu.hidden = true;
     }
-    let policyAddCopyFrom = null;
-    function openPolicyAddModal(opts = {}){
+    function openPolicyAddModal(){
       const mask = document.getElementById('policyAddModal');
       if (!mask) return;
-      const copyFrom = (opts.copyFrom || '').trim();
-      policyAddCopyFrom = copyFrom || null;
       resetPolicyForm();
       const lead = mask.querySelector('.policy-add-lead');
-      if (copyFrom) {
-        const rows = sitesOfCategory(copyFrom);
-        policyAddRows = rows.map(r => ({
-          site: r.site,
-          crawlUrl: r.crawlUrl || '',
-          certs: normalizeCerts(r.certs || r.cert),
-          content: r.content || '',
-          ticVerify: r.ticVerify || ''
-        }));
-        renderPolicySiteConfigList();
-        if (lead) {
-          lead.textContent = `由「${copyFrom}」复制站点明细模板；请填写新的合规分类后提交（不会改动原分类，也不做跨分类移动）。`;
-        }
-        document.getElementById('policyAddModalTitle').textContent = '复制政策';
-      } else {
-        if (lead) {
-          lead.textContent = '选择合规分类，按站点表格配置明细；提交后各站默认启用。已有政策的站点请进详情维护。';
-        }
-        document.getElementById('policyAddModalTitle').textContent = '新建政策';
+      if (lead) {
+        lead.textContent = '选择合规分类，按站点表格配置明细；提交后各站默认启用。已有政策的站点请进详情维护。';
       }
+      const title = document.getElementById('policyAddModalTitle');
+      if (title) title.textContent = '新建政策';
       mask.classList.add('show');
       mask.setAttribute('aria-hidden', 'false');
       setTimeout(() => document.getElementById('policyCategoryInput')?.focus(), 30);
@@ -6017,18 +6041,8 @@
       if (!mask) return;
       closePolicyAddSiteMenu();
       closePolicyCategoryPanel();
-      policyAddCopyFrom = null;
       mask.classList.remove('show');
       mask.setAttribute('aria-hidden', 'true');
-    }
-    function openPolicyCopyModal(category){
-      const cat = String(category || '').trim();
-      if (!cat || !sitesOfCategory(cat).length) {
-        showToast('无可复制的站点明细');
-        return;
-      }
-      closePolicyDetailModal();
-      openPolicyAddModal({ copyFrom: cat });
     }
     function fillPolicyAddSiteMenu(){
       const list = document.getElementById('policyAddSiteMenuList');
@@ -6168,10 +6182,6 @@
     document.getElementById('submitPolicyBtn')?.addEventListener('click', () => {
       const typed = getPolicyCategoryValue();
       if (!typed) { showToast('请选择合规分类'); return; }
-      if (policyAddCopyFrom && typed === policyAddCopyFrom) {
-        showToast('复制须使用新的合规分类名；若仅改名请在详情中点「重命名」');
-        return;
-      }
       const category = ensureComplianceCategory(typed, { toastOnCreate: !COMPLIANCE_CATEGORIES.includes(typed) });
       if (!category) return;
       setPolicyCategoryValue(category);
@@ -6188,6 +6198,7 @@
         return;
       }
       const ts = Date.now();
+      const createdRows = [];
       policyAddRows.slice().reverse().forEach((r, i) => {
         const content = r.content.trim();
         const nb = getPolicyContent(content);
@@ -6198,7 +6209,7 @@
         nb.content = content;
         const certs = normalizeCerts(r.certs || r.cert);
         const tsStr = nowPolicyTime();
-        POLICY_STORE.unshift({
+        const row = {
           id: 'policy_' + ts + '_' + i,
           category,
           platform: '亚马逊',
@@ -6213,15 +6224,17 @@
           ticVerify: (r.ticVerify || '').trim(),
           standard: '—',
           tic: '待接入'
-        });
+        };
+        POLICY_STORE.unshift(row);
+        createdRows.push(row);
       });
-      const fromCopy = policyAddCopyFrom;
+      createdRows.forEach(row => {
+        pushPolicyLog(row, '新建政策', `分类「${category}」新增站点「${row.site}」，默认启用`);
+      });
       closePolicyAddModal();
       renderPolicyTable();
       refreshRescanPolicySelect();
-      showToast(fromCopy
-        ? `已从「${fromCopy}」复制创建「${category}」，站点默认启用`
-        : '已提交：分类明细已写入，站点默认启用');
+      showToast('已提交：分类明细已写入，站点默认启用');
       if (document.getElementById('policy')?.classList.contains('active') === false) go('policy');
     });
 
@@ -6257,15 +6270,18 @@
         showToast(`已存在分类「${newName}」，请换一个名称`);
         return;
       }
+      const touched = [];
       POLICY_STORE.forEach(p => {
         if (p.category === oldName) {
           p.category = newName;
           p.updatedAt = nowPolicyTime();
+          touched.push(p);
         }
       });
       const idx = COMPLIANCE_CATEGORIES.indexOf(oldName);
       if (idx >= 0) COMPLIANCE_CATEGORIES[idx] = newName;
       else COMPLIANCE_CATEGORIES.unshift(newName);
+      touched.forEach(p => pushPolicyLog(p, '重命名分类', `「${oldName}」→「${newName}」`));
       closePolicyRenameModal();
       if (policyModalCategory === oldName) {
         policyModalCategory = newName;
@@ -6379,6 +6395,7 @@
               <span class="op-more" title="操作">☰</span>
               <div class="op-menu">
                 <button type="button" data-act="edit" data-id="${p.id}">编辑</button>
+                <button type="button" data-act="transfer" data-id="${p.id}">转移</button>
                 <button type="button" data-act="${toggleAct}" data-id="${p.id}">${toggleLabel}</button>
                 <button type="button" data-act="${learnAct}" data-id="${p.id}">${learnLabel}</button>
                 <button type="button" data-act="log" data-id="${p.id}">日志</button>
@@ -6459,6 +6476,10 @@
         const act = actBtn.dataset.act;
         if (act === 'edit') {
           openPdEditSiteModal(row);
+          return;
+        }
+        if (act === 'transfer') {
+          openPolicyTransferModal([row]);
           return;
         }
         if (act === 'log') {
@@ -6588,9 +6609,139 @@
       if (!policyModalCategory) return;
       openPolicyRenameModal(policyModalCategory);
     });
-    document.getElementById('pdCopyBtn')?.addEventListener('click', () => {
-      if (!policyModalCategory) return;
-      openPolicyCopyModal(policyModalCategory);
+
+    let policyTransferPending = null;
+    function fillPolicyTransferCatList(fromCategory){
+      const list = document.getElementById('policyTransferCatList');
+      if (!list) return;
+      const names = [...new Set([
+        ...COMPLIANCE_CATEGORIES,
+        ...POLICY_STORE.map(p => p.category)
+      ])].filter(c => c && c !== fromCategory).sort((a, b) => a.localeCompare(b, 'zh'));
+      list.innerHTML = names.map(c => `<option value="${c.replace(/"/g, '&quot;')}"></option>`).join('');
+    }
+    function openPolicyTransferModal(rows){
+      const list = (rows || []).filter(Boolean);
+      if (!list.length) { showToast('请选择要转移的站点'); return; }
+      const fromCategory = list[0].category;
+      if (list.some(r => r.category !== fromCategory)) {
+        showToast('请选择同一分类下的站点进行转移');
+        return;
+      }
+      policyTransferPending = { rows: list.map(r => r.id), fromCategory, target: '' };
+      document.getElementById('policyTransferFrom').textContent = fromCategory;
+      document.getElementById('policyTransferSites').textContent = list.map(r => r.site).join('、');
+      const input = document.getElementById('policyTransferCatInput');
+      if (input) input.value = '';
+      fillPolicyTransferCatList(fromCategory);
+      document.getElementById('policyTransferHint').textContent =
+        list.length > 1
+          ? `将转移 ${list.length} 个站点；目标分类已有同站点时将被替换。`
+          : '目标分类已有同站点时将被替换。';
+      document.getElementById('policyTransferModal')?.classList.add('show');
+      setTimeout(() => input?.focus(), 30);
+    }
+    function closePolicyTransferModal(){
+      document.getElementById('policyTransferModal')?.classList.remove('show');
+    }
+    function closePolicyTransferConfirmModal(){
+      document.getElementById('policyTransferConfirmModal')?.classList.remove('show');
+    }
+    function nextPolicyTransfer(){
+      if (!policyTransferPending) return;
+      const target = (document.getElementById('policyTransferCatInput')?.value || '').trim();
+      if (!target) { showToast('请选择目标合规分类'); return; }
+      if (target === policyTransferPending.fromCategory) {
+        showToast('目标分类不能与原分类相同');
+        return;
+      }
+      if (target.length > 40) { showToast('分类名称不超过 40 字'); return; }
+      const rows = policyTransferPending.rows
+        .map(id => POLICY_STORE.find(p => p.id === id))
+        .filter(Boolean);
+      if (!rows.length) { showToast('站点数据已变化，请重试'); return; }
+      const replaceSites = rows
+        .filter(r => POLICY_STORE.some(p => p.category === target && p.site === r.site && p.id !== r.id))
+        .map(r => r.site);
+      policyTransferPending.target = target;
+      policyTransferPending.replaceSites = replaceSites;
+      const replaceTip = replaceSites.length
+        ? `<br/><span style="color:var(--danger)">将替换目标分类下已有站点：${replaceSites.join('、')}</span>`
+        : '';
+      document.getElementById('policyTransferConfirmDesc').innerHTML =
+        `确认将 <b>${rows.map(r => r.site).join('、')}</b> 从「<b>${policyTransferPending.fromCategory}</b>」转移到「<b>${target}</b>」？${replaceTip}`;
+      closePolicyTransferModal();
+      document.getElementById('policyTransferConfirmModal')?.classList.add('show');
+    }
+    function confirmPolicyTransfer(){
+      if (!policyTransferPending?.target) return;
+      const fromCategory = policyTransferPending.fromCategory;
+      const target = ensureComplianceCategory(policyTransferPending.target, { toastOnCreate: !COMPLIANCE_CATEGORIES.includes(policyTransferPending.target) });
+      if (!target) return;
+      const ids = policyTransferPending.rows.slice();
+      let moved = 0;
+      let replaced = 0;
+      ids.forEach(id => {
+        const row = POLICY_STORE.find(p => p.id === id);
+        if (!row || row.category !== fromCategory) return;
+        const existing = POLICY_STORE.find(p => p.category === target && p.site === row.site && p.id !== row.id);
+        if (existing) {
+          const oldKey = policyLogKey(existing);
+          const keepKey = policyLogKey(row);
+          if (POLICY_LOGS[oldKey]?.length) {
+            POLICY_LOGS[keepKey] = [...(POLICY_LOGS[keepKey] || []), ...POLICY_LOGS[oldKey]];
+            delete POLICY_LOGS[oldKey];
+          }
+          const exIdx = POLICY_STORE.findIndex(p => p.id === existing.id);
+          if (exIdx >= 0) POLICY_STORE.splice(exIdx, 1);
+          replaced += 1;
+          pushPolicyLog(row, '转移站点', `从「${fromCategory}」→「${target}」，并替换原「${target}」下「${row.site}」配置`);
+        } else {
+          pushPolicyLog(row, '转移站点', `从「${fromCategory}」→「${target}」`);
+        }
+        row.category = target;
+        touchPolicyRow(row);
+        moved += 1;
+      });
+      closePolicyTransferConfirmModal();
+      policyTransferPending = null;
+      renderPolicyTable();
+      refreshRescanPolicySelect();
+      const remain = sitesOfCategory(fromCategory);
+      if (remain.length && policyModalCategory === fromCategory) {
+        renderPolicyDetailGrid(fromCategory);
+        refreshPolicyDetailChrome(fromCategory);
+      } else if (policyModalCategory === fromCategory) {
+        closePolicyDetailModal();
+        openPolicyDetailModal(target, 'view');
+      } else if (policyModalCategory === target) {
+        renderPolicyDetailGrid(target);
+        refreshPolicyDetailChrome(target);
+      }
+      showToast(replaced
+        ? `已转移 ${moved} 站至「${target}」（其中替换 ${replaced} 站）`
+        : `已转移 ${moved} 站至「${target}」`);
+    }
+    document.getElementById('closePolicyTransferModal')?.addEventListener('click', closePolicyTransferModal);
+    document.getElementById('cancelPolicyTransferBtn')?.addEventListener('click', closePolicyTransferModal);
+    document.getElementById('nextPolicyTransferBtn')?.addEventListener('click', nextPolicyTransfer);
+    document.getElementById('closePolicyTransferConfirmModal')?.addEventListener('click', closePolicyTransferConfirmModal);
+    document.getElementById('cancelPolicyTransferConfirmBtn')?.addEventListener('click', () => {
+      closePolicyTransferConfirmModal();
+      document.getElementById('policyTransferModal')?.classList.add('show');
+    });
+    document.getElementById('confirmPolicyTransferBtn')?.addEventListener('click', confirmPolicyTransfer);
+    document.getElementById('policyTransferModal')?.addEventListener('click', e => {
+      if (e.target.id === 'policyTransferModal') closePolicyTransferModal();
+    });
+    document.getElementById('policyTransferConfirmModal')?.addEventListener('click', e => {
+      if (e.target.id === 'policyTransferConfirmModal') closePolicyTransferConfirmModal();
+    });
+    document.getElementById('policyTransferCatInput')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        nextPolicyTransfer();
+      }
     });
 
     let pdAcPending = null;
@@ -6836,6 +6987,10 @@
       closePdBatchMenu();
       if (action === 'edit') {
         openPdBatchEditModal(selected);
+        return;
+      }
+      if (action === 'transfer') {
+        openPolicyTransferModal(selected);
         return;
       }
       const enable = action === 'enable';
@@ -7125,13 +7280,6 @@
       if (pop) {
         e.preventDefault();
         openPolicySitesModal(pop.getAttribute('data-category'));
-        return;
-      }
-      const copyBtn = e.target.closest('.policy-copy-btn');
-      if (copyBtn) {
-        e.preventDefault();
-        hidePolicySiteHover();
-        openPolicyCopyModal(copyBtn.getAttribute('data-category'));
         return;
       }
       const btn = e.target.closest('.policy-view-btn');
