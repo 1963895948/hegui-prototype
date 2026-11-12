@@ -591,14 +591,6 @@
       padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;
       max-height:320px;overflow:auto;
     }
-    .rescan-policy-preview .rescan-content-edit{
-      width:100%;min-height:72px;margin-top:6px;padding:8px 10px;box-sizing:border-box;
-      border:1px solid #d6e0ef;border-radius:6px;font-size:12px;line-height:1.55;
-      color:var(--text);resize:vertical;background:#fff;font-family:inherit;
-    }
-    .rescan-policy-preview .rescan-content-edit:focus{
-      outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(37,99,235,.12);
-    }
     #rescan-create .task-form{max-width:1180px}
     #rescan-create .form-cols{
       grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;max-width:none;
@@ -1685,7 +1677,7 @@
 
               <div class="form-panel">
                 <h3 class="panel-title">2. 回扫站点与政策</h3>
-                <p class="form-section-tip">先选合规政策（单选可切换），再多选回扫站点；下方按站点编辑本次回扫使用的政策内容（可改，仅影响本任务）。</p>
+                <p class="form-section-tip">先选合规政策（单选可切换），再多选回扫站点；下方只读预览所选政策在已选站点上的内容。</p>
 
                 <div class="form-field">
                   <label><span class="req">*</span>合规政策</label>
@@ -1693,7 +1685,7 @@
                     <select class="sel block" id="rescanPolicySelect">
                       <option value="">请选择一项合规政策（可切换）</option>
                     </select>
-                    <div class="hint" style="margin-top:6px">同时只能选一个政策；切换后会按新政策带出内容，已选站点保留。</div>
+                    <div class="hint" style="margin-top:6px">同时只能选一个政策；切换后预览区会更新，已选站点保留。</div>
                   </div>
                 </div>
 
@@ -1718,7 +1710,7 @@
                       <div class="rescan-site-empty">
                         <div class="empty-ico" aria-hidden="true"></div>
                         <div>请先选择合规政策与回扫站点</div>
-                        <div style="opacity:.85">支持按站点编辑政策内容，仅作用于本次回扫任务。</div>
+                        <div style="opacity:.85">预览为只读，勾选站点表示纳入本次回扫。</div>
                       </div>
                     </div>
                   </div>
@@ -4002,10 +3994,8 @@
     let draftSites = new Set();
     let modalTarget = 'rescan';
     let policySiteNames = new Set(['美国']);
-    // 创建回扫：政策单选 → 站点多选 → 政策内容可编辑（任务级，不回写政策库）
+    // 创建回扫：政策单选 → 站点多选 → 政策内容只读预览
     let rescanAllowedSiteKeys = null;
-    let rescanContentEdits = {};
-    let rescanContentEditPolicy = '';
 
     function siteKey(p, s){ return `${p}|${s}` }
     function parseKey(k){ const i = k.indexOf('|'); return { platform: k.slice(0, i), site: k.slice(i + 1) }; }
@@ -4101,18 +4091,6 @@
       syncRescanSiteCheckAllState();
       renderRescanPolicyPreview();
     }
-    function seedRescanContentEdits(policy, selectedKeys, { force = false } = {}){
-      const cat = policy?.category || '';
-      if (force || rescanContentEditPolicy !== cat) {
-        rescanContentEdits = {};
-        rescanContentEditPolicy = cat;
-      }
-      (selectedKeys || []).forEach(k => {
-        if (rescanContentEdits[k] == null) {
-          rescanContentEdits[k] = getRescanSitePolicyContent(k);
-        }
-      });
-    }
     function renderRescanPolicyPreview(){
       const box = document.getElementById('rescanPolicyPreview');
       if (!box) return;
@@ -4122,7 +4100,7 @@
         box.innerHTML = `<div class="rescan-site-empty">
           <div class="empty-ico" aria-hidden="true"></div>
           <div>请先选择合规政策与回扫站点</div>
-          <div style="opacity:.85">政策内容支持按站点编辑，仅作用于本次回扫。</div>
+          <div style="opacity:.85">预览为只读，勾选站点表示纳入本次回扫。</div>
         </div>`;
         return;
       }
@@ -4136,27 +4114,20 @@
       if (!selected.length) {
         box.innerHTML = `<div class="rescan-site-empty">
           <div class="empty-ico" aria-hidden="true"></div>
-          <div>已选政策「${policy.category.replace(/</g, '&lt;')}」，请勾选回扫站点后编辑内容</div>
+          <div>已选政策「${policy.category.replace(/</g, '&lt;')}」，请勾选回扫站点后预览内容</div>
         </div>`;
         return;
       }
-      seedRescanContentEdits(policy, selected);
       box.innerHTML = selected.map(k => {
-        const tip = (rescanContentEdits[k] || '').trim()
-          ? ''
-          : '<div class="hint" style="margin:4px 0 0">该站库中暂无启用内容，可手工填写本次回扫文案</div>';
+        const content = getRescanSitePolicyContent(k);
+        const body = content
+          ? content.replace(/</g, '&lt;')
+          : '<span class="empty">该站暂无启用内容</span>';
         return `<div class="rescan-site-item is-on" data-key="${k.replace(/"/g, '&quot;')}">
           <label>${formatLabel(k).replace(/</g, '&lt;')} · ${policy.category.replace(/</g, '&lt;')}</label>
-          <textarea class="rescan-content-edit" data-key="${k.replace(/"/g, '&quot;')}" rows="3" placeholder="请输入该站本次回扫使用的政策内容"></textarea>
-          ${tip}
+          <div class="site-content">${body}</div>
         </div>`;
       }).join('');
-      box.querySelectorAll('.rescan-content-edit').forEach(el => {
-        el.value = rescanContentEdits[el.dataset.key] || '';
-        el.addEventListener('input', () => {
-          rescanContentEdits[el.dataset.key] = el.value;
-        });
-      });
     }
     document.getElementById('rescanSiteCheckAll')?.addEventListener('change', e => {
       const pool = getRescanSitePoolKeys();
@@ -4541,10 +4512,8 @@
     renderRescanSiteChecks();
 
     rescanPolicySelect?.addEventListener('change', () => {
-      // 切换政策：保留已选站点，按新政策重新带出可编辑内容
+      // 切换政策：保留已选站点，只读预览随政策更新
       const p = getSelectedRescanPolicy();
-      const selected = getRescanSitePoolKeys().filter(k => confirmedSites.has(k));
-      seedRescanContentEdits(p, selected, { force: true });
       renderRescanPolicyPreview();
       if (p) showToast(`已切换政策「${p.category}」`);
     });
