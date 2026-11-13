@@ -934,6 +934,11 @@
     }
     .task-detail-cats{display:flex;flex-direction:column;gap:4px}
     .task-detail-cats span{font-size:12px;line-height:1.5}
+    .task-detail-sku-box{width:100%;max-width:100%}
+    .task-detail-sku-box textarea{
+      min-height:160px;max-height:240px;resize:none;background:#fff;color:var(--text);
+      cursor:default;line-height:1.55;
+    }
     .detail-kv{display:flex;gap:4px;margin-bottom:12px;font-size:12px;line-height:1.7;align-items:flex-start}
     .detail-kv .k{color:var(--text);flex:none;white-space:nowrap}
     .detail-kv .v{color:var(--text);word-break:break-word;min-width:0}
@@ -2981,10 +2986,18 @@
             <h3 class="panel-title">1. 产品范围</h3>
             <div class="detail-kv"><span class="k">回扫SKU：</span><span class="v" id="rtdSkuMode">—</span></div>
             <div class="detail-kv" id="rtdDevTimeRow"><span class="k">开发时间：</span><span class="v" id="rtdDevTime">—</span></div>
-            <div class="detail-kv" id="rtdSkuListRow" hidden><span class="k">指定SKU：</span><span class="v muted" id="rtdSkuList">—</span></div>
-            <div class="detail-kv"><span class="k">组合SKU：</span><span class="v" id="rtdCombo">—</span></div>
-            <div class="detail-kv"><span class="k">产品状态：</span><span class="v" id="rtdProdStatus">—</span></div>
-            <div class="detail-kv" style="align-items:flex-start">
+            <div class="detail-kv" id="rtdSkuListRow" hidden style="align-items:flex-start;flex-direction:column;gap:6px">
+              <span class="k">指定SKU：</span>
+              <div class="ctl" style="width:100%">
+                <div class="sku-box task-detail-sku-box">
+                  <textarea id="rtdSkuList" readonly rows="10" placeholder="—"></textarea>
+                  <span class="counter" id="rtdSkuCounter">0 / 20000</span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-kv" id="rtdComboRow"><span class="k">组合SKU：</span><span class="v" id="rtdCombo">—</span></div>
+            <div class="detail-kv" id="rtdProdStatusRow"><span class="k">产品状态：</span><span class="v" id="rtdProdStatus">—</span></div>
+            <div class="detail-kv" id="rtdCategoriesRow" style="align-items:flex-start">
               <span class="k">回扫产品类目：</span>
               <span class="v"><div class="task-detail-cats" id="rtdCategories">—</div></span>
             </div>
@@ -5183,7 +5196,13 @@
       },
       '100002': {
         skuMode: '指定SKU',
-        skuList: 'SKU-D3301、SKU-D3302、SKU-C8821 等 86 个',
+        skuList: [
+          '12078514','12080672','12091614','12095483','12101226','12110736','12117514','12124890',
+          '12130991','12140122','12148801','12155210','12163348','12170105','12178862','12186033',
+          '12194217','12201844','12209351','12217008','12224866','12231920','12240117','12248803',
+          '12256114','12264028','12271890','12280145','12287901','12295016','12302844','12311027',
+          '12318802','12326019','12334158','12341990','12350112','12358044','12366201','12374018'
+        ],
         combo: '否',
         prodStatus: '—',
         categories: [],
@@ -5253,7 +5272,22 @@
       const bySku = skuMode === '指定SKU';
       document.getElementById('rtdDevTimeRow')?.toggleAttribute('hidden', bySku);
       document.getElementById('rtdSkuListRow')?.toggleAttribute('hidden', !bySku);
-      fillRescanTaskDetailField('rtdSkuList', pack.skuList || '—');
+      document.getElementById('rtdComboRow')?.toggleAttribute('hidden', bySku);
+      document.getElementById('rtdProdStatusRow')?.toggleAttribute('hidden', bySku);
+      document.getElementById('rtdCategoriesRow')?.toggleAttribute('hidden', bySku);
+      const skuTa = document.getElementById('rtdSkuList');
+      const skuCounter = document.getElementById('rtdSkuCounter');
+      let skuArr = [];
+      if (Array.isArray(pack.skuList)) {
+        skuArr = pack.skuList.map(s => String(s).trim()).filter(Boolean);
+      } else if (typeof pack.skuList === 'string' && pack.skuList.trim() && pack.skuList !== '—') {
+        skuArr = pack.skuList.split(/[\n、,，;\s]+/).map(s => s.trim()).filter(Boolean);
+      }
+      if (skuTa) {
+        skuTa.value = bySku ? (skuArr.join('\n') || '') : '';
+        skuTa.scrollTop = 0;
+      }
+      if (skuCounter) skuCounter.textContent = `${skuArr.length} / 20000`;
 
       const catBox = document.getElementById('rtdCategories');
       if (catBox) {
