@@ -934,6 +934,7 @@
       margin:0 0 12px;font-size:14px;font-weight:600;color:var(--text);
     }
     .task-detail-panel .detail-kv .k{color:var(--sub);min-width:96px}
+    .task-detail-panel .detail-kv[hidden]{display:none!important}
     .task-detail-sites{display:flex;flex-wrap:wrap;gap:6px}
     .task-detail-sites .chip{
       display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;
@@ -5327,14 +5328,21 @@
       if (!el) return;
       el.textContent = value == null || value === '' ? '—' : String(value);
     }
-    /** 创建任务时「回扫SKU」选项：指定开发时间 / 指定SKU */
+    /** 创建任务时「回扫SKU」选项：指定开发时间 / 指定SKU（优先任务明细配置） */
     function resolveTaskSkuMode(row, pack, taskName, taskType){
-      const raw = (row?.dataset.skuMode || pack?.skuMode || '').trim();
+      const raw = (pack?.skuMode || row?.dataset.skuMode || '').trim();
       if (raw === 'sku' || raw === '指定SKU') return '指定SKU';
       if (raw === 'time' || raw === '指定开发时间') return '指定开发时间';
       const blob = `${taskName || ''} ${taskType || ''}`;
       if (/指定\s*SKU|增量\s*SKU/i.test(blob)) return '指定SKU';
       return '指定开发时间';
+    }
+    function setRescanTaskDetailRowVisible(id, visible){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.hidden = !visible;
+      if (!visible) el.style.display = 'none';
+      else el.style.removeProperty('display');
     }
     function parseTaskSkuList(pack){
       if (Array.isArray(pack?.skuList)) {
@@ -5370,11 +5378,12 @@
       fillRescanTaskDetailField('rtdPolicy', pack.policy || '—');
       fillRescanTaskDetailField('rtdPolicyContent', pack.policyContent || '—');
 
-      document.getElementById('rtdDevTimeRow')?.toggleAttribute('hidden', bySku);
-      document.getElementById('rtdSkuListRow')?.toggleAttribute('hidden', !bySku);
-      document.getElementById('rtdComboRow')?.toggleAttribute('hidden', bySku);
-      document.getElementById('rtdProdStatusRow')?.toggleAttribute('hidden', bySku);
-      document.getElementById('rtdCategoriesRow')?.toggleAttribute('hidden', bySku);
+      // 指定开发时间：展示开发时间/状态/类目，隐藏指定SKU；指定SKU：反之
+      setRescanTaskDetailRowVisible('rtdDevTimeRow', !bySku);
+      setRescanTaskDetailRowVisible('rtdSkuListRow', bySku);
+      setRescanTaskDetailRowVisible('rtdComboRow', !bySku);
+      setRescanTaskDetailRowVisible('rtdProdStatusRow', !bySku);
+      setRescanTaskDetailRowVisible('rtdCategoriesRow', !bySku);
 
       const skuArr = bySku ? parseTaskSkuList(pack) : [];
       const skuTa = document.getElementById('rtdSkuList');
