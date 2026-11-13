@@ -904,6 +904,36 @@
     .detail-block{margin-bottom:14px}
     .detail-label{color:var(--sub);font-size:11px;margin-bottom:4px}
     .detail-val{font-size:12px;line-height:1.65;word-break:break-word}
+    /* 合规回扫 · 任务详情（对齐禁售任务详情双栏） */
+    .task-detail-top{
+      display:flex;flex-wrap:wrap;gap:8px 40px;margin-bottom:16px;padding-bottom:12px;
+      border-bottom:1px solid var(--line);
+    }
+    .task-detail-top .detail-kv{margin-bottom:0;min-width:240px}
+    .task-detail-cols{
+      display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;align-items:stretch;
+    }
+    @media(max-width:860px){.task-detail-cols{grid-template-columns:1fr}}
+    .task-detail-panel{
+      border:1px solid var(--line);border-radius:8px;background:#fafbfd;padding:14px 16px 8px;
+      min-height:280px;
+    }
+    .task-detail-panel .panel-title{
+      margin:0 0 12px;font-size:14px;font-weight:600;color:var(--text);
+    }
+    .task-detail-panel .detail-kv .k{color:var(--sub);min-width:96px}
+    .task-detail-sites{display:flex;flex-wrap:wrap;gap:6px}
+    .task-detail-sites .chip{
+      display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;
+      background:#e8f1ff;color:var(--pri);font-size:12px;border:1px solid #c9dcff;
+    }
+    .task-detail-policy{
+      margin-top:4px;padding:10px 12px;border:1px dashed #d6e0ef;border-radius:6px;
+      background:#fff;font-size:12px;line-height:1.65;color:var(--text);
+      white-space:pre-wrap;word-break:break-word;max-height:180px;overflow:auto;
+    }
+    .task-detail-cats{display:flex;flex-direction:column;gap:4px}
+    .task-detail-cats span{font-size:12px;line-height:1.5}
     .detail-kv{display:flex;gap:4px;margin-bottom:12px;font-size:12px;line-height:1.7;align-items:flex-start}
     .detail-kv .k{color:var(--text);flex:none;white-space:nowrap}
     .detail-kv .v{color:var(--text);word-break:break-word;min-width:0}
@@ -1770,7 +1800,7 @@
                 <td><span class="link" data-go="rescan-detail">总量1200/合规品1055（已认证：318）/非合规品137（已认证：42）/失败8</span></td>
                 <td>2026-06-10 14:20</td>
                 <td>2026-06-11 09:05</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>100002</td>
@@ -1782,7 +1812,7 @@
                 <td>—</td>
                 <td>2026-06-01 08:00</td>
                 <td>—</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>100003</td>
@@ -1794,7 +1824,7 @@
                 <td><span class="link" data-go="rescan-detail">总量640/合规品612（已认证：180）/非合规品28（已认证：8）/失败0</span></td>
                 <td>2026-05-28 10:15</td>
                 <td>2026-05-28 16:40</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>100004</td>
@@ -1806,7 +1836,7 @@
                 <td>—</td>
                 <td>2026-06-22 09:00</td>
                 <td>—</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200008</td>
@@ -1818,7 +1848,7 @@
                 <td><span class="link" data-go="rescan-detail">总量1286/合规品1194（已认证：360）/非合规品86（已认证：25）/失败6</span></td>
                 <td>2026-06-05 02:00</td>
                 <td>2026-06-05 06:18</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200009</td>
@@ -1830,7 +1860,7 @@
                 <td>—</td>
                 <td>2026-06-12 02:00</td>
                 <td>—</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200010</td>
@@ -1842,7 +1872,7 @@
                 <td><span class="link" data-go="rescan-detail">总量512/合规品471（已认证：140）/非合规品41（已认证：12）/失败0</span></td>
                 <td>2026-06-18 11:05</td>
                 <td>2026-06-18 14:22</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200011</td>
@@ -1854,7 +1884,7 @@
                 <td><span class="link" data-go="rescan-detail">总量2180/合规品1942（已认证：520）/非合规品210（已认证：55）/失败28</span></td>
                 <td>2026-06-21 02:00</td>
                 <td>2026-06-21 07:10</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>100005</td>
@@ -1866,7 +1896,7 @@
                 <td><span class="link" data-go="rescan-detail">总量320/合规品320（已认证：96）/非合规品0（已认证：0）/失败0</span></td>
                 <td>2026-06-08 15:30</td>
                 <td>2026-06-08 17:05</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200012</td>
@@ -1878,7 +1908,7 @@
                 <td>—</td>
                 <td>2026-06-22 16:40</td>
                 <td>—</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200013</td>
@@ -1890,7 +1920,7 @@
                 <td><span class="link" data-go="rescan-detail">总量186/合规品138（已认证：40）/非合规品42（已认证：10）/失败6</span></td>
                 <td>2026-06-19 09:20</td>
                 <td>2026-06-19 11:05</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
                 <td>200014</td>
@@ -1902,7 +1932,7 @@
                 <td>—</td>
                 <td>2026-06-22 14:10</td>
                 <td>—</td>
-                <td><span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
+                <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
             </tbody>
           </table>
@@ -2929,6 +2959,52 @@
       <div class="modal-ft">
         <button type="button" class="btn" id="cancelSyncConfirmModal">取消</button>
         <button type="button" class="btn pri" id="confirmSyncConfirmModal">确定同步</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 合规回扫 · 任务详情（参考禁售品任务详情） -->
+  <div class="modal-mask" id="rescanTaskDetailModal" aria-hidden="true">
+    <div class="modal-box lg" role="dialog" aria-labelledby="rescanTaskDetailTitle">
+      <div class="modal-hd">
+        <span id="rescanTaskDetailTitle">任务详情</span>
+        <button type="button" class="modal-x" id="closeRescanTaskDetailModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-bd">
+        <div class="task-detail-top">
+          <div class="detail-kv"><span class="k">任务名称：</span><span class="v" id="rtdName">—</span></div>
+          <div class="detail-kv"><span class="k">回扫类型：</span><span class="v" id="rtdType">—</span></div>
+          <div class="detail-kv"><span class="k">任务编号：</span><span class="v" id="rtdId">—</span></div>
+        </div>
+        <div class="task-detail-cols">
+          <div class="task-detail-panel">
+            <h3 class="panel-title">1. 产品范围</h3>
+            <div class="detail-kv"><span class="k">回扫SKU：</span><span class="v" id="rtdSkuMode">—</span></div>
+            <div class="detail-kv" id="rtdDevTimeRow"><span class="k">开发时间：</span><span class="v" id="rtdDevTime">—</span></div>
+            <div class="detail-kv" id="rtdSkuListRow" hidden><span class="k">指定SKU：</span><span class="v muted" id="rtdSkuList">—</span></div>
+            <div class="detail-kv"><span class="k">组合SKU：</span><span class="v" id="rtdCombo">—</span></div>
+            <div class="detail-kv"><span class="k">产品状态：</span><span class="v" id="rtdProdStatus">—</span></div>
+            <div class="detail-kv" style="align-items:flex-start">
+              <span class="k">回扫产品类目：</span>
+              <span class="v"><div class="task-detail-cats" id="rtdCategories">—</div></span>
+            </div>
+          </div>
+          <div class="task-detail-panel">
+            <h3 class="panel-title">2. 回扫站点与政策</h3>
+            <div class="detail-kv"><span class="k">合规政策：</span><span class="v" id="rtdPolicy">—</span></div>
+            <div class="detail-kv" style="align-items:flex-start">
+              <span class="k">回扫站点：</span>
+              <span class="v"><div class="task-detail-sites" id="rtdSites">—</div></span>
+            </div>
+            <div class="detail-kv" style="align-items:flex-start;flex-direction:column;gap:6px">
+              <span class="k">政策内容：</span>
+              <div class="task-detail-policy" id="rtdPolicyContent">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn pri" id="closeRescanTaskDetailBtn">关闭</button>
       </div>
     </div>
   </div>
@@ -5092,6 +5168,130 @@
     });
 
     const rescanResultSection = document.getElementById('rescan-result');
+
+    /* 合规回扫 · 任务详情（对齐禁售品任务详情双栏） */
+    const RESCAN_TASK_DETAILS = {
+      '100001': {
+        skuMode: '指定开发时间',
+        devTime: '2024-01-01 00:00:00 ~ 2026-06-10 23:59:59',
+        combo: '否',
+        prodStatus: '正常、停产、锁定、暂时缺货、清库',
+        categories: ['Toys & Games › Toys', 'Baby Products › Toys'],
+        policy: '儿童玩具',
+        sites: ['美国'],
+        policyContent: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      },
+      '100002': {
+        skuMode: '指定SKU',
+        skuList: 'SKU-D3301、SKU-D3302、SKU-C8821 等 86 个',
+        combo: '否',
+        prodStatus: '—',
+        categories: [],
+        policy: '儿童玩具',
+        sites: ['美国'],
+        policyContent: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      },
+      '100003': {
+        skuMode: '指定开发时间',
+        devTime: '2023-01-01 00:00:00 ~ 2026-05-28 23:59:59',
+        combo: '否',
+        prodStatus: '正常、停产',
+        categories: ['Electronics › Audio', 'Electronics › Chargers'],
+        policy: '无线射频设备',
+        sites: ['美国', '加拿大'],
+        policyContent: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      },
+      '100004': {
+        skuMode: '指定开发时间',
+        devTime: '2024-06-01 00:00:00 ~ 2026-06-22 23:59:59',
+        combo: '否',
+        prodStatus: '正常',
+        categories: ['Clothing › Sleepwear', 'Baby › Comfort'],
+        policy: '儿童睡衣',
+        sites: ['英国'],
+        policyContent: 'CPC证书及易燃性要求；UKCA及燃烧性能按站点配置。'
+      },
+      '200008': {
+        skuMode: '指定开发时间',
+        devTime: '2007-11-01 00:00:00 ~ 2026-06-05 23:59:59',
+        combo: '否',
+        prodStatus: '正常、停产、锁定、暂时缺货、清库',
+        categories: ['Toys & Games', 'Baby Products', 'Home & Kitchen'],
+        policy: '儿童玩具',
+        sites: ['美国', '加拿大'],
+        policyContent: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      }
+    };
+    function fillRescanTaskDetailField(id, value){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value == null || value === '' ? '—' : String(value);
+    }
+    function openRescanTaskDetailModal(row){
+      if (!row) return;
+      const tds = [...row.children];
+      const text = (i) => (tds[i]?.innerText || '').replace(/\s+/g, ' ').trim() || '—';
+      const taskId = row.dataset.taskId || text(0);
+      const taskName = text(1);
+      const taskType = text(2);
+      const platformSites = text(3);
+      const pack = RESCAN_TASK_DETAILS[taskId] || {};
+      const sitesFromRow = platformSites.replace(/^亚马逊[：:]/, '').split(/[、,，]/).map(s => s.trim()).filter(Boolean);
+      const sites = (pack.sites && pack.sites.length) ? pack.sites : sitesFromRow;
+      const skuMode = pack.skuMode || '指定开发时间';
+
+      fillRescanTaskDetailField('rtdName', taskName);
+      fillRescanTaskDetailField('rtdType', taskType);
+      fillRescanTaskDetailField('rtdId', taskId);
+      fillRescanTaskDetailField('rtdSkuMode', skuMode);
+      fillRescanTaskDetailField('rtdDevTime', pack.devTime || '—');
+      fillRescanTaskDetailField('rtdCombo', pack.combo || '否');
+      fillRescanTaskDetailField('rtdProdStatus', pack.prodStatus || '—');
+      fillRescanTaskDetailField('rtdPolicy', pack.policy || '—');
+      fillRescanTaskDetailField('rtdPolicyContent', pack.policyContent || '—');
+
+      const bySku = skuMode === '指定SKU';
+      document.getElementById('rtdDevTimeRow')?.toggleAttribute('hidden', bySku);
+      document.getElementById('rtdSkuListRow')?.toggleAttribute('hidden', !bySku);
+      fillRescanTaskDetailField('rtdSkuList', pack.skuList || '—');
+
+      const catBox = document.getElementById('rtdCategories');
+      if (catBox) {
+        const cats = pack.categories || [];
+        catBox.innerHTML = cats.length
+          ? cats.map(c => `<span>${String(c).replace(/</g, '&lt;')}</span>`).join('')
+          : '—';
+      }
+      const siteBox = document.getElementById('rtdSites');
+      if (siteBox) {
+        siteBox.innerHTML = sites.length
+          ? sites.map(s => `<span class="chip">亚马逊-${String(s).replace(/</g, '&lt;')}</span>`).join('')
+          : '—';
+      }
+      document.getElementById('rescanTaskDetailModal')?.classList.add('show');
+    }
+    function closeRescanTaskDetailModal(){
+      document.getElementById('rescanTaskDetailModal')?.classList.remove('show');
+    }
+    document.getElementById('closeRescanTaskDetailModal')?.addEventListener('click', closeRescanTaskDetailModal);
+    document.getElementById('closeRescanTaskDetailBtn')?.addEventListener('click', closeRescanTaskDetailModal);
+    document.getElementById('rescanTaskDetailModal')?.addEventListener('click', e => {
+      if (e.target.id === 'rescanTaskDetailModal') closeRescanTaskDetailModal();
+    });
+    rescanResultSection?.addEventListener('click', e => {
+      const btn = e.target.closest('.rescan-task-detail-btn');
+      if (!btn) return;
+      e.preventDefault();
+      openRescanTaskDetailModal(btn.closest('tr'));
+    });
+    // 给结果列表行打上 taskId，便于任务详情取数
+    rescanResultSection?.querySelectorAll('tbody tr').forEach(tr => {
+      const id = tr.children[0]?.textContent?.trim();
+      if (id) {
+        tr.classList.add('rescan-task-row');
+        tr.dataset.taskId = id;
+      }
+    });
 
     /* 审核统计 · 数据统计弹窗 */
     const AUDIT_STATS_DEMO = [
