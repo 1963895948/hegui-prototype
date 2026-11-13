@@ -6297,9 +6297,19 @@
           { who: '李四', time: '2026-06-10 14:08:22', what: `【审核结果】：修改成 ${row.dataset.audit || '—'}` }
         ];
       }
+      // 操作时间倒序（新→旧）；同秒内保持原相对顺序的逆序
+      logs = [...logs]
+        .map((l, i) => ({ ...l, _i: i }))
+        .sort((a, b) => {
+          const ta = String(a.time || '');
+          const tb = String(b.time || '');
+          if (ta !== tb) return tb.localeCompare(ta);
+          return b._i - a._i;
+        })
+        .map(({ _i, ...l }) => l);
       if (detectLogBody) {
         detectLogBody.innerHTML = logs.map(l =>
-          `<tr><td>${l.who}</td><td>${l.time}</td><td>${l.what}</td></tr>`
+          `<tr><td>${l.who}</td><td>${l.time}</td><td>${(l.what || '').replace(/</g, '&lt;')}</td></tr>`
         ).join('');
       }
       if (detectLogEmpty) detectLogEmpty.style.display = logs.length ? 'none' : 'block';
