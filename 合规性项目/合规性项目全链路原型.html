@@ -2190,7 +2190,7 @@
                   <div>审核时间：—</div>
                   <div>同步时间：—</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-B2205" data-title-cn="锂电池移动电源 10000mAh" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
@@ -2216,7 +2216,7 @@
                   <div>审核时间：—</div>
                   <div>同步时间：—</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-E3310" data-title-cn="蓝牙音箱 便携防水" data-sys-result="合规品" data-sys-desc="含蓝牙射频模块，命中 FCC Part 15 / ISED 射频认证义务，建议人工确认后打标" data-audit="合规品" data-sync-status="待同步">
                 <td><input type="checkbox" /></td>
@@ -2242,7 +2242,7 @@
                   <div>审核时间：2026-06-10 11:20:33</div>
                   <div>同步时间：—</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-sync-btn">同步</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-sync-btn">同步</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-F5501" data-title-cn="儿童睡衣套装 纯棉" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
@@ -2268,7 +2268,7 @@
                   <div>审核时间：—</div>
                   <div>同步时间：—</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-G6602" data-title-cn="硅胶烘焙模具套装" data-sys-result="合规品" data-sys-desc="食品接触硅胶烘焙器具，命中 FDA、LFGB 食品级认证义务，人工已确认" data-audit="合规品" data-synced="1" data-sync-status="已同步">
                 <td><input type="checkbox" /></td>
@@ -2294,7 +2294,7 @@
                   <div>审核时间：2026-06-11 09:42:10</div>
                   <div>同步时间：2026-06-11 14:08:22</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-H7703" data-title-cn="婴儿安抚巾 带牙胶" data-sys-result="非合规品" data-audit="非合规品" data-sync-status="无需同步">
                 <td><input type="checkbox" /></td>
@@ -2320,7 +2320,7 @@
                   <div>审核时间：—</div>
                   <div>同步时间：—</div>
                 </td>
-                <td><span class="link rescan-reaudit-btn">重复审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
+                <td><span class="link rescan-audit-btn">审核</span> · <span class="link rescan-view-btn">查看</span> · <span class="link rescan-log-btn">日志</span></td>
               </tr>
               <tr class="rescan-data-row" data-sku="SKU-J8804" data-title-cn="无线充电器 三合一" data-sys-result="合规品" data-sys-desc="无线充电设备，命中 FCC 射频与电能传输认证义务，建议人工确认后打标" data-audit="待审核" data-sync-status="" data-policy-category="无线射频设备">
                 <td><input type="checkbox" /></td>
@@ -5778,7 +5778,6 @@
     let auditSource = 'detect';
     let auditSingleSku = '';
     let auditSingleRow = null;
-    let auditIsReaudit = false;
     const rescanAuditLogs = Object.create(null); // sku -> log entries[]
 
     function nowAuditTime(){
@@ -5796,11 +5795,11 @@
       });
       return parts.length ? parts.join('、') : '—';
     }
-    function pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark, reaudit = false, syncStatus = '' }){
+    function pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark, syncStatus = '' }){
       const sku = row?.dataset.sku || '';
       if (!sku) return;
       if (!rescanAuditLogs[sku]) rescanAuditLogs[sku] = [];
-      const tag = reaudit ? '【重复审核】' : '【审核】';
+      const tag = '【审核】';
       rescanAuditLogs[sku].push({ who, time, what: `${tag}结果=${result}` });
       if (result === '合规品') {
         rescanAuditLogs[sku].push({
@@ -5832,11 +5831,7 @@
     }
     function renderRescanOpsHtml(result, syncStatus){
       const parts = [];
-      if (result === '合规品' || result === '非合规品') {
-        parts.push('<span class="link rescan-reaudit-btn">重复审核</span>');
-      } else {
-        parts.push('<span class="link rescan-audit-btn">审核</span>');
-      }
+      parts.push('<span class="link rescan-audit-btn">审核</span>');
       if (result === '合规品' && (syncStatus === '待同步' || syncStatus === '同步失败')) {
         parts.push('<span class="link rescan-sync-btn">同步</span>');
       }
@@ -5852,7 +5847,7 @@
       if (syncStatus === '无需同步') return '无需同步';
       return '—';
     }
-    function applyAuditToRescanRow(row, { result, sites, certs, remark, who = '林佳丽', reaudit = false }){
+    function applyAuditToRescanRow(row, { result, sites, certs, remark, who = '林佳丽' }){
       if (!row || !row.classList.contains('rescan-data-row')) return;
       const tds = [...row.children];
       if (tds.length < 16) return;
@@ -5862,8 +5857,8 @@
       let remarkText = (remark || '').trim();
       if (!remarkText) {
         remarkText = result === '合规品'
-          ? (reaudit ? '重复审核：仍为有风险（合规品）' : '人工确认合规品，待同步打标')
-          : (reaudit ? '重复审核：改为无风险（非合规品），无需同步' : '人工确认为非合规品，无需同步打标');
+          ? '人工确认合规品，待同步打标'
+          : '人工确认为非合规品，无需同步打标';
       }
       const prevSyncUser = (tds[13].innerText.match(/同步人：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
       const prevSyncTime = (tds[14].innerText.match(/同步时间：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
@@ -5903,7 +5898,7 @@
       tds[15].innerHTML = renderRescanOpsHtml(result, syncStatus);
 
       pushRescanAuditLogs(row, {
-        who, time, result, bizSites, bizCerts, remark: remarkText, reaudit, syncStatus
+        who, time, result, bizSites, bizCerts, remark: remarkText, syncStatus
       });
     }
     function applyAuditToDetectRow(row, { result, remark, who = '林佳丽' }){
@@ -5946,7 +5941,7 @@
     }
     function prefillsAuditSitesFromRow(row){
       if (!row) return new Set();
-      // 重复审核优先带出业务配置合规站点；否则回扫站点 / 检测站点
+      // 已审优先带出业务配置合规站点；否则回扫站点 / 检测站点
       if (row.classList.contains('rescan-data-row')) {
         const biz = row.querySelector('.cell-biz-sites');
         const bizText = (biz?.dataset.bizSites || biz?.textContent || '').trim();
@@ -5984,19 +5979,17 @@
       return tags.includes('非合规品') ? '非合规品' : '';
     }
     function canAuditRow(row){
-      // 首次审核：系统检出有风险（合规品）且待审核
+      // 检测列表：系统检出有风险（合规品）且待审核；回扫可多次审核
       if (!row) return false;
+      if (row.classList.contains('rescan-data-row')) {
+        const audit = getRowAuditResult(row);
+        return audit === '待审核' || audit === '合规品' || audit === '非合规品' || audit === '—' || !audit;
+      }
       const sys = getRowSysResult(row);
       const audit = getRowAuditResult(row);
       if (sys !== '合规品') return false;
-      if (row.classList.contains('detect-data-row') && row.dataset.status !== '检测完成') return false;
+      if (row.dataset.status !== '检测完成') return false;
       return audit === '待审核' || audit === '—' || !audit;
-    }
-    function canReAuditRescanRow(row){
-      // 重复审核：已有人工审核结论即可（含已同步）；用于纠错
-      if (!row || !row.classList.contains('rescan-data-row')) return false;
-      const audit = getRowAuditResult(row);
-      return audit === '合规品' || audit === '非合规品';
     }
     function canSyncRow(row){
       // 仅有风险（审核=合规品）且待同步/同步失败可同步；无风险=无需同步；已同步由业务改产品库
@@ -6057,16 +6050,12 @@
       syncAuditRiskSitesField();
     }
     batchAuditResultBox?.addEventListener('change', syncAuditRiskSitesField);
-    function openBatchAuditModal(mode = 'batch', row = null, source = 'detect', opts = {}){
-      const reaudit = !!opts.reaudit;
+    function openBatchAuditModal(mode = 'batch', row = null, source = 'detect'){
       if (mode === 'single' && row) {
-        if (reaudit) {
-          if (!canReAuditRescanRow(row)) {
-            showWarnToast('仅已审核记录可重复审核');
-            return;
-          }
-        } else if (!canAuditRow(row)) {
-          showWarnToast('仅系统检测结果为合规品且待审核的记录可审核');
+        if (!canAuditRow(row)) {
+          showWarnToast(source === 'rescan'
+            ? '当前记录不可审核'
+            : '仅系统检测结果为合规品且待审核的记录可审核');
           return;
         }
       }
@@ -6088,24 +6077,23 @@
           return;
         }
         if (rows.some(r => !canAuditRow(r))) {
-          showWarnToast('仅系统检测结果为合规品且待审核的记录可首次审核；已审请用「重复审核」');
+          showWarnToast('所选记录不可审核');
           return;
         }
       }
       auditMode = mode;
       auditSource = source;
-      auditIsReaudit = reaudit && mode === 'single' && source === 'rescan';
       auditSingleSku = row?.dataset.sku || '';
       auditSingleRow = mode === 'single' ? row : null;
       const titleEl = document.getElementById('batchAuditModalTitle');
       if (titleEl) {
-        titleEl.textContent = auditIsReaudit ? '重复审核' : (mode === 'single' ? '审核' : '批量审核');
+        titleEl.textContent = mode === 'single' ? '审核' : '批量审核';
       }
       const tipEl = document.getElementById('batchAuditSyncTip');
       if (tipEl) {
         tipEl.hidden = false;
-        tipEl.textContent = auditIsReaudit
-          ? '重复审核：有风险（合规品）可同步；无风险（非合规品）同步状态改为无需同步。已同步过的由业务自行改产品库。'
+        tipEl.textContent = source === 'rescan'
+          ? '有风险（合规品）可同步；无风险（非合规品）同步状态为无需同步。已审核可再次审核，不限次数；已同步过的由业务自行改产品库。'
           : '有风险（合规品）可同步打标；无风险（非合规品）同步状态为无需同步。';
       }
       // 对齐政策分类，供「所需相关认证」按政策自动带出
@@ -6118,7 +6106,7 @@
       // 单条审核时默认带出回扫站点 / 业务配置站点
       const prefills = mode === 'single' ? prefillsAuditSitesFromRow(row) : new Set();
       resetBatchAuditForm(prefills);
-      if (auditIsReaudit && row) {
+      if (mode === 'single' && source === 'rescan' && row) {
         const cur = getRowAuditResult(row);
         if (cur === '合规品' || cur === '非合规品') {
           setBatchAuditResult(cur);
@@ -6133,7 +6121,6 @@
       auditSource = 'detect';
       auditSingleSku = '';
       auditSingleRow = null;
-      auditIsReaudit = false;
     }
     document.getElementById('closeBatchAuditModal')?.addEventListener('click', closeBatchAuditModal);
     document.getElementById('cancelBatchAuditModal')?.addEventListener('click', closeBatchAuditModal);
@@ -6174,15 +6161,13 @@
       } else {
         targetRows = getCheckedDetectRows();
       }
-      const doingReaudit = auditIsReaudit;
       targetRows.forEach(row => {
         if (row.classList.contains('rescan-data-row')) {
           applyAuditToRescanRow(row, {
             result,
             sites: sitesSnap,
             certs: certsSnap,
-            remark,
-            reaudit: doingReaudit
+            remark
           });
         } else {
           applyAuditToDetectRow(row, { result, remark });
@@ -6196,9 +6181,8 @@
       const siteTip = result === '合规品'
         ? `，合规站点：${[...sitesSnap].sort().map(formatLabel).join('、')}${certTip}`
         : '';
-      const actName = doingReaudit ? '重复审核' : '审核';
       closeBatchAuditModal();
-      showToast(`已对 ${label} ${actName}为「${result}」${siteTip}`);
+      showToast(`已对 ${label} 审核为「${result}」${siteTip}`);
     });
 
     /* 合规品检测结果 · 行内操作菜单 */
@@ -6811,11 +6795,6 @@
       const viewBtn = e.target.closest('.rescan-view-btn');
       if (viewBtn) {
         openDetectDetailFromRescanRow(viewBtn.closest('.rescan-data-row'));
-        return;
-      }
-      const reauditBtn = e.target.closest('.rescan-reaudit-btn');
-      if (reauditBtn) {
-        openBatchAuditModal('single', reauditBtn.closest('.rescan-data-row'), 'rescan', { reaudit: true });
         return;
       }
       const auditBtn = e.target.closest('.rescan-audit-btn');
