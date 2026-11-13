@@ -2951,7 +2951,7 @@
           <select class="sel" id="auditStatsType" style="width:140px">
             <option value="audit">审核统计</option>
           </select>
-          <div class="stats-daterange" title="统计时间范围">
+          <div class="stats-daterange" title="按明细最新审核时间筛选">
             <input type="date" id="auditStatsDateStart" aria-label="开始日期" />
             <span>→</span>
             <input type="date" id="auditStatsDateEnd" aria-label="结束日期" />
@@ -2960,6 +2960,7 @@
           <button type="button" class="btn pri" id="auditStatsSearchBtn">搜索</button>
           <button type="button" class="btn" id="auditStatsResetBtn">重置</button>
         </div>
+        <p class="hint" style="margin:0 0 10px">时间范围按每条明细的<strong>最新一次审核时间</strong>纳入统计；多次审核只计最新结论与审核人，历史审核不重复计入。</p>
         <div class="stats-kpi" id="auditStatsKpi">
           <span>准确率：<b id="auditStatsAcc">--%</b></span>
           <span class="kpi-sep"></span>
@@ -2969,6 +2970,8 @@
           <span class="stats-info" tabindex="0" aria-label="指标说明">
             i
             <span class="stats-info-tip" role="tooltip">
+              口径：同一 SKU 多次审核时，仅以<strong>最新一次审核</strong>的时间、结论、审核人纳入统计。<br>
+              时间筛选：按该最新审核时间是否落在所选区间判断是否计入。<br>
               TP（真正例）：预测为合规品，实际审核为合规品<br>
               FP（假正例）：预测为合规品，实际审核为非合规品<br>
               FN（假负例）：预测为非合规品，实际审核为合规品<br>
@@ -5424,26 +5427,27 @@
       }
     });
 
-    /* 审核统计 · 数据统计弹窗 */
+    /* 审核统计 · 数据统计弹窗
+       口径：明细以「最新一次审核」为准（时间/结论/审核人）；时间筛选用 latestAuditDate */
     const AUDIT_STATS_DEMO = [
       {
         taskId: '100003', taskName: '电子类-FCC 存量回扫', modelRisk: 612, reviewer: '林佳丽',
-        audited: 640, risk: 580, safe: 60, precision: 0.948, date: '2026-05-28',
+        audited: 640, risk: 580, safe: 60, precision: 0.948, latestAuditDate: '2026-05-28',
         tp: 560, fp: 52, fn: 20, tn: 8
       },
       {
         taskId: '200008', taskName: '增量政策回扫-2026W24', modelRisk: 1194, reviewer: '王五',
-        audited: 1280, risk: 1100, safe: 180, precision: 0.921, date: '2026-06-05',
+        audited: 1280, risk: 1100, safe: 180, precision: 0.921, latestAuditDate: '2026-06-05',
         tp: 1050, fp: 144, fn: 50, tn: 36
       },
       {
         taskId: '200010', taskName: '增量邮件回扫-儿童玩具', modelRisk: 471, reviewer: '李四',
-        audited: 512, risk: 430, safe: 82, precision: 0.913, date: '2026-06-12',
+        audited: 512, risk: 430, safe: 82, precision: 0.913, latestAuditDate: '2026-06-12',
         tp: 410, fp: 61, fn: 20, tn: 21
       },
       {
         taskId: '100001', taskName: '儿童玩具-CPC 存量回扫', modelRisk: 1055, reviewer: '待分配',
-        audited: 0, risk: 0, safe: 0, precision: null, date: '2026-06-10',
+        audited: 0, risk: 0, safe: 0, precision: null, latestAuditDate: '',
         tp: 0, fp: 0, fn: 0, tn: 0
       }
     ];
@@ -5455,8 +5459,11 @@
       const start = document.getElementById('auditStatsDateStart')?.value || '';
       const end = document.getElementById('auditStatsDateEnd')?.value || '';
       return AUDIT_STATS_DEMO.filter(r => {
-        if (start && r.date < start) return false;
-        if (end && r.date > end) return false;
+        // 未审核（无最新审核时间）不纳入有时间条件的统计；无时间条件时展示任务行但已审量为 0
+        const d = r.latestAuditDate || '';
+        if (!d) return !start && !end;
+        if (start && d < start) return false;
+        if (end && d > end) return false;
         return true;
       });
     }
