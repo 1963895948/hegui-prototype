@@ -1777,6 +1777,14 @@
             <select class="sel"><option>回扫类型</option><option>人工创建回扫</option><option>增量 SKU 回扫</option><option>增量政策回扫</option><option>增量邮件回扫</option></select>
             <select class="sel"><option>回扫状态</option><option>待回扫</option><option>回扫中</option><option>回扫完成</option></select>
             <select class="sel"><option>审核状态</option><option>待分配</option><option>审核中</option><option>审核完成</option></select>
+            <select class="sel" id="rescanCreatorFilter">
+              <option value="">创建人</option>
+              <option>系统</option>
+              <option>林佳丽</option>
+              <option>王五</option>
+              <option>马婷婷</option>
+              <option>李四</option>
+            </select>
             <input class="input" placeholder="生成时间起" />
             <input class="input" placeholder="生成时间止" />
             <button class="btn pri">搜索</button>
@@ -1791,7 +1799,7 @@
               <tr>
                 <th>任务编号</th><th>任务名称</th><th>回扫类型</th><th>平台/站点</th>
                 <th>回扫状态</th><th>审核状态</th><th>回扫结果</th>
-                <th>生成时间</th><th>回扫完成时间</th><th>操作</th>
+                <th>创建人</th><th>生成 / 完成时间</th><th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -1803,8 +1811,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
                 <td><span class="link" data-go="rescan-detail">总量1200/合规品1055（已认证：318）/非合规品137（已认证：42）/失败8</span></td>
-                <td>2026-06-10 14:20</td>
-                <td>2026-06-11 09:05</td>
+                <td>林佳丽</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-10 14:20</div>
+                  <div>完成：2026-06-11 09:05</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1815,8 +1826,11 @@
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
                 <td>—</td>
-                <td>2026-06-01 08:00</td>
-                <td>—</td>
+                <td>王五</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-01 08:00</div>
+                  <div>完成：—</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1827,8 +1841,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
                 <td><span class="link" data-go="rescan-detail">总量640/合规品612（已认证：180）/非合规品28（已认证：8）/失败0</span></td>
-                <td>2026-05-28 10:15</td>
-                <td>2026-05-28 16:40</td>
+                <td>马婷婷</td>
+                <td class="cell-meta">
+                  <div>生成：2026-05-28 10:15</div>
+                  <div>完成：2026-05-28 16:40</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1839,8 +1856,11 @@
                 <td><span class="tag t-w">待回扫</span></td>
                 <td>—</td>
                 <td>—</td>
-                <td>2026-06-22 09:00</td>
-                <td>—</td>
+                <td>林佳丽</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-22 09:00</div>
+                  <div>完成：—</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1851,8 +1871,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
                 <td><span class="link" data-go="rescan-detail">总量1286/合规品1194（已认证：360）/非合规品86（已认证：25）/失败6</span></td>
-                <td>2026-06-05 02:00</td>
-                <td>2026-06-05 06:18</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-05 02:00</div>
+                  <div>完成：2026-06-05 06:18</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1863,8 +1886,11 @@
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
                 <td>—</td>
-                <td>2026-06-12 02:00</td>
-                <td>—</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-12 02:00</div>
+                  <div>完成：—</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1875,8 +1901,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
                 <td><span class="link" data-go="rescan-detail">总量512/合规品471（已认证：140）/非合规品41（已认证：12）/失败0</span></td>
-                <td>2026-06-18 11:05</td>
-                <td>2026-06-18 14:22</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-18 11:05</div>
+                  <div>完成：2026-06-18 14:22</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1887,8 +1916,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
                 <td><span class="link" data-go="rescan-detail">总量2180/合规品1942（已认证：520）/非合规品210（已认证：55）/失败28</span></td>
-                <td>2026-06-21 02:00</td>
-                <td>2026-06-21 07:10</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-21 02:00</div>
+                  <div>完成：2026-06-21 07:10</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1899,8 +1931,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
                 <td><span class="link" data-go="rescan-detail">总量320/合规品320（已认证：96）/非合规品0（已认证：0）/失败0</span></td>
-                <td>2026-06-08 15:30</td>
-                <td>2026-06-08 17:05</td>
+                <td>李四</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-08 15:30</div>
+                  <div>完成：2026-06-08 17:05</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1911,8 +1946,11 @@
                 <td><span class="tag t-w">待回扫</span></td>
                 <td>—</td>
                 <td>—</td>
-                <td>2026-06-22 16:40</td>
-                <td>—</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-22 16:40</div>
+                  <div>完成：—</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1923,8 +1961,11 @@
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
                 <td><span class="link" data-go="rescan-detail">总量186/合规品138（已认证：40）/非合规品42（已认证：10）/失败6</span></td>
-                <td>2026-06-19 09:20</td>
-                <td>2026-06-19 11:05</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-19 09:20</div>
+                  <div>完成：2026-06-19 11:05</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
               <tr>
@@ -1935,8 +1976,11 @@
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
                 <td>—</td>
-                <td>2026-06-22 14:10</td>
-                <td>—</td>
+                <td>系统</td>
+                <td class="cell-meta">
+                  <div>生成：2026-06-22 14:10</div>
+                  <div>完成：—</div>
+                </td>
                 <td><span class="link rescan-task-detail-btn">任务详情</span> · <span class="link rescan-assign-btn">分配任务</span> · <span class="link" data-go="rescan-detail">回扫详情</span></td>
               </tr>
             </tbody>
