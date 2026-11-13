@@ -1823,7 +1823,7 @@
           <table>
             <thead>
               <tr>
-                <th>任务编号</th><th>任务名称</th><th>回扫类型</th><th>平台/站点</th>
+                <th>任务编号</th><th>任务名称</th><th>回扫类型</th><th>合规分类</th><th>平台/站点</th>
                 <th>回扫状态</th><th>审核状态</th><th>回扫结果</th>
                 <th>创建人</th><th>生成 / 完成时间</th><th>操作</th>
               </tr>
@@ -1833,6 +1833,7 @@
                 <td>100001</td>
                 <td>儿童玩具-CPC 存量回扫</td>
                 <td>人工创建回扫</td>
+                <td>儿童玩具</td>
                 <td>亚马逊：美国</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
@@ -1848,6 +1849,7 @@
                 <td>100002</td>
                 <td>儿童玩具-CPC 指定SKU回扫</td>
                 <td>人工创建回扫</td>
+                <td>儿童玩具</td>
                 <td>亚马逊：美国</td>
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
@@ -1863,6 +1865,7 @@
                 <td>100003</td>
                 <td>电子类-FCC 存量回扫</td>
                 <td>人工创建回扫</td>
+                <td>无线射频设备</td>
                 <td>亚马逊：美国、加拿大</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
@@ -1878,6 +1881,7 @@
                 <td>100004</td>
                 <td>婴儿用品-易燃性存量回扫</td>
                 <td>人工创建回扫</td>
+                <td>儿童睡衣</td>
                 <td>亚马逊：英国</td>
                 <td><span class="tag t-w">待回扫</span></td>
                 <td>—</td>
@@ -1893,6 +1897,7 @@
                 <td>200008</td>
                 <td>增量政策回扫-2026W24</td>
                 <td>增量政策回扫</td>
+                <td>儿童玩具</td>
                 <td>亚马逊：美国、加拿大</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
@@ -1908,6 +1913,7 @@
                 <td>200009</td>
                 <td>增量SKU回扫-2026W24</td>
                 <td>增量 SKU 回扫</td>
+                <td>全部合规分类</td>
                 <td>亚马逊：美国、英国、德国</td>
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
@@ -1923,6 +1929,7 @@
                 <td>200010</td>
                 <td>增量政策回扫-锂电池UN38.3</td>
                 <td>增量政策回扫</td>
+                <td>锂电池</td>
                 <td>亚马逊：德国、日本</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
@@ -1938,6 +1945,7 @@
                 <td>200011</td>
                 <td>增量SKU回扫-2026W25</td>
                 <td>增量 SKU 回扫</td>
+                <td>全部合规分类</td>
                 <td>亚马逊：美国、法国、意大利</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
@@ -1953,6 +1961,7 @@
                 <td>100005</td>
                 <td>厨房用品-存量人工回扫</td>
                 <td>人工创建回扫</td>
+                <td>食品接触材料</td>
                 <td>亚马逊：美国</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-y">审核完成</span></td>
@@ -1968,6 +1977,7 @@
                 <td>200012</td>
                 <td>增量政策回扫-儿童睡衣易燃性</td>
                 <td>增量政策回扫</td>
+                <td>儿童睡衣</td>
                 <td>亚马逊：美国、加拿大、英国</td>
                 <td><span class="tag t-w">待回扫</span></td>
                 <td>—</td>
@@ -1983,6 +1993,7 @@
                 <td>200013</td>
                 <td>增量邮件回扫-CPC合规提醒</td>
                 <td>增量邮件回扫</td>
+                <td>儿童玩具</td>
                 <td>亚马逊：美国、澳大利亚</td>
                 <td><span class="tag t-y">回扫完成</span></td>
                 <td><span class="tag t-w">待分配</span></td>
@@ -1998,6 +2009,7 @@
                 <td>200014</td>
                 <td>增量邮件回扫-FCC邮件通知</td>
                 <td>增量邮件回扫</td>
+                <td>无线射频设备</td>
                 <td>亚马逊：美国、日本、新加坡</td>
                 <td><span class="tag t-w">回扫中</span></td>
                 <td><span class="tag t-w">审核中</span></td>
@@ -5428,7 +5440,7 @@
       const taskId = row.dataset.taskId || text(0);
       const taskName = text(1);
       const taskType = text(2);
-      const platformSites = text(3);
+      const platformSites = text(4); // 3=合规分类
       const pack = RESCAN_TASK_DETAILS[taskId] || {};
       const sitesFromRow = platformSites.replace(/^亚马逊[：:]/, '').split(/[、,，]/).map(s => s.trim()).filter(Boolean);
       const sites = (pack.sites && pack.sites.length) ? pack.sites : sitesFromRow;
