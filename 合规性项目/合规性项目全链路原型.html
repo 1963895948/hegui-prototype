@@ -5890,22 +5890,34 @@
       });
       return parts.length ? parts.join('、') : '—';
     }
-    function pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark, syncStatus = '' }){
+    /** 变更日志：字段由【旧值】修改为新值（空旧值写空括号；空新值写—） */
+    function normLogVal(v){
+      const s = String(v ?? '').replace(/\s+/g, ' ').trim();
+      if (!s || s === '待审核' || s === '-' || s === '—') return '';
+      return s;
+    }
+    function changeClause(field, from, to){
+      const f = normLogVal(from);
+      const t = normLogVal(to) || '—';
+      return `${field}由【${f}】修改为${t}`;
+    }
+    function pushRescanAuditLogs(row, { who, time, result, bizSites, bizCerts, remark, prev = {} }){
       const sku = row?.dataset.sku || '';
       if (!sku) return;
       if (!rescanAuditLogs[sku]) rescanAuditLogs[sku] = [];
-      const tag = '【审核】';
-      rescanAuditLogs[sku].push({ who, time, what: `${tag}结果=${result}` });
-      if (result === '合规品') {
-        rescanAuditLogs[sku].push({
-          who, time,
-          what: `${tag}审核合规站点=${bizSites || '—'}；所需认证=${bizCerts || '—'}`
-        });
-      }
-      rescanAuditLogs[sku].push({ who, time, what: `${tag}明细=${remark || '—'}` });
-      if (syncStatus) {
-        rescanAuditLogs[sku].push({ who, time, what: `${tag}同步状态=${syncStatus}` });
-      }
+      const parts = [
+        changeClause('审核结果', prev.result, result),
+        changeClause('审核合规站点', prev.bizSites, bizSites),
+        changeClause('所需认证', prev.bizCerts, bizCerts),
+        changeClause('审核说明', prev.remark, remark)
+      ];
+      const same =
+        normLogVal(prev.result) === normLogVal(result) &&
+        normLogVal(prev.bizSites) === normLogVal(bizSites) &&
+        normLogVal(prev.bizCerts) === normLogVal(bizCerts) &&
+        normLogVal(prev.remark) === normLogVal(remark);
+      if (same) return;
+      rescanAuditLogs[sku].push({ who, time, what: parts.join('；') });
     }
     /** 有风险=合规品（可同步）；无风险=非合规品（无需同步） */
     function resolveRescanSyncStatusAfterAudit(row, result){
@@ -5955,6 +5967,12 @@
           ? '人工确认合规品，待同步至产品库'
           : '人工确认为非合规品，无需同步';
       }
+      const prevAudit = {
+        result: (tds[8]?.innerText || '').replace(/\s+/g, ' ').trim(),
+        bizSites: (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim(),
+        bizCerts: (tds[10]?.innerText || '').replace(/\s+/g, ' ').trim(),
+        remark: (tds[11]?.innerText || '').replace(/\s+/g, ' ').trim()
+      };
       const prevSyncUser = (tds[13].innerText.match(/同步人：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
       const prevSyncTime = (tds[14].innerText.match(/同步时间：\s*(.+)/) || [])[1]?.split('\n')[0]?.trim() || '—';
       const { syncStatus, synced, keepSyncMeta } = resolveRescanSyncStatusAfterAudit(row, result);
@@ -5993,7 +6011,7 @@
       tds[15].innerHTML = renderRescanOpsHtml(result, syncStatus);
 
       pushRescanAuditLogs(row, {
-        who, time, result, bizSites, bizCerts, remark: remarkText, syncStatus
+        who, time, result, bizSites, bizCerts, remark: remarkText, prev: prevAudit
       });
     }
     function applyAuditToDetectRow(row, { result, remark, who = '林佳丽' }){
@@ -6421,14 +6439,15 @@
       const bizSites = (tds[9]?.innerText || '').replace(/\s+/g, ' ').trim();
       const bizCerts = (tds[10]?.innerText || '').replace(/\s+/g, ' ').trim();
       const base = [
-        { who: '系统', time: '2026-06-05 02:10:18', what: '【回扫任务】：进入回扫队列并完成检测' }
+        { who: '系统', time: '2026-06-05 02:10:18', what: '检测状态由【】修改为检测完成' }
       ];
       const sku = row.dataset.sku || '';
       const live = rescanAuditLogs[sku] || [];
+      const syncSites = bizSites && bizSites !== '—' ? bizSites : '—';
       if (live.length) {
         const logs = [...base, ...live];
-        if (row.dataset.synced === '1') {
-          logs.push({ who: '林佳丽', time: nowAuditTime(), what: '【同步产品库】：已同步至产品库' });
+        if (row.dataset.synced === '1' && !live.some(l => String(l.what || '').includes('【同步产品库】'))) {
+          logs.push({ who: '林佳丽', time: nowAuditTime(), what: `【同步产品库】成功；写入合规站点=${syncSites}` });
         }
         return logs;
       }
@@ -6438,19 +6457,26 @@
       if (audit.includes('非合规品')) {
         return [
           ...base,
-          { who: '林佳丽', time: '2026-06-05 09:42:41', what: '【审核】结果=非合规品' },
-          { who: '林佳丽', time: '2026-06-05 09:43:05', what: `【审核】明细=${remark && remark !== '—' ? remark : '系统判定非合规品，无需同步'}` }
+          { who: '林佳丽', time: '2026-06-05 09:42:41', what: [
+            changeClause('审核结果', '', '非合规品'),
+            changeClause('审核合规站点', '', '—'),
+            changeClause('所需认证', '', '—'),
+            changeClause('审核说明', '', remark && remark !== '—' ? remark : '系统判定非合规品，无需同步')
+          ].join('；') }
         ];
       }
       if ((audit.includes('合规品') && !audit.includes('非合规品')) || audit === '合规品') {
         const logs = [
           ...base,
-          { who: '林佳丽', time: '2026-06-05 11:20:33', what: '【审核】结果=合规品' },
-          { who: '林佳丽', time: '2026-06-05 11:20:35', what: `【审核】审核合规站点=${bizSites && bizSites !== '—' ? bizSites : '—'}；所需认证=${bizCerts && bizCerts !== '—' ? bizCerts : '—'}` },
-          { who: '林佳丽', time: '2026-06-05 11:20:40', what: `【审核】明细=${remark && remark !== '—' ? remark : '人工确认合规品'}` }
+          { who: '林佳丽', time: '2026-06-05 11:20:33', what: [
+            changeClause('审核结果', '', '合规品'),
+            changeClause('审核合规站点', '', bizSites && bizSites !== '—' ? bizSites : '美国'),
+            changeClause('所需认证', '', bizCerts && bizCerts !== '—' ? bizCerts : 'CPC'),
+            changeClause('审核说明', '', remark && remark !== '—' ? remark : '符合')
+          ].join('；') }
         ];
         if (row.dataset.synced === '1') {
-          logs.push({ who: '林佳丽', time: '2026-06-05 11:30:12', what: '【同步产品库】：已同步至产品库' });
+          logs.push({ who: '林佳丽', time: '2026-06-05 11:30:12', what: `【同步产品库】成功；写入合规站点=${syncSites}` });
         }
         return logs;
       }
@@ -6464,19 +6490,19 @@
         logs = buildRescanLogs(row);
       } else if (row.dataset.audit === '合规品') {
         logs = [
-          { who: '王五', time: '2026-06-10 09:30:12', what: '【提交检测】：已提交' },
-          { who: '系统', time: '2026-06-10 09:31:05', what: '【检测状态】：修改成 检测完成' },
-          { who: '王五', time: '2026-06-10 11:20:33', what: '【审核结果】：修改成 合规品' }
+          { who: '王五', time: '2026-06-10 09:30:12', what: '检测状态由【】修改为已提交' },
+          { who: '系统', time: '2026-06-10 09:31:05', what: '检测状态由【已提交】修改为检测完成' },
+          { who: '王五', time: '2026-06-10 11:20:33', what: '审核结果由【】修改为合规品；审核合规站点由【】修改为美国；所需认证由【】修改为CPC；审核说明由【】修改为符合' }
         ];
       } else if (row.dataset.audit === '待审核' || !row.dataset.audit) {
         logs = [
-          { who: '张三', time: '2026-06-12 10:20:00', what: '【提交检测】：已提交' },
-          { who: '系统', time: '2026-06-12 10:21:00', what: '【检测状态】：修改成 检测完成' }
+          { who: '张三', time: '2026-06-12 10:20:00', what: '检测状态由【】修改为已提交' },
+          { who: '系统', time: '2026-06-12 10:21:00', what: '检测状态由【已提交】修改为检测完成' }
         ];
       } else {
         logs = [
-          { who: '系统', time: '2026-06-10 09:31:05', what: '【检测状态】：修改成 检测完成' },
-          { who: '李四', time: '2026-06-10 14:08:22', what: `【审核结果】：修改成 ${row.dataset.audit || '—'}` }
+          { who: '系统', time: '2026-06-10 09:31:05', what: '检测状态由【】修改为检测完成' },
+          { who: '李四', time: '2026-06-10 14:08:22', what: `审核结果由【】修改为${row.dataset.audit || '—'}；审核合规站点由【】修改为—；所需认证由【】修改为—；审核说明由【】修改为—` }
         ];
       }
       // 操作时间倒序（新→旧）；同秒内保持原相对顺序的逆序
@@ -6846,7 +6872,8 @@
         const sku = r.dataset.sku || '';
         if (sku) {
           if (!rescanAuditLogs[sku]) rescanAuditLogs[sku] = [];
-          rescanAuditLogs[sku].push({ who: '林佳丽', time: nowAuditTime(), what: '【同步产品库】成功' });
+          const writeSites = (r.querySelector('.cell-biz-sites')?.textContent || '').replace(/\s+/g, ' ').trim() || '—';
+          rescanAuditLogs[sku].push({ who: '林佳丽', time: nowAuditTime(), what: `【同步产品库】成功；写入合规站点=${writeSites}` });
         }
       });
       const tip = syncConfirmCount > 1
@@ -7136,7 +7163,7 @@
         createdRows.push(row);
       });
       createdRows.forEach(row => {
-        pushPolicyLog(row, '新建政策', `分类「${category}」新增站点「${row.site}」，默认启用`);
+        pushPolicyLog(row, `分类由【】修改为${category}；站点由【】修改为${row.site}；状态由【】修改为启用`);
       });
       closePolicyAddModal();
       renderPolicyTable();
@@ -7188,7 +7215,7 @@
       const idx = COMPLIANCE_CATEGORIES.indexOf(oldName);
       if (idx >= 0) COMPLIANCE_CATEGORIES[idx] = newName;
       else COMPLIANCE_CATEGORIES.unshift(newName);
-      touched.forEach(p => pushPolicyLog(p, '重命名分类', `「${oldName}」→「${newName}」`));
+      touched.forEach(p => pushPolicyLog(p, `分类名称由【${oldName}】修改为${newName}`));
       closePolicyRenameModal();
       if (policyModalCategory === oldName) {
         policyModalCategory = newName;
@@ -7401,7 +7428,7 @@
           }
           row.status = '启用';
           touchPolicyRow(row);
-          pushPolicyLog(row, '启用站点', '状态：启用');
+          pushPolicyLog(row, '状态由【停用】修改为启用');
           showToast(`已启用：亚马逊 · ${row.site}`);
           refreshPolicyDetailAfterSiteChange(category);
           return;
@@ -7419,7 +7446,7 @@
           row.learned = true;
           syncPolicyContentLearned(row, category);
           touchPolicyRow(row);
-          pushPolicyLog(row, '确认模型学习', '模型是否学习：已学习');
+          pushPolicyLog(row, '模型是否学习由【未学习】修改为已学习');
           showToast(`已确认学习：亚马逊 · ${row.site}`);
           refreshPolicyDetailAfterSiteChange(category);
           return;
@@ -7434,21 +7461,14 @@
     function fmtLogTime(d){
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     }
-    /** 操作类型并入详情：【类型】详情；弹窗不再单独展示「操作类型」列 */
-    function formatPolicyLogDetail(type, detail){
-      const d = (detail == null || detail === '') ? '—' : String(detail);
-      const t = (type || '').trim();
-      if (!t) return d;
-      if (d.startsWith('【') && d.includes('】')) return d;
-      return `【${t}】${d}`;
-    }
-    function pushPolicyLog(p, type, detail, user){
+    /** 政策日志详情：变更记「字段由【旧】修改为新」；无独立操作类型列 */
+    function pushPolicyLog(p, detail, user){
       const key = policyLogKey(p);
       if (!POLICY_LOGS[key]) POLICY_LOGS[key] = [];
       POLICY_LOGS[key].unshift({
         time: fmtLogTime(new Date()),
         user: user || '当前用户',
-        detail: formatPolicyLogDetail(type, detail)
+        detail: detail || '—'
       });
     }
     function seedPolicyLogs(p){
@@ -7456,10 +7476,11 @@
       if (POLICY_LOGS[key]?.length) return;
       const now = Date.now();
       const certText = Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—');
+      const en = siteEnabled(p);
       POLICY_LOGS[key] = [
-        { time: fmtLogTime(new Date(now - 86400000)), user: '李四（合规）', detail: formatPolicyLogDetail(siteEnabled(p) ? '启用站点' : '停用站点', `状态：${siteEnabled(p) ? '启用' : '停用'}`) },
-        ...(p.crawlUrl ? [{ time: fmtLogTime(new Date(now - 86400000 * 3)), user: '张三（产品）', detail: formatPolicyLogDetail('配置采集链接', p.crawlUrl) }] : []),
-        { time: fmtLogTime(new Date(now - 86400000 * 5)), user: '张三（产品）', detail: formatPolicyLogDetail('新增站点明细', `亚马逊：${p.site}，认证：${certText}`) }
+        { time: fmtLogTime(new Date(now - 86400000)), user: '李四（合规）', detail: `状态由【${en ? '停用' : '启用'}】修改为${en ? '启用' : '停用'}` },
+        ...(p.crawlUrl ? [{ time: fmtLogTime(new Date(now - 86400000 * 3)), user: '张三（产品）', detail: `采集链接由【】修改为${p.crawlUrl}` }] : []),
+        { time: fmtLogTime(new Date(now - 86400000 * 5)), user: '张三（产品）', detail: `站点由【】修改为${p.site}；所需认证由【】修改为${certText || '—'}；状态由【】修改为启用` }
       ];
     }
     function openPolicyLogModal(p) {
@@ -7473,7 +7494,7 @@
       const esc = s => (s||'').replace(/</g,'&lt;');
       tbody.innerHTML = logs.length
         ? logs.map(l => {
-          const detail = formatPolicyLogDetail(l.type, l.detail);
+          const detail = l.detail || '—';
           return `<tr>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--sub)">${esc(l.time)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap">${esc(l.user)}</td>
@@ -7611,9 +7632,9 @@
           const exIdx = POLICY_STORE.findIndex(p => p.id === existing.id);
           if (exIdx >= 0) POLICY_STORE.splice(exIdx, 1);
           replaced += 1;
-          pushPolicyLog(row, '转移站点', `从「${fromCategory}」→「${target}」，并替换原「${target}」下「${row.site}」配置`);
+          pushPolicyLog(row, `所属分类由【${fromCategory}】修改为${target}；并替换原「${target}」下「${row.site}」配置`);
         } else {
-          pushPolicyLog(row, '转移站点', `从「${fromCategory}」→「${target}」`);
+          pushPolicyLog(row, `所属分类由【${fromCategory}】修改为${target}`);
         }
         row.category = target;
         touchPolicyRow(row);
@@ -7940,7 +7961,7 @@
         if (kind === 'single-disable') {
           row.status = '已停用';
           touchPolicyRow(row);
-          pushPolicyLog(row, '停用站点', '状态：停用');
+          pushPolicyLog(row, '状态由【启用】修改为停用');
           showToast(`已停用：亚马逊 · ${row.site}`);
         } else {
           row.learned = false;
@@ -7949,7 +7970,7 @@
           const siblings = sitesOfCategory(category).filter(x => bodyKeyByContent(x.content || '') === key);
           body.learned = siblings.some(x => !!x.learned);
           touchPolicyRow(row);
-          pushPolicyLog(row, '取消模型学习', '模型是否学习：未学习');
+          pushPolicyLog(row, '模型是否学习由【已学习】修改为未学习');
           showToast(`已取消学习：亚马逊 · ${row.site}`);
         }
         renderPolicyDetailGrid(category);
@@ -7963,12 +7984,17 @@
         const idSet = new Set(ids);
         const rows = sitesOfCategory(category).filter(r => idSet.has(r.id));
         rows.forEach(row => {
+          const parts = [
+            changeClause('政策内容', row.content, content),
+            changeClause('所需认证', (row.certs || []).join('、') || '—', (certs || []).join('、') || '—')
+          ];
+          if (crawlUrl) parts.splice(1, 0, changeClause('采集链接', row.crawlUrl, crawlUrl));
           row.content = content;
           if (crawlUrl) row.crawlUrl = crawlUrl;
           row.certs = certs.slice();
           row.ticVerify = ticVerify;
           touchPolicyRow(row);
-          pushPolicyLog(row, '批量编辑', crawlUrl ? '内容/链接/认证已更新' : '内容/认证已更新（链接未改）');
+          pushPolicyLog(row, parts.join('；'));
         });
         pdSelectedIds.clear();
         pdAcPending = null;
@@ -7996,13 +8022,13 @@
           if (row.status === '启用') return;
           row.status = '启用';
           touchPolicyRow(row);
-          pushPolicyLog(row, '批量启用', '状态：启用');
+          pushPolicyLog(row, '状态由【停用】修改为启用');
           n++;
         } else {
           if (row.status === '已停用') return;
           row.status = '已停用';
           touchPolicyRow(row);
-          pushPolicyLog(row, '批量停用', '状态：停用');
+          pushPolicyLog(row, '状态由【启用】修改为停用');
           n++;
         }
       });
@@ -8067,7 +8093,7 @@
           };
           touchPolicyRow(row);
           POLICY_STORE.push(row);
-          pushPolicyLog(row, '新增站点明细', `亚马逊：${r.site}，认证：${(r.certs || []).join('、') || '—'}`, '当前用户');
+          pushPolicyLog(row, `站点由【】修改为${r.site}；所需认证由【】修改为${(r.certs || []).join('、') || '—'}；状态由【】修改为启用`, '当前用户');
         });
         closePdAcModal();
         const names = rows.map(r => r.site);
@@ -8107,13 +8133,18 @@
       if (pdAcPending.mode !== 'edit') return;
       const row = POLICY_STORE.find(x => x.id === pdAcPending.rowId);
       if (!row) return;
+      const editParts = [
+        changeClause('政策内容', row.content, content),
+        changeClause('采集链接', row.crawlUrl, crawlUrl),
+        changeClause('所需认证', (row.certs || []).join('、') || '—', (certs || []).join('、') || '—')
+      ];
       row.content = content;
       row.crawlUrl = crawlUrl;
       row.certs = certs;
       row.ticVerify = ticVerify;
       touchPolicyRow(row);
       const category = row.category;
-      pushPolicyLog(row, '编辑站点明细', `内容/链接/认证已更新`, '当前用户');
+      pushPolicyLog(row, editParts.join('；'), '当前用户');
       closePdAcModal();
       showToast(`已保存：亚马逊 · ${row.site}`);
       renderPolicyDetailGrid(category);
