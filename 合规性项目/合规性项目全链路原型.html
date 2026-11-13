@@ -729,6 +729,18 @@
       min-width:1480px;width:max-content;margin:0;border:none;
     }
     #rescan-detail .rescan-detail-table-wrap th{white-space:nowrap}
+    /* 操作列右侧固定，横滚时始终可见 */
+    #rescan-detail .rescan-detail-table-wrap th:last-child,
+    #rescan-detail .rescan-detail-table-wrap td:last-child{
+      position:sticky;right:0;z-index:2;
+      background:#fff;white-space:nowrap;min-width:168px;
+      box-shadow:-6px 0 8px -6px rgba(15,23,42,.14);
+      border-left:1px solid var(--line);
+    }
+    #rescan-detail .rescan-detail-table-wrap th:last-child{
+      z-index:3;background:#fafafa;
+    }
+    #rescan-detail .rescan-detail-table-wrap tbody tr:hover td:last-child{background:#fafafa}
     #rescan-detail .cell-sync-status{white-space:nowrap;font-size:12px}
     .thumb{width:48px;height:48px;background:#eef1f6;border-radius:4px;flex:none}
 
