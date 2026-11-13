@@ -5239,12 +5239,51 @@
         policy: '儿童玩具',
         sites: ['美国', '加拿大'],
         policyContent: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      },
+      '200009': {
+        skuMode: '指定SKU',
+        skuList: [
+          '501430399','501430401','501430418','501430425','501430432','501430449','501430456','501430463',
+          '501430470','501430487','501430494','501430500','501430517','501430524','501430531','501430548',
+          '501430555','501430562','501430579','501430586','501430593','501430609','501430616','501430623'
+        ],
+        policy: '无线射频设备',
+        sites: ['美国', '英国', '德国'],
+        policyContent: '含射频发射的无线设备需满足目标站点认证与射频暴露要求。各站点认证不同，模型按相同内容识别该分类产品。'
+      },
+      '200011': {
+        skuMode: '指定SKU',
+        skuList: [
+          '23110438','SKU-D3301','SKU-D3302','SKU-E3310','SKU-J8804','SKU-G6602','SKU-C8821','SKU-B2205',
+          'SKU-F5501','SKU-H7703','12078514','12080672','12091614','12095483','12101226','12110736'
+        ],
+        policy: '儿童玩具',
+        sites: ['美国', '法国', '意大利'],
+        policyContent: '儿童玩具需满足目标站点安全认证与实验室要求。各站点认证不同，模型按相同内容识别该分类产品。'
       }
     };
     function fillRescanTaskDetailField(id, value){
       const el = document.getElementById(id);
       if (!el) return;
       el.textContent = value == null || value === '' ? '—' : String(value);
+    }
+    /** 创建任务时「回扫SKU」选项：指定开发时间 / 指定SKU */
+    function resolveTaskSkuMode(row, pack, taskName, taskType){
+      const raw = (row?.dataset.skuMode || pack?.skuMode || '').trim();
+      if (raw === 'sku' || raw === '指定SKU') return '指定SKU';
+      if (raw === 'time' || raw === '指定开发时间') return '指定开发时间';
+      const blob = `${taskName || ''} ${taskType || ''}`;
+      if (/指定\s*SKU|增量\s*SKU/i.test(blob)) return '指定SKU';
+      return '指定开发时间';
+    }
+    function parseTaskSkuList(pack){
+      if (Array.isArray(pack?.skuList)) {
+        return pack.skuList.map(s => String(s).trim()).filter(Boolean);
+      }
+      if (typeof pack?.skuList === 'string' && pack.skuList.trim() && pack.skuList !== '—') {
+        return pack.skuList.split(/[\n、,，;\s]+/).map(s => s.trim()).filter(Boolean);
+      }
+      return [];
     }
     function openRescanTaskDetailModal(row){
       if (!row) return;
@@ -5257,41 +5296,38 @@
       const pack = RESCAN_TASK_DETAILS[taskId] || {};
       const sitesFromRow = platformSites.replace(/^亚马逊[：:]/, '').split(/[、,，]/).map(s => s.trim()).filter(Boolean);
       const sites = (pack.sites && pack.sites.length) ? pack.sites : sitesFromRow;
-      const skuMode = pack.skuMode || '指定开发时间';
+      // 以创建时选择的「回扫SKU」类型为准，分支展示
+      const skuMode = resolveTaskSkuMode(row, pack, taskName, taskType);
+      const bySku = skuMode === '指定SKU';
 
       fillRescanTaskDetailField('rtdName', taskName);
       fillRescanTaskDetailField('rtdType', taskType);
       fillRescanTaskDetailField('rtdId', taskId);
       fillRescanTaskDetailField('rtdSkuMode', skuMode);
-      fillRescanTaskDetailField('rtdDevTime', pack.devTime || '—');
-      fillRescanTaskDetailField('rtdCombo', pack.combo || '否');
-      fillRescanTaskDetailField('rtdProdStatus', pack.prodStatus || '—');
+      fillRescanTaskDetailField('rtdDevTime', bySku ? '—' : (pack.devTime || '—'));
+      fillRescanTaskDetailField('rtdCombo', bySku ? '—' : (pack.combo || '否'));
+      fillRescanTaskDetailField('rtdProdStatus', bySku ? '—' : (pack.prodStatus || '—'));
       fillRescanTaskDetailField('rtdPolicy', pack.policy || '—');
       fillRescanTaskDetailField('rtdPolicyContent', pack.policyContent || '—');
 
-      const bySku = skuMode === '指定SKU';
       document.getElementById('rtdDevTimeRow')?.toggleAttribute('hidden', bySku);
       document.getElementById('rtdSkuListRow')?.toggleAttribute('hidden', !bySku);
       document.getElementById('rtdComboRow')?.toggleAttribute('hidden', bySku);
       document.getElementById('rtdProdStatusRow')?.toggleAttribute('hidden', bySku);
       document.getElementById('rtdCategoriesRow')?.toggleAttribute('hidden', bySku);
+
+      const skuArr = bySku ? parseTaskSkuList(pack) : [];
       const skuTa = document.getElementById('rtdSkuList');
       const skuCounter = document.getElementById('rtdSkuCounter');
-      let skuArr = [];
-      if (Array.isArray(pack.skuList)) {
-        skuArr = pack.skuList.map(s => String(s).trim()).filter(Boolean);
-      } else if (typeof pack.skuList === 'string' && pack.skuList.trim() && pack.skuList !== '—') {
-        skuArr = pack.skuList.split(/[\n、,，;\s]+/).map(s => s.trim()).filter(Boolean);
-      }
       if (skuTa) {
-        skuTa.value = bySku ? (skuArr.join('\n') || '') : '';
+        skuTa.value = skuArr.join('\n');
         skuTa.scrollTop = 0;
       }
       if (skuCounter) skuCounter.textContent = `${skuArr.length} / 20000`;
 
       const catBox = document.getElementById('rtdCategories');
       if (catBox) {
-        const cats = pack.categories || [];
+        const cats = bySku ? [] : (pack.categories || []);
         catBox.innerHTML = cats.length
           ? cats.map(c => `<span>${String(c).replace(/</g, '&lt;')}</span>`).join('')
           : '—';
@@ -5318,12 +5354,16 @@
       e.preventDefault();
       openRescanTaskDetailModal(btn.closest('tr'));
     });
-    // 给结果列表行打上 taskId，便于任务详情取数
+    // 给结果列表行打上 taskId / 创建时回扫SKU类型，便于任务详情按类型展示
     rescanResultSection?.querySelectorAll('tbody tr').forEach(tr => {
       const id = tr.children[0]?.textContent?.trim();
+      const name = tr.children[1]?.textContent?.trim() || '';
+      const type = tr.children[2]?.textContent?.trim() || '';
       if (id) {
         tr.classList.add('rescan-task-row');
         tr.dataset.taskId = id;
+        const mode = resolveTaskSkuMode(tr, RESCAN_TASK_DETAILS[id] || {}, name, type);
+        tr.dataset.skuMode = mode === '指定SKU' ? 'sku' : 'time';
       }
     });
 
