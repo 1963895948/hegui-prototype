@@ -591,6 +591,18 @@
       padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;
       max-height:320px;overflow:auto;
     }
+    .rescan-policy-preview .rescan-policy-pick{
+      display:block;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+      background:#fafbfd;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;
+    }
+    .rescan-policy-preview .rescan-policy-pick:hover{border-color:#91b4e8;background:#f7faff}
+    .rescan-policy-preview .rescan-policy-pick.is-on{
+      border-color:var(--pri);background:#f3f8ff;box-shadow:0 0 0 1px rgba(47,107,255,.18);
+    }
+    .rescan-policy-preview .rescan-policy-pick > .pick-hd{
+      display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text);
+    }
+    .rescan-policy-preview .rescan-policy-pick > .pick-hd input{accent-color:var(--pri);flex:none}
     #rescan-create .task-form{max-width:1180px}
     #rescan-create .form-cols{
       grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;max-width:none;
@@ -1734,7 +1746,7 @@
 
               <div class="form-panel">
                 <h3 class="panel-title">2. 回扫站点与政策</h3>
-                <p class="form-section-tip">先选合规分类（政策），选完后下方展示该分类下可用站点供勾选；政策内容只读预览。</p>
+                <p class="form-section-tip">先选合规分类（政策），再勾选回扫站点；政策内容按已选站点展示，须勾选其中一条（仅可选一条）。</p>
 
                 <div class="form-field">
                   <label><span class="req">*</span>合规政策</label>
@@ -1763,11 +1775,12 @@
                 <div class="form-field" style="align-items:flex-start;flex:1">
                   <label><span class="req">*</span>政策内容</label>
                   <div class="ctl" style="display:flex;flex-direction:column;min-height:160px">
+                    <div class="hint" style="margin:0 0 6px">按已选回扫站点展示政策内容，勾选一条作为本次任务依据（单选）。</div>
                     <div class="rescan-policy-preview" id="rescanPolicyPreview">
                       <div class="rescan-site-empty">
                         <div class="empty-ico" aria-hidden="true"></div>
                         <div>请先选择合规政策与回扫站点</div>
-                        <div style="opacity:.85">预览为只读，勾选站点表示纳入本次回扫。</div>
+                        <div style="opacity:.85">展示后请勾选一条政策内容。</div>
                       </div>
                     </div>
                   </div>
@@ -4216,8 +4229,9 @@
     let draftSites = new Set();
     let modalTarget = 'rescan';
     let policySiteNames = new Set(['美国']);
-    // 创建回扫：先选合规分类 → 仅展示该分类可用站勾选 → 政策内容只读预览
+    // 创建回扫：先选合规分类 → 勾选回扫站点 → 政策内容单选一条
     let rescanAllowedSiteKeys = null;
+    let selectedRescanPolicyContentKey = '';
 
     function siteKey(p, s){ return `${p}|${s}` }
     function parseKey(k){ const i = k.indexOf('|'); return { platform: k.slice(0, i), site: k.slice(i + 1) }; }
@@ -4253,6 +4267,9 @@
       const pool = getRescanSitePoolKeys();
       rescanAllowedSiteKeys = new Set(pool);
       confirmedSites = new Set([...confirmedSites].filter(k => rescanAllowedSiteKeys.has(k)));
+      if (selectedRescanPolicyContentKey && !confirmedSites.has(selectedRescanPolicyContentKey)) {
+        selectedRescanPolicyContentKey = '';
+      }
       renderRescanSiteChecks();
       renderRescanPolicyPreview();
     }
@@ -4332,15 +4349,20 @@
       if (!box) return;
       const policy = getSelectedRescanPolicy();
       const selected = getRescanSitePoolKeys().filter(k => confirmedSites.has(k));
+      if (selectedRescanPolicyContentKey && !selected.includes(selectedRescanPolicyContentKey)) {
+        selectedRescanPolicyContentKey = '';
+      }
       if (!policy && !selected.length) {
+        selectedRescanPolicyContentKey = '';
         box.innerHTML = `<div class="rescan-site-empty">
           <div class="empty-ico" aria-hidden="true"></div>
           <div>请先选择合规政策与回扫站点</div>
-          <div style="opacity:.85">预览为只读，勾选站点表示纳入本次回扫。</div>
+          <div style="opacity:.85">展示后请勾选一条政策内容（仅可选一条）。</div>
         </div>`;
         return;
       }
       if (!policy) {
+        selectedRescanPolicyContentKey = '';
         box.innerHTML = `<div class="rescan-site-empty">
           <div class="empty-ico" aria-hidden="true"></div>
           <div>请先选择一项合规政策</div>
@@ -4348,22 +4370,45 @@
         return;
       }
       if (!selected.length) {
+        selectedRescanPolicyContentKey = '';
         box.innerHTML = `<div class="rescan-site-empty">
           <div class="empty-ico" aria-hidden="true"></div>
-          <div>已选政策「${policy.category.replace(/</g, '&lt;')}」，请勾选回扫站点后预览内容</div>
+          <div>已选政策「${policy.category.replace(/</g, '&lt;')}」，请勾选回扫站点后选择政策内容</div>
         </div>`;
         return;
+      }
+      if (!selectedRescanPolicyContentKey) {
+        selectedRescanPolicyContentKey = selected[0];
       }
       box.innerHTML = selected.map(k => {
         const content = getRescanSitePolicyContent(k);
         const body = content
           ? content.replace(/</g, '&lt;')
           : '<span class="empty">该站暂无启用内容</span>';
-        return `<div class="rescan-site-item is-on" data-key="${k.replace(/"/g, '&quot;')}">
-          <label>${formatLabel(k).replace(/</g, '&lt;')} · ${policy.category.replace(/</g, '&lt;')}</label>
+        const on = selectedRescanPolicyContentKey === k;
+        const safeK = k.replace(/"/g, '&quot;');
+        return `<label class="rescan-policy-pick ${on ? 'is-on' : ''}" data-key="${safeK}">
+          <span class="pick-hd">
+            <input type="checkbox" class="rescan-policy-content-cb" name="rescanPolicyContentPick" data-key="${safeK}" ${on ? 'checked' : ''} />
+            ${formatLabel(k).replace(/</g, '&lt;')} · ${policy.category.replace(/</g, '&lt;')}
+          </span>
           <div class="site-content">${body}</div>
-        </div>`;
+        </label>`;
       }).join('');
+      box.querySelectorAll('.rescan-policy-content-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const key = cb.dataset.key || '';
+          if (cb.checked) {
+            selectedRescanPolicyContentKey = key;
+          } else if (selectedRescanPolicyContentKey === key) {
+            // 单选：不允许全部取消，保持当前项勾选
+            cb.checked = true;
+            showToast('政策内容须勾选一条');
+            return;
+          }
+          renderRescanPolicyPreview();
+        });
+      });
     }
     document.getElementById('rescanSiteCheckAll')?.addEventListener('change', e => {
       const pool = getRescanSitePoolKeys();
@@ -4807,11 +4852,34 @@
     renderRescanSiteChecks();
 
     rescanPolicySelect?.addEventListener('change', () => {
-      // 切换分类：站点池改为该分类可用站，并刷新勾选与预览
+      // 切换分类：站点池改为该分类可用站，并刷新勾选与预览；政策内容需重选
+      selectedRescanPolicyContentKey = '';
       const p = getSelectedRescanPolicy();
       syncRescanSitesToPolicy();
       if (p) showToast(`已切换「${p.category}」，可选站 ${p.siteNames?.length || 0} 个`);
     });
+
+    document.querySelector('#rescan-create .form-footer .btn.pri')?.addEventListener('click', e => {
+      if (!getSelectedRescanPolicy()) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        showToast('请选择合规政策');
+        return;
+      }
+      if (!confirmedSites.size) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        showToast('请至少勾选一个回扫站点');
+        return;
+      }
+      if (!selectedRescanPolicyContentKey || !confirmedSites.has(selectedRescanPolicyContentKey)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        showToast('请勾选一条政策内容');
+        return;
+      }
+      showToast(`已提交，政策内容：${formatLabel(selectedRescanPolicyContentKey)}`);
+    }, true);
 
     /* 合规性提交检测 · Tab 切换 */
     const detectTabMap = { manual: 'detectPaneManual', sku: 'detectPaneSku', batch: 'detectPaneBatch' };
