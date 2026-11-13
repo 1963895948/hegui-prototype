@@ -2451,24 +2451,24 @@
     </main>
   </div>
 
-  <!-- 转移站点到其他合规分类 -->
+  <!-- 复制站点到其他合规分类（原分类保留） -->
   <div class="modal-mask above" id="policyTransferModal" aria-hidden="true">
     <div class="modal-box md" role="dialog" aria-labelledby="policyTransferTitle">
       <div class="modal-hd">
-        <span id="policyTransferTitle">转移站点</span>
+        <span id="policyTransferTitle">复制站点</span>
         <button type="button" class="modal-x" id="closePolicyTransferModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd">
-        <p class="hint" style="margin:0 0 12px" id="policyTransferLead">将所选站点明细转移到目标合规分类；若目标分类已有同站点，将替换其配置。</p>
+        <p class="hint" style="margin:0 0 12px" id="policyTransferLead">将所选站点明细复制到目标合规分类；原分类下配置不变。若目标分类已有同站点，将替换其配置。</p>
         <div style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#fafcff;font-size:13px;line-height:1.7">
-          <div>原分类：<b id="policyTransferFrom">—</b></div>
+          <div>来源分类：<b id="policyTransferFrom">—</b></div>
           <div>站点：<b id="policyTransferSites">—</b></div>
         </div>
         <div class="form-field" style="display:flex;flex-direction:column;gap:6px;align-items:stretch">
           <label style="font-size:13px"><span class="req">*</span>目标合规分类</label>
           <input class="input" id="policyTransferCatInput" list="policyTransferCatList" placeholder="请选择或搜索目标合规分类" style="width:100%" autocomplete="off" />
           <datalist id="policyTransferCatList"></datalist>
-          <div class="hint" id="policyTransferHint" style="margin:0">不可选当前分类；目标已有同站点时确认后替换。</div>
+          <div class="hint" id="policyTransferHint" style="margin:0">不可选当前分类；目标已有同站点时确认后替换目标侧配置。</div>
         </div>
       </div>
       <div class="modal-ft">
@@ -2481,7 +2481,7 @@
   <div class="modal-mask above" id="policyTransferConfirmModal" aria-hidden="true">
     <div class="modal-box sm" role="dialog" aria-labelledby="policyTransferConfirmTitle">
       <div class="modal-hd">
-        <span id="policyTransferConfirmTitle">确认转移</span>
+        <span id="policyTransferConfirmTitle">确认复制</span>
         <button type="button" class="modal-x" id="closePolicyTransferConfirmModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd">
@@ -2489,7 +2489,7 @@
       </div>
       <div class="modal-ft">
         <button type="button" class="btn" id="cancelPolicyTransferConfirmBtn">取 消</button>
-        <button type="button" class="btn pri" id="confirmPolicyTransferBtn">确认转移</button>
+        <button type="button" class="btn pri" id="confirmPolicyTransferBtn">确认复制</button>
       </div>
     </div>
   </div>
@@ -2502,7 +2502,7 @@
         <button type="button" class="modal-x" id="closePolicyRenameModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-bd">
-        <p class="hint" style="margin:0 0 12px">仅修改分类名称，各站点明细内容不变；回扫/检测中引用该分类名的选项将一并按新名展示。站点换分类请用操作列「转移」。</p>
+        <p class="hint" style="margin:0 0 12px">仅修改分类名称，各站点明细内容不变；回扫/检测中引用该分类名的选项将一并按新名展示。站点复制到其他分类请用操作列「复制」。</p>
         <div class="form-field" style="display:flex;flex-direction:column;gap:6px;align-items:stretch">
           <label style="font-size:12px;color:var(--sub)">原名称</label>
           <div id="policyRenameOld" style="font-size:13px;font-weight:600">—</div>
@@ -2774,7 +2774,7 @@
               <button type="button" class="btn" id="pdBatchBtn" style="height:30px;padding:0 12px;font-size:12px">批量操作 ▾</button>
               <div class="pd-batch-menu" id="pdBatchMenu" hidden>
                 <button type="button" class="pd-batch-item" data-action="edit">编辑所选站点</button>
-                <button type="button" class="pd-batch-item" data-action="transfer">转移所选站点</button>
+                <button type="button" class="pd-batch-item" data-action="transfer">复制所选站点</button>
                 <button type="button" class="pd-batch-item" data-action="enable">启用所选站点</button>
                 <button type="button" class="pd-batch-item" data-action="disable">停用所选站点</button>
               </div>
@@ -7329,7 +7329,7 @@
               <span class="op-more" title="操作">☰</span>
               <div class="op-menu">
                 <button type="button" data-act="edit" data-id="${p.id}">编辑</button>
-                <button type="button" data-act="transfer" data-id="${p.id}">转移</button>
+                <button type="button" data-act="transfer" data-id="${p.id}">复制</button>
                 <button type="button" data-act="${toggleAct}" data-id="${p.id}">${toggleLabel}</button>
                 <button type="button" data-act="${learnAct}" data-id="${p.id}">${learnLabel}</button>
                 <button type="button" data-act="log" data-id="${p.id}">日志</button>
@@ -7559,10 +7559,10 @@
     }
     function openPolicyTransferModal(rows){
       const list = (rows || []).filter(Boolean);
-      if (!list.length) { showToast('请选择要转移的站点'); return; }
+      if (!list.length) { showToast('请选择要复制的站点'); return; }
       const fromCategory = list[0].category;
       if (list.some(r => r.category !== fromCategory)) {
-        showToast('请选择同一分类下的站点进行转移');
+        showToast('请选择同一分类下的站点进行复制');
         return;
       }
       policyTransferPending = { rows: list.map(r => r.id), fromCategory, target: '' };
@@ -7573,8 +7573,8 @@
       fillPolicyTransferCatList(fromCategory);
       document.getElementById('policyTransferHint').textContent =
         list.length > 1
-          ? `将转移 ${list.length} 个站点；目标分类已有同站点时将被替换。`
-          : '目标分类已有同站点时将被替换。';
+          ? `将复制 ${list.length} 个站点到目标分类；来源分类不变。目标已有同站点时替换目标侧配置。`
+          : '来源分类不变；目标已有同站点时替换目标侧配置。';
       document.getElementById('policyTransferModal')?.classList.add('show');
       setTimeout(() => input?.focus(), 30);
     }
@@ -7606,9 +7606,19 @@
         ? `<br/><span style="color:var(--danger)">将替换目标分类下已有站点：${replaceSites.join('、')}</span>`
         : '';
       document.getElementById('policyTransferConfirmDesc').innerHTML =
-        `确认将 <b>${rows.map(r => r.site).join('、')}</b> 从「<b>${policyTransferPending.fromCategory}</b>」转移到「<b>${target}</b>」？${replaceTip}`;
+        `确认将 <b>${rows.map(r => r.site).join('、')}</b> 从「<b>${policyTransferPending.fromCategory}</b>」<b>复制</b>到「<b>${target}</b>」？来源分类配置不变。${replaceTip}`;
       closePolicyTransferModal();
       document.getElementById('policyTransferConfirmModal')?.classList.add('show');
+    }
+    function clonePolicyRowToCategory(src, targetCategory){
+      const copy = {
+        ...src,
+        id: 'policy_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+        category: targetCategory,
+        certs: Array.isArray(src.certs) ? src.certs.slice() : src.certs
+      };
+      touchPolicyRow(copy);
+      return copy;
     }
     function confirmPolicyTransfer(){
       if (!policyTransferPending?.target) return;
@@ -7616,48 +7626,44 @@
       const target = ensureComplianceCategory(policyTransferPending.target, { toastOnCreate: !COMPLIANCE_CATEGORIES.includes(policyTransferPending.target) });
       if (!target) return;
       const ids = policyTransferPending.rows.slice();
-      let moved = 0;
+      let copied = 0;
       let replaced = 0;
       ids.forEach(id => {
         const row = POLICY_STORE.find(p => p.id === id);
         if (!row || row.category !== fromCategory) return;
-        const existing = POLICY_STORE.find(p => p.category === target && p.site === row.site && p.id !== row.id);
+        const existing = POLICY_STORE.find(p => p.category === target && p.site === row.site);
         if (existing) {
           const oldKey = policyLogKey(existing);
-          const keepKey = policyLogKey(row);
-          if (POLICY_LOGS[oldKey]?.length) {
-            POLICY_LOGS[keepKey] = [...(POLICY_LOGS[keepKey] || []), ...POLICY_LOGS[oldKey]];
-            delete POLICY_LOGS[oldKey];
-          }
+          if (POLICY_LOGS[oldKey]) delete POLICY_LOGS[oldKey];
           const exIdx = POLICY_STORE.findIndex(p => p.id === existing.id);
           if (exIdx >= 0) POLICY_STORE.splice(exIdx, 1);
           replaced += 1;
-          pushPolicyLog(row, `所属分类由【${fromCategory}】修改为${target}；并替换原「${target}」下「${row.site}」配置`);
-        } else {
-          pushPolicyLog(row, `所属分类由【${fromCategory}】修改为${target}`);
         }
-        row.category = target;
-        touchPolicyRow(row);
-        moved += 1;
+        const copy = clonePolicyRowToCategory(row, target);
+        POLICY_STORE.push(copy);
+        pushPolicyLog(
+          copy,
+          existing
+            ? `复制来源分类由【${fromCategory}】修改为${target}；并替换原「${target}」下「${row.site}」配置`
+            : `复制来源分类由【${fromCategory}】修改为${target}`
+        );
+        pushPolicyLog(row, `已复制到分类「${target}」（本站配置未改）`);
+        copied += 1;
       });
       closePolicyTransferConfirmModal();
       policyTransferPending = null;
       renderPolicyTable();
       refreshRescanPolicySelect();
-      const remain = sitesOfCategory(fromCategory);
-      if (remain.length && policyModalCategory === fromCategory) {
+      if (policyModalCategory === fromCategory) {
         renderPolicyDetailGrid(fromCategory);
         refreshPolicyDetailChrome(fromCategory);
-      } else if (policyModalCategory === fromCategory) {
-        closePolicyDetailModal();
-        openPolicyDetailModal(target, 'view');
       } else if (policyModalCategory === target) {
         renderPolicyDetailGrid(target);
         refreshPolicyDetailChrome(target);
       }
       showToast(replaced
-        ? `已转移 ${moved} 站至「${target}」（其中替换 ${replaced} 站）`
-        : `已转移 ${moved} 站至「${target}」`);
+        ? `已复制 ${copied} 站至「${target}」（其中替换 ${replaced} 站）；来源分类未改`
+        : `已复制 ${copied} 站至「${target}」；来源分类未改`);
     }
     document.getElementById('closePolicyTransferModal')?.addEventListener('click', closePolicyTransferModal);
     document.getElementById('cancelPolicyTransferBtn')?.addEventListener('click', closePolicyTransferModal);
