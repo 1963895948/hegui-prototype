@@ -2919,7 +2919,6 @@
           <thead><tr style="background:var(--bg);position:sticky;top:0">
             <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap">时间</th>
             <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap">操作人</th>
-            <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap">操作类型</th>
             <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)">详情</th>
           </tr></thead>
           <tbody id="policyLogBody"></tbody>
@@ -3165,9 +3164,9 @@
         <table class="log-table">
           <thead>
             <tr>
+              <th style="width:170px">时间</th>
               <th style="width:100px">操作人</th>
-              <th style="width:170px">操作时间</th>
-              <th>操作内容</th>
+              <th>详情</th>
             </tr>
           </thead>
           <tbody id="detectLogBody"></tbody>
@@ -6492,7 +6491,7 @@
         .map(({ _i, ...l }) => l);
       if (detectLogBody) {
         detectLogBody.innerHTML = logs.map(l =>
-          `<tr><td>${l.who}</td><td>${l.time}</td><td>${(l.what || '').replace(/</g, '&lt;')}</td></tr>`
+          `<tr><td>${l.time}</td><td>${l.who}</td><td>${(l.what || '').replace(/</g, '&lt;')}</td></tr>`
         ).join('');
       }
       if (detectLogEmpty) detectLogEmpty.style.display = logs.length ? 'none' : 'block';
@@ -7435,14 +7434,21 @@
     function fmtLogTime(d){
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     }
+    /** 操作类型并入详情：【类型】详情；弹窗不再单独展示「操作类型」列 */
+    function formatPolicyLogDetail(type, detail){
+      const d = (detail == null || detail === '') ? '—' : String(detail);
+      const t = (type || '').trim();
+      if (!t) return d;
+      if (d.startsWith('【') && d.includes('】')) return d;
+      return `【${t}】${d}`;
+    }
     function pushPolicyLog(p, type, detail, user){
       const key = policyLogKey(p);
       if (!POLICY_LOGS[key]) POLICY_LOGS[key] = [];
       POLICY_LOGS[key].unshift({
         time: fmtLogTime(new Date()),
         user: user || '当前用户',
-        type,
-        detail: detail || '—'
+        detail: formatPolicyLogDetail(type, detail)
       });
     }
     function seedPolicyLogs(p){
@@ -7451,9 +7457,9 @@
       const now = Date.now();
       const certText = Array.isArray(p.certs) ? (p.certs.join('、') || '—') : (p.certs || '—');
       POLICY_LOGS[key] = [
-        { time: fmtLogTime(new Date(now - 86400000)), user: '李四（合规）', type: siteEnabled(p) ? '启用站点' : '停用站点', detail: `状态：${siteEnabled(p) ? '启用' : '停用'}` },
-        ...(p.crawlUrl ? [{ time: fmtLogTime(new Date(now - 86400000 * 3)), user: '张三（产品）', type: '配置采集链接', detail: p.crawlUrl }] : []),
-        { time: fmtLogTime(new Date(now - 86400000 * 5)), user: '张三（产品）', type: '新增站点明细', detail: `亚马逊：${p.site}，认证：${certText}` }
+        { time: fmtLogTime(new Date(now - 86400000)), user: '李四（合规）', detail: formatPolicyLogDetail(siteEnabled(p) ? '启用站点' : '停用站点', `状态：${siteEnabled(p) ? '启用' : '停用'}`) },
+        ...(p.crawlUrl ? [{ time: fmtLogTime(new Date(now - 86400000 * 3)), user: '张三（产品）', detail: formatPolicyLogDetail('配置采集链接', p.crawlUrl) }] : []),
+        { time: fmtLogTime(new Date(now - 86400000 * 5)), user: '张三（产品）', detail: formatPolicyLogDetail('新增站点明细', `亚马逊：${p.site}，认证：${certText}`) }
       ];
     }
     function openPolicyLogModal(p) {
@@ -7466,13 +7472,15 @@
       const logs = POLICY_LOGS[policyLogKey(p)] || [];
       const esc = s => (s||'').replace(/</g,'&lt;');
       tbody.innerHTML = logs.length
-        ? logs.map(l => `<tr>
+        ? logs.map(l => {
+          const detail = formatPolicyLogDetail(l.type, l.detail);
+          return `<tr>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--sub)">${esc(l.time)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap">${esc(l.user)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap">${esc(l.type)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid var(--line);color:var(--sub);max-width:240px;overflow:hidden;text-overflow:ellipsis" title="${esc(l.detail)}">${esc(l.detail)}</td>
-      </tr>`).join('')
-        : '<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--sub)">暂无日志</td></tr>';
+        <td style="padding:8px 12px;border-bottom:1px solid var(--line);color:var(--sub);max-width:360px;overflow:hidden;text-overflow:ellipsis" title="${esc(detail)}">${esc(detail)}</td>
+      </tr>`;
+        }).join('')
+        : '<tr><td colspan="3" style="padding:16px;text-align:center;color:var(--sub)">暂无日志</td></tr>';
       modal.classList.add('show');
     }
     function closePolicyLogModal() {
